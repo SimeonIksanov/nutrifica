@@ -4,8 +4,8 @@ using Nutrifica.Domain.Common.Models;
 using Nutrifica.Domain.OrderAggregate.Entities;
 using Nutrifica.Domain.OrderAggregate.Enums;
 using Nutrifica.Domain.OrderAggregate.ValueObjects;
-using Nutrifica.Domain.Shared.Enums;
 using Nutrifica.Domain.UserAggregate.ValueObjects;
+using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Domain.OrderAggregate;
 

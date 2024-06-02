@@ -1,8 +1,8 @@
 using Nutrifica.Domain.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Common.Interfaces;
 using Nutrifica.Domain.Common.Models;
-using Nutrifica.Domain.UserAggregate.Enums;
 using Nutrifica.Domain.UserAggregate.ValueObjects;
+using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Domain.UserAggregate;
 
@@ -24,7 +24,7 @@ public class User : Entity<UserId>, IAggregateRoot
             PhoneNumber = phoneNumber,
             Email = email,
             Enabled = true,
-            Role = Role.Operator,
+            Role = UserRole.Operator,
             SupervisorId = supervisorId,
         };
         return newUser;
@@ -51,7 +51,7 @@ public class User : Entity<UserId>, IAggregateRoot
 
     public UserId? SupervisorId { get; set; } = null!;
     public ICollection<ClientId> ClientIds { get; private set; } = null!;
-    public Role Role { get; set; }
+    public UserRole Role { get; set; }
 
     public override string ToString()
     {

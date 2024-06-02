@@ -1,4 +1,4 @@
-namespace Nutrifica.Domain.Shared.Enums;
+namespace Nutrifica.Shared.Enums;
 
 public enum State
 {

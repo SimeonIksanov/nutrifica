@@ -2,8 +2,8 @@ using Nutrifica.Domain.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Common.Interfaces;
 using Nutrifica.Domain.Common.Models;
 using Nutrifica.Domain.OrderAggregate.ValueObjects;
-using Nutrifica.Domain.Shared.Enums;
 using Nutrifica.Domain.UserAggregate.ValueObjects;
+using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Domain.ClientAggregate;
 

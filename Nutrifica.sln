@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{24F22C76-F267-488A-8DF4-1C056A88987E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{24F22C76-F267-488A-8DF4-1C056A88987E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nutrifica.Domain", "src\Nutrifica.Domain\Nutrifica.Domain.csproj", "{67F5A360-1BC7-4346-ABA2-3EDD4BEBCE6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nutrifica.Shared", "src\Nutrifica.Shared\Nutrifica.Shared.csproj", "{86EC76CD-6CD7-462B-8F76-EE9B035E6A9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,8 +22,14 @@ Global
 		{67F5A360-1BC7-4346-ABA2-3EDD4BEBCE6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67F5A360-1BC7-4346-ABA2-3EDD4BEBCE6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67F5A360-1BC7-4346-ABA2-3EDD4BEBCE6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86EC76CD-6CD7-462B-8F76-EE9B035E6A9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86EC76CD-6CD7-462B-8F76-EE9B035E6A9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86EC76CD-6CD7-462B-8F76-EE9B035E6A9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86EC76CD-6CD7-462B-8F76-EE9B035E6A9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{67F5A360-1BC7-4346-ABA2-3EDD4BEBCE6E} = {24F22C76-F267-488A-8DF4-1C056A88987E}
+		{1F5A4CFF-FB3E-4E0E-81DF-0C47BD4BEC50} = {24F22C76-F267-488A-8DF4-1C056A88987E}
+		{86EC76CD-6CD7-462B-8F76-EE9B035E6A9E} = {1F5A4CFF-FB3E-4E0E-81DF-0C47BD4BEC50}
 	EndGlobalSection
 EndGlobal

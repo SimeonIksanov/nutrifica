@@ -1,6 +1,6 @@
-namespace Nutrifica.Domain.UserAggregate.Enums;
+namespace Nutrifica.Shared.Enums;
 
-public enum Role
+public enum UserRole
 {
     Operator = 1,
     Manager = 32,
