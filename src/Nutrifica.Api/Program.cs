@@ -1,3 +1,7 @@
+using Nutrifica.Api.Extensions;
+using Nutrifica.Application.Extensions;
+using Nutrifica.Infrastructure.Extensions;
+
 namespace Nutrifica.Api;
 
 public class Program
@@ -6,12 +10,15 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-
-        builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         // builder.Services.AddEndpointsApiExplorer();
         // builder.Services.AddSwaggerGen();
+
+        builder
+            .Services
+            .AddPresentationLayer()
+            .AddApplicationLayer()
+            .AddInfrastructureLayer(builder.Configuration);
 
         var app = builder.Build();
 
@@ -24,6 +31,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
 
