@@ -6,7 +6,7 @@ namespace Nutrifica.Domain.ProductAggregate;
 
 public class Product : Entity<ProductId>, IAggregateRoot
 {
-    public static Product Create(string name, decimal price, string details)
+    public static Product Create(string name, Money price, string details)
     {
         return new Product()
         {
@@ -22,6 +22,6 @@ public class Product : Entity<ProductId>, IAggregateRoot
     }
 
     public string Name { get; set; } = string.Empty;
-    public decimal Price { get; private set; }
+    public Money Price { get; private set; }
     public string Details { get; set; } = string.Empty;
 }

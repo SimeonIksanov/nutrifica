@@ -19,7 +19,7 @@ public class Client : Entity<ClientId>, IAggregateRoot
     public string FullName => string.Join(" ", LastName, FirstName, MiddleName).Trim();
 
     public Address Address { get; set; } = null!;
-    public string Comment { get; set; } = string.Empty;
+    public Comment Comment { get; set; }
     public PhoneNumber PhoneNumber { get; set; } = null!;
     public string Source { get; set; } = string.Empty;
     public HashSet<UserId> Operators { get; private set; } = null!;
@@ -32,7 +32,7 @@ public class Client : Entity<ClientId>, IAggregateRoot
     public State State { get; set; }
 
     public static Client Create(string firstName, string middleName, string lastName,
-        PhoneNumber phoneNumber, Address address, string comment, UserId createdBy, string source)
+        PhoneNumber phoneNumber, Address address, Comment comment, UserId createdBy, string source)
     {
         ArgumentNullException.ThrowIfNull(phoneNumber);
         ArgumentNullException.ThrowIfNull(createdBy);

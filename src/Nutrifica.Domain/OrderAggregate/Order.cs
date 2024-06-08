@@ -4,6 +4,7 @@ using Nutrifica.Domain.Common.Models;
 using Nutrifica.Domain.OrderAggregate.Entities;
 using Nutrifica.Domain.OrderAggregate.Enums;
 using Nutrifica.Domain.OrderAggregate.ValueObjects;
+using Nutrifica.Domain.ProductAggregate.ValueObjects;
 using Nutrifica.Domain.UserAggregate.ValueObjects;
 using Nutrifica.Shared.Enums;
 
@@ -20,7 +21,7 @@ public class Order : Entity<OrderId>, IAggregateRoot
     public State State { get; set; }
     public DateTime CreatedAt { get; init; }
     public ICollection<OrderItem> Items { get; private set; } = null!;
-    public decimal TotalSum { get; }
+    public Money TotalSum { get; }
     public HashSet<UserId> Operators { get; private set; } = null!;
 
     public static Order Create(ClientId clientId, UserId userId)

@@ -59,7 +59,7 @@ public class JwtFactory : IJwtFactory
     {
         return new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Username),
+            new Claim(ClaimTypes.NameIdentifier, user.Account.Username),
             new Claim(ClaimTypes.Name, user.FirstName),
             new Claim(ClaimTypes.Surname, user.LastName),
             new Claim(ClaimTypes.Role, ((int)user.Role).ToString())

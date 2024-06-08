@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="UserAggregate\Entities\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Nutrifica.Shared\Nutrifica.Shared.csproj" />
   </ItemGroup>
 

@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Nutrifica.Api.Contracts.Authentication;
+using Nutrifica.Application.CommandAndQueries.Authentication.Login;
 
 namespace Nutrifica.Api.Controllers
 {
@@ -13,9 +13,9 @@ namespace Nutrifica.Api.Controllers
     {
         private readonly ISender _mediatr;
 
-        public AuthenticationController()
+        public AuthenticationController(ISender mediatr)
         {
-            // _mediatr = mediatr;
+            _mediatr = mediatr;
         }
 
         /// <summary>
@@ -26,7 +26,10 @@ namespace Nutrifica.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<TokenResponse>> Login(TokenRequest request, CancellationToken ct)
         {
-            return new TokenResponse($"jwt_token for {request.username} and {request.password}", "refresh_token");
+            var command = new LoginCommand() { Username = request.Username, Password = request.Password };
+            var result = await _mediatr.Send(command, ct);
+            if (result.Failure) return BadRequest();
+            return result.Value;
         }
         
         /// <summary>

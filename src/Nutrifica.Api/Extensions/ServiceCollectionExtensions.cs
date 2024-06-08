@@ -11,11 +11,25 @@ public static class ServiceCollectionExtensions
 
     private static void ConfigureCors(this IServiceCollection services)
     {
-        services.AddCors(options =>
-            options.AddDefaultPolicy(config =>
-                config
-                    .AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()));
+        services
+            .AddCors(config =>
+            {
+                config.AddPolicy("Open",
+                    policy =>
+                    {
+                        policy
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+
+                config.AddPolicy("Specific",
+                    policy =>
+                    {
+                        policy.WithOrigins("https://localhost", "http://localhost")
+                            .AllowAnyMethod()
+                            .AllowAnyMethod();
+                    });
+            });
     }
 }
