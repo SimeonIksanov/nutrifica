@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Models.Authentication;
-using Nutrifica.Domain.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate;
 
 namespace Nutrifica.Infrastructure.Authentication;
 

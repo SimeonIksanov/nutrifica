@@ -1,4 +1,4 @@
-using Nutrifica.Domain.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Interfaces;

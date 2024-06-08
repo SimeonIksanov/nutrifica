@@ -1,5 +1,5 @@
-using Nutrifica.Domain.ClientAggregate.ValueObjects;
-using Nutrifica.Domain.UserAggregate;
+using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
+using Nutrifica.Domain.Aggregates.UserAggregate;
 
 namespace Nutrifica.Infrastructure.UnitTests.Utilities;
 

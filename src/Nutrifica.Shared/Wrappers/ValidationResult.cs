@@ -8,7 +8,7 @@ public interface IValidationResult
 
 public sealed class ValidationResult : Result, IValidationResult
 {
-    public ValidationResult(Error[] errors) : base("A Validation problem occured.")
+    public ValidationResult(Error[] errors) : base(false, new("ValidationError", "A Validation problem occured."))
     {
         Errors = errors;
     }
@@ -19,7 +19,7 @@ public sealed class ValidationResult : Result, IValidationResult
 
 public sealed class ValidationResult<TValue> : Result<TValue>, IValidationResult
 {
-    public ValidationResult(Error[] errors) : base("A Validation problem occured.")
+    public ValidationResult(Error[] errors) : base(default!, false, new("ValidationError", "A Validation problem occured."))
     {
         Errors = errors;
     }

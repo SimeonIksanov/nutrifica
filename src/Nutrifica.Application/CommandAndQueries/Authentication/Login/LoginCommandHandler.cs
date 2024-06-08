@@ -1,7 +1,7 @@
 using MediatR;
 using Nutrifica.Api.Contracts.Authentication;
 using Nutrifica.Application.Interfaces.Services;
-using Nutrifica.Domain.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.CommandAndQueries.Authentication.Login;

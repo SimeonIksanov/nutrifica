@@ -1,6 +1,6 @@
 using FluentValidation;
 using Nutrifica.Application.Interfaces;
-using Nutrifica.Domain.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate;
 
 namespace Nutrifica.Application.CommandAndQueries.Users;
 

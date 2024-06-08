@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Nutrifica.Application.Interfaces.Services;
-using Nutrifica.Domain.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Infrastructure.Persistence;
 
 namespace Nutrifica.Api.Extensions;
