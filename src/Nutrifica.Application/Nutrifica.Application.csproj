@@ -14,9 +14,13 @@
     <ItemGroup>
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
       <PackageReference Include="MediatR" Version="12.2.0" />
+      <PackageReference Include="Moq" Version="4.20.70" />
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Abstractions/Clock/" />
+      <Folder Include="Accounts/" />
+      <Folder Include="Accounts/Create/" />
       <Folder Include="Interfaces\Authentication\" />
     </ItemGroup>
 

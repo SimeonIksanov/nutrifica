@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Nutrifica.Domain.Common.Interfaces;
+namespace Nutrifica.Domain.Abstractions;
 
 public interface IDomainEvent : INotification
 {

@@ -21,10 +21,10 @@ public class ApiController : ControllerBase
     {
         return result switch
         {
-            { Success: true } => throw new InvalidOperationException(),
+            { IsSuccess: true } => throw new InvalidOperationException(),
             IValidationResult validationResult => BadRequest(CreateProblemDetails("Validation Error",
-                StatusCodes.Status400BadRequest, result.Message, validationResult.Errors)),
-            _ => BadRequest(CreateProblemDetails("Bad Request", StatusCodes.Status400BadRequest, result.Message))
+                StatusCodes.Status400BadRequest, result.Error.Description, validationResult.Errors)),
+            _ => BadRequest(CreateProblemDetails("Bad Request", StatusCodes.Status400BadRequest, result.Error.Description))
         };
     }
 

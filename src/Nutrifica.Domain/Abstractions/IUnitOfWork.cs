@@ -1,4 +1,4 @@
-﻿namespace Nutrifica.Domain.Common.Interfaces;
+﻿namespace Nutrifica.Domain.Abstractions;
 
 public interface IUnitOfWork
 {

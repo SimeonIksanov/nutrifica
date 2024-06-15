@@ -1,4 +1,4 @@
-using Nutrifica.Infrastructure.Services;
+using Nutrifica.Infrastructure.Clock;
 using Nutrifica.Infrastructure.UnitTests.Utilities;
 
 namespace Nutrifica.Infrastructure.UnitTests.JwtFactory;
@@ -10,8 +10,8 @@ public class GenerateRefreshTokenTests
     {
         // Arrange 
         var jwtSettings = JwtSettingsFactory.Create();
-        var sut = new Authentication.JwtFactory(jwtSettings, new DateTimeService());
-        
+        var sut = new Authentication.JwtFactory(jwtSettings, new DateTimeProvider());
+
         // Act
         var actual = sut.GenerateRefreshToken("1.1.1.1");
 

@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using Nutrifica.Application.Models.Authentication;
 using Nutrifica.Domain.Aggregates.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate.Entities;
 
 namespace Nutrifica.Application.Interfaces.Services;
 

@@ -1,5 +1,5 @@
-﻿using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
-using Nutrifica.Domain.Common.Interfaces;
+﻿using Nutrifica.Domain.Abstractions;
+using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 
 namespace Nutrifica.Domain.Aggregates.UserAggregate.Events;
 

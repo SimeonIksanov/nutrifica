@@ -2,18 +2,19 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
+using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Interfaces.Services;
-using Nutrifica.Application.Models.Authentication;
 using Nutrifica.Domain.Aggregates.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate.Entities;
 
 namespace Nutrifica.Infrastructure.Authentication;
 
 public class JwtFactory : IJwtFactory
 {
-    private readonly IDateTimeService _dateTimeProvider;
+    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly JwtSettings _jwtSettings;
 
-    public JwtFactory(JwtSettings jwtSettings, IDateTimeService dateTimeProvider)
+    public JwtFactory(JwtSettings jwtSettings, IDateTimeProvider dateTimeProvider)
     {
         _dateTimeProvider = dateTimeProvider;
         _jwtSettings = jwtSettings;
@@ -25,8 +26,8 @@ public class JwtFactory : IJwtFactory
             _jwtSettings.Issuer,
             _jwtSettings.Audience,
             GetClaims(user),
-            _dateTimeProvider.UtcNow.DateTime,
-            _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes).DateTime,
+            _dateTimeProvider.UtcNow,
+            _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes),
             GetSigningCredentials()
         );
         var token = new JwtSecurityTokenHandler()
@@ -60,8 +61,8 @@ public class JwtFactory : IJwtFactory
         return new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Account.Username),
-            new Claim(ClaimTypes.Name, user.FirstName),
-            new Claim(ClaimTypes.Surname, user.LastName),
+            new Claim(ClaimTypes.Name, user.FirstName.Value),
+            new Claim(ClaimTypes.Surname, user.LastName.Value),
             new Claim(ClaimTypes.Role, ((int)user.Role).ToString())
         };
     }

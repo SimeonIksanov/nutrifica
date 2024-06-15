@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Nutrifica.Application.CommandAndQueries.Authentication.Login;
+namespace Nutrifica.Application.Authentication.Login;
 
 public class LoginCommandValidator : AbstractValidator<LoginCommand>
 {

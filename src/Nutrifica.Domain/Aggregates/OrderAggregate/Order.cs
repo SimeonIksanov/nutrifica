@@ -1,9 +1,9 @@
+using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.OrderAggregate.Entities;
 using Nutrifica.Domain.Aggregates.OrderAggregate.Enums;
 using Nutrifica.Domain.Aggregates.OrderAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
-using Nutrifica.Domain.Common.Interfaces;
 using Nutrifica.Domain.Common.Models;
 using Nutrifica.Domain.Shared;
 using Nutrifica.Shared.Enums;

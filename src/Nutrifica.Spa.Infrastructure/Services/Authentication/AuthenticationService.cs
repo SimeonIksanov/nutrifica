@@ -26,9 +26,9 @@ public class AuthenticationService : IAuthenticationService
         {
             PropertyNameCaseInsensitive = true
         });
-        if (result is null || result.Failure)
-            return Result.Fail(result is null ? "Не удалось войти" : result.Message);
-        return Result.Ok();
+        if (result is null || result.IsFailure)
+            return Result.Failure(result is null ? Error.NullValue : result.Error);
+        return Result.Success();
     }
 
     public Task<IResult> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken ct)

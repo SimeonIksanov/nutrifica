@@ -1,3 +1,3 @@
 namespace Nutrifica.Api.Contracts.Authentication;
 
-public record TokenResponse(string jwt, string refreshToken);
+public record TokenResponse(string Jwt, string RefreshToken);

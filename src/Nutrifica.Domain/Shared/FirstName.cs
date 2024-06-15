@@ -4,6 +4,8 @@ namespace Nutrifica.Domain.Shared;
 
 public class FirstName : ValueObject
 {
+    public static FirstName Create(string value) => new FirstName(value);
+    private FirstName(string value) => Value = value;
     public string Value { get; set; } = string.Empty;
     protected override IEnumerable<object> GetEqualityComponents()
     {

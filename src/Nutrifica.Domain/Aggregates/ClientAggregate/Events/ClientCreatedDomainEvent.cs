@@ -1,5 +1,5 @@
-﻿using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
-using Nutrifica.Domain.Common.Interfaces;
+﻿using Nutrifica.Domain.Abstractions;
+using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 namespace Nutrifica.Domain;
 

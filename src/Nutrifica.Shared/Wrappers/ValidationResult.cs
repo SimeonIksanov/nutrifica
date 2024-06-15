@@ -27,6 +27,3 @@ public sealed class ValidationResult<TValue> : Result<TValue>, IValidationResult
     public Error[] Errors { get; }
     public static ValidationResult<TValue> WithErrors(Error[] errors) => new(errors);
 }
-
-
-//15.03

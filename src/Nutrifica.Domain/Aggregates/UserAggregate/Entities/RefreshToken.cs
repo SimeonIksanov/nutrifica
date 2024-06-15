@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Nutrifica.Application.Models.Authentication;
+namespace Nutrifica.Domain.Aggregates.UserAggregate.Entities;
 
 public class RefreshToken
 {

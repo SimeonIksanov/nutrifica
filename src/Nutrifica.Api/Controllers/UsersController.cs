@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nutrifica.Api.Contracts.Users;
-using Nutrifica.Application.CommandAndQueries.Users;
+using Nutrifica.Application.Accounts.UserCreate;
 
 namespace Nutrifica.Api.Controllers;
 
@@ -28,12 +28,12 @@ public class UsersController : ApiController
             FirstName = "sdfasdfsdasf"
         };
         var result = await _mediator.Send(command, ct);
-        if (result.Failure)
+        if (result.IsFailure)
         {
             return HandleFailure(result);
         }
         return Ok(Array.Empty<UserDTO>());
     }
 
-    
+
 }

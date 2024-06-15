@@ -1,11 +1,12 @@
 using FluentValidation;
 using MediatR;
+using Nutrifica.Application.Abstractions.Messaging;
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.CommandAndQueries.Common.Behaviors;
 
 public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : IBaseCommand
     where TResponse : Result //, new()
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;

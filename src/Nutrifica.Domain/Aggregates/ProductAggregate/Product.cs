@@ -1,5 +1,5 @@
+using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ProductAggregate.ValueObjects;
-using Nutrifica.Domain.Common.Interfaces;
 using Nutrifica.Domain.Common.Models;
 using Nutrifica.Domain.Shared;
 

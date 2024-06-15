@@ -1,4 +1,4 @@
-using Nutrifica.Domain.Common.Interfaces;
+using Nutrifica.Domain.Abstractions;
 
 namespace Nutrifica.Domain.Common.Models;
 
@@ -7,8 +7,8 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>> where TId : notnull
     private readonly List<IDomainEvent> _domainEvents = new();
     public TId Id { get; protected set; } = default(TId)!;
 
-    protected Entity(TId id) => Id = id;
     protected Entity() { }
+    protected Entity(TId id) => Id = id;
 
     public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
     public void ClearDomainEvents() => _domainEvents.Clear();
