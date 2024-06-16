@@ -6,10 +6,10 @@ public class RefreshTokensCommandValidator : AbstractValidator<RefreshTokensComm
 {
     public RefreshTokensCommandValidator()
     {
-        RuleFor(x => x.jwt)
+        RuleFor(x => x.Jwt)
             .NotEmpty();
 
-        RuleFor(x => x.refreshToken)
+        RuleFor(x => x.RefreshToken)
             .NotEmpty();
     }
 }

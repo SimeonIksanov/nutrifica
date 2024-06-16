@@ -1,7 +1,7 @@
 using Nutrifica.Infrastructure.Clock;
 using Nutrifica.Infrastructure.UnitTests.Utilities;
 
-namespace Nutrifica.Infrastructure.UnitTests.JwtFactory;
+namespace Nutrifica.Infrastructure.UnitTests.JwtFactoryTests;
 
 public class GenerateAccessTokenTests
 {

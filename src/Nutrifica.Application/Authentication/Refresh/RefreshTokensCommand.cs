@@ -3,7 +3,7 @@ using Nutrifica.Application.Abstractions.Messaging;
 
 namespace Nutrifica.Application;
 
-public record RefreshTokensCommand(string jwt, string refreshToken, string ipAddress)
+public record RefreshTokensCommand(string Jwt, string RefreshToken, string IpAddress)
     : ICommand<TokenResponse>
 {
 }
