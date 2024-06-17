@@ -26,4 +26,9 @@ public static class UserErrors
         "User.RefreshTokenNotActive",
         "Provided refresh token expired or revoked."
     );
+
+    public static Error Disabled = new Error(
+        "User.Disabled",
+        "User is disabled."
+    );
 }

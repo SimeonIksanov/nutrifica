@@ -42,6 +42,11 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, TokenRes
             return Result.Failure<TokenResponse>(UserErrors.BadLoginOrPassword);
         }
 
+        if (user.Enabled is false)
+        {
+            return Result.Failure<TokenResponse>(UserErrors.Disabled);
+        }
+
         var jwt = _jwtFactory.GenerateAccessToken(user);
         var refreshToken = _jwtFactory.GenerateRefreshToken(request.IpAddress);
         var response = new TokenResponse(jwt, refreshToken.Token);

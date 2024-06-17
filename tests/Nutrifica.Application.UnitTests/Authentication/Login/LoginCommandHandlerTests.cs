@@ -1,20 +1,24 @@
 ﻿using Moq;
+
+using Nutrifica.Api.Contracts.Authentication;
 using Nutrifica.Application.Authentication.Login;
 using Nutrifica.Application.Interfaces.Services;
+using Nutrifica.Domain;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.Entities;
 using Nutrifica.Domain.Shared;
+using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.UnitTests.Authentication.Login;
 
 public class LoginCommandHandlerTests
 {
-    private readonly Mock<IPasswordHasherService> _passwordHasherMock = new Mock<IPasswordHasherService>();
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock = new Mock<IUnitOfWork>();
-    private readonly Mock<IJwtFactory> _jwtFactoryMock = new Mock<IJwtFactory>();
-    private readonly Mock<IUserRepository> _userRepositoryMock = new Mock<IUserRepository>();
+    private readonly Mock<IJwtFactory> _jwtFactoryMock = new();
+    private readonly Mock<IPasswordHasherService> _passwordHasherMock = new();
     private readonly LoginCommandHandler _sut = null!;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
+    private readonly Mock<IUserRepository> _userRepositoryMock = new();
 
     public LoginCommandHandlerTests()
     {
@@ -28,10 +32,10 @@ public class LoginCommandHandlerTests
     [Fact]
     public async void Handle_When_InvalidUsernameProvided_Should_ReturnErrorUserBadLoginOrPass()
     {
-        var command = new LoginCommand() { Username = "admin", Password = "admin" };
+        var command = new LoginCommand { Username = "admin", Password = "admin" };
 
         // Act
-        var result = await _sut.Handle(command, default);
+        Result<TokenResponse> result = await _sut.Handle(command, default);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -42,17 +46,17 @@ public class LoginCommandHandlerTests
     public async void Handle_When_InvalidPasswordProvided_Should_ReturnErrorUserBadLoginOrPass()
     {
         // Arrange
-        var userInStore = CreateUser();
+        User userInStore = CreateUser();
 
         _userRepositoryMock
             .Setup(x => x.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(userInStore)
             .Verifiable();
 
-        var command = new LoginCommand() { Username = "admin", Password = "admin" };
+        var command = new LoginCommand { Username = "admin", Password = "admin" };
 
         // Act
-        var result = await _sut.Handle(command, default);
+        Result<TokenResponse> result = await _sut.Handle(command, default);
 
         // Assert
         _userRepositoryMock.VerifyAll();
@@ -64,7 +68,7 @@ public class LoginCommandHandlerTests
     public async void Handle_When_ValidCredsProvided_Should_SaveRefreshTokenAndReturnTokens()
     {
         // Arrange
-        var userInStore = CreateUser();
+        User userInStore = CreateUser();
 
         _jwtFactoryMock
             .Setup(x => x.GenerateAccessToken(userInStore))
@@ -72,7 +76,7 @@ public class LoginCommandHandlerTests
             .Verifiable();
         _jwtFactoryMock
             .Setup(x => x.GenerateRefreshToken(It.IsAny<string>()))
-            .Returns(new RefreshToken() { Token = "token" })
+            .Returns(new RefreshToken { Token = "token" })
             .Verifiable();
 
         _passwordHasherMock
@@ -85,12 +89,12 @@ public class LoginCommandHandlerTests
             .ReturnsAsync(userInStore)
             .Verifiable();
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-        .Verifiable();
+            .Verifiable();
 
-        var command = new LoginCommand() { Username = "admin", Password = "admin" };
+        var command = new LoginCommand { Username = "admin", Password = "admin" };
 
         // Act
-        var result = await _sut.Handle(command, default);
+        Result<TokenResponse> result = await _sut.Handle(command, default);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -103,14 +107,43 @@ public class LoginCommandHandlerTests
         _unitOfWorkMock.VerifyAll();
     }
 
+    [Fact]
+    public async void Handle_When_UserDisabled_Returns_UserDisabledError()
+    {
+        // Arrange
+        User userInStore = CreateUser();
+        userInStore.Enabled = false;
+
+        _passwordHasherMock
+            .Setup(x => x.Verify("admin", It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(true)
+            .Verifiable();
+
+        _userRepositoryMock
+            .Setup(x => x.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(userInStore)
+            .Verifiable();
+
+        var command = new LoginCommand { Username = "admin", Password = "admin" };
+
+        // Act
+        Result<TokenResponse> result = await _sut.Handle(command, default);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UserErrors.Disabled, result.Error);
+        _userRepositoryMock.VerifyAll();
+        _passwordHasherMock.VerifyAll();
+    }
+
     private static User CreateUser()
     {
         var user = User.Create(
-                    "admin",
-                    FirstName.Create("fn"),
-                    MiddleName.Create("mn"),
-                    LastName.Create("ln"),
-                    null, null, null);
+            "admin",
+            FirstName.Create("fn"),
+            MiddleName.Create("mn"),
+            LastName.Create("ln"),
+            null, null, null);
         user.Account.Salt = "value";
         user.Account.PasswordHash = "value";
         return user;
