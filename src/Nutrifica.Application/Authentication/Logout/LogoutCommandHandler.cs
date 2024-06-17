@@ -4,7 +4,6 @@ using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Domain;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.UserAggregate;
-using Nutrifica.Domain.Aggregates.UserAggregate.Entities;
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application;
@@ -15,13 +14,15 @@ public class LogoutCommandHandler : ICommandHandler<LogoutCommand>
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IRefreshTokenService _refreshTokenService;
 
-    public LogoutCommandHandler(IJwtFactory jwtFactory, IUserRepository userRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider)
+    public LogoutCommandHandler(IJwtFactory jwtFactory, IUserRepository userRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider, IRefreshTokenService refreshTokenService)
     {
         _jwtFactory = jwtFactory;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _dateTimeProvider = dateTimeProvider;
+        _refreshTokenService = refreshTokenService;
     }
 
 
@@ -57,46 +58,16 @@ public class LogoutCommandHandler : ICommandHandler<LogoutCommand>
             if (refreshToken.IsRevoked)
             {
                 //some one already revoked it, looks like tokens were stollen
-                RevokeDescendantRefreshTokens(refreshToken, user, request.IpAddress, $"Attempted reuse of revoked ancestor token: {request.RefreshToken}");
+                _refreshTokenService.RevokeDescendantRefreshTokens(refreshToken, user, request.IpAddress, $"Attempted reuse of revoked ancestor token: {request.RefreshToken}");
             }
             return Result.Failure(UserErrors.RefreshTokenNotActive);
         }
 
-        RemoveOldRefreshTokens(user);
+        _refreshTokenService.RevokeRefreshToken(refreshToken, request.IpAddress, "Logout", null);
+        _refreshTokenService.RemoveOldRefreshTokens(user);
 
         await _unitOfWork.SaveChangesAsync();
 
         return Result.Success();
-    }
-
-    private void RevokeDescendantRefreshTokens(RefreshToken refreshToken, User user, string ipAddress, string reason)
-    {
-        if (!string.IsNullOrWhiteSpace(refreshToken.ReplacedByToken))
-        {
-            var childToken = user
-                .Account
-                .RefreshTokens
-                .SingleOrDefault(x => x.Token == refreshToken.ReplacedByToken);
-
-            if (childToken is null) return;
-            if (!childToken.IsRevoked) RevokeRefreshToken(childToken, ipAddress, reason);
-            RevokeDescendantRefreshTokens(childToken, user, ipAddress, reason);
-        }
-    }
-
-    private void RemoveOldRefreshTokens(User user)
-    {
-        user
-            .Account
-            .RefreshTokens
-            .RemoveAll(rt => rt.IsExpired);
-    }
-
-    private void RevokeRefreshToken(RefreshToken token, string ipAddress, string? reason = null, string? replacedByToken = null)
-    {
-        token.ReplacedByToken = replacedByToken;
-        token.RevokedByIp = ipAddress;
-        token.RevokedAt = _dateTimeProvider.UtcNow;
-        token.ReasonRevoked = reason;
     }
 }

@@ -8,6 +8,7 @@ using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Domain.Shared;
 using Nutrifica.Domain;
 using Nutrifica.Application.Abstractions.Clock;
+using Nutrifica.Application.Interfaces.Services.Impl;
 
 namespace Nutrifica.Application.UnitTests.Authentication.Logout;
 
@@ -18,6 +19,7 @@ public class LogoutCommandHandlerTests
     private readonly Mock<IJwtFactory> _jwtFactoryMock;
     private readonly Mock<IDateTimeProvider> _dateTimeProviderMock;
 
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly LogoutCommandHandler _sut;
     private readonly LogoutCommand _command;
 
@@ -28,16 +30,19 @@ public class LogoutCommandHandlerTests
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _jwtFactoryMock = new Mock<IJwtFactory>();
         _dateTimeProviderMock = new Mock<IDateTimeProvider>();
+        _refreshTokenService = new RefreshTokenService(_dateTimeProviderMock.Object);
 
         _command = new LogoutCommand(
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9zaWQiOiIyMzM4ZDNjMS05MWViLTQxYjQtODhmNi01ZGZiNTE3OTc0MzkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6InVzZXJuYW1lIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6ImZuIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvc3VybmFtZSI6Imxhc3RuYW1lIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiMSIsIm5iZiI6MTcxODQ2MDI1MiwiZXhwIjoxNzE4NDYwNTUyLCJpc3MiOiJJc3N1ZXIiLCJhdWQiOiJhdWRpZW5jZSJ9.iyrtP_5pFMT82mbeujcQjay8q4J_R5xpnkRh29C_OH4",
             "asdf",
             "1.1.1.1");
 
-        _sut = new LogoutCommandHandler(_jwtFactoryMock.Object,
-                                        _userRepositoryMock.Object,
-                                        _unitOfWorkMock.Object,
-                                        _dateTimeProviderMock.Object);
+        _sut = new LogoutCommandHandler(
+            _jwtFactoryMock.Object,
+            _userRepositoryMock.Object,
+            _unitOfWorkMock.Object,
+            _dateTimeProviderMock.Object,
+            _refreshTokenService);
     }
 
     [Fact]
