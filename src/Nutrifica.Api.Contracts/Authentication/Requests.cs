@@ -1,5 +1,10 @@
 namespace Nutrifica.Api.Contracts.Authentication;
 
-public record TokenRequest(string username, string password);
-public record RefreshTokenRequest(string jwt, string refreshToken);
-public record LogoutRequest(string refreshToken);
+public class TokenRequest
+{
+    public string Username { get; set; } = null!;
+    public string Password { get; set; } = null!;
+}
+
+public record RefreshTokenRequest(string Jwt, string RefreshToken);
+public record LogoutRequest(string RefreshToken);

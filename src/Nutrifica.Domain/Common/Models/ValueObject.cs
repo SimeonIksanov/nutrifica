@@ -1,13 +1,13 @@
 namespace Nutrifica.Domain.Common.Models;
 
-public abstract class ValueObject: IEquatable<ValueObject>
+public abstract class ValueObject : IEquatable<ValueObject>
 {
     protected abstract IEnumerable<object> GetEqualityComponents();
 
     public bool Equals(ValueObject? other)
     {
         if (other is null) return false;
-        
+
         return GetEqualityComponents()
             .SequenceEqual(other.GetEqualityComponents());
     }
@@ -16,7 +16,7 @@ public abstract class ValueObject: IEquatable<ValueObject>
     {
         if (other is null || other.GetType() != GetType())
             return false;
-        
+
         return Equals(other);
     }
 

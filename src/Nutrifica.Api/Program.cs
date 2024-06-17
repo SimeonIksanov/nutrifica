@@ -27,13 +27,18 @@ public class Program
         {
             // app.UseSwagger();
             // app.UseSwaggerUI();
+            // app.SeedDevelopmentData();
+            app.UseCors("Open");
+        }
+        else
+        {
+            app.UseCors("Specific");
         }
 
-        app.UseHttpsRedirection();
-
-        app.UseAuthentication();
-        app.UseAuthorization();
-
+        app
+            .UseHttpsRedirection()
+            .UseAuthentication()
+            .UseAuthorization();
 
         app.MapControllers();
 

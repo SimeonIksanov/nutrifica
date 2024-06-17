@@ -1,28 +1,36 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Infrastructure.Authentication;
+using Nutrifica.Infrastructure.Clock;
+using Nutrifica.Infrastructure.Persistence;
 using Nutrifica.Infrastructure.Services;
 
 namespace Nutrifica.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, ConfigurationManager configuration)
+    public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services,
+        ConfigurationManager configuration)
     {
-        services.AddJwtAuthentication(configuration);
-        services.AddServices();
+        services
+            .AddJwtAuthentication(configuration)
+            .AddPersistence()
+            .AddServices();
+
         return services;
     }
 
-    private static void AddJwtAuthentication(this IServiceCollection services, ConfigurationManager configuration)
+    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services,
+        ConfigurationManager configuration)
     {
         var jwtSettings = new JwtSettings();
         configuration.Bind(nameof(JwtSettings), jwtSettings);
-        
+
         services.AddSingleton(jwtSettings);
         services.AddSingleton<IJwtFactory, JwtFactory>();
 
@@ -43,10 +51,24 @@ public static class ServiceCollectionExtensions
                 IssuerSigningKey = SecurityKeyProvider.GetSecurityKey(jwtSettings)
             };
         });
+
+        return services;
     }
 
-    private static void AddServices(this IServiceCollection services)
+    private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddSingleton<IDateTimeService, DateTimeService>();
+        services
+            .AddSingleton<IDateTimeProvider, DateTimeProvider>()
+            .AddScoped<IPasswordHasherService, PasswordHasherService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddPersistence(this IServiceCollection services)
+    {
+        services.AddDbContext<AppDbContext>(
+            options => options.UseInMemoryDatabase("InMemory"));
+
+        return services;
     }
 }

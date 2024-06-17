@@ -7,11 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="UserAggregate\Entities\" />
+    <ProjectReference Include="..\Nutrifica.Shared\Nutrifica.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Nutrifica.Shared\Nutrifica.Shared.csproj" />
+    <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Aggregates/OrderAggregate/Events/" />
+    <Folder Include="Shared/" />
   </ItemGroup>
 
 </Project>

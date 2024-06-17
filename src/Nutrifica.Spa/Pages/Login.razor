@@ -1,0 +1,17 @@
+@page "/Login"
+@layout BaseLayout
+
+<h3>Login</h3>
+
+<EditForm OnValidSubmit="HandleFormSubmit" EditContext="_editContext">
+    <DataAnnotationsValidator />
+    @* <ValidationSummary /> *@
+    
+    <InputText @bind-Value="_model.Username" />
+    <ValidationMessage For="()=>_model.Username"/>
+    
+    <InputText @bind-Value="_model.Password"/>
+    <ValidationMessage For="()=>_model.Password"/>
+    
+    <button type="submit">Login</button>
+</EditForm>
