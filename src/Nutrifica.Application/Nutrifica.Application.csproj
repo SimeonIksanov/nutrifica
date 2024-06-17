@@ -20,9 +20,7 @@
     <ItemGroup>
       <Folder Include="Abstractions/Clock/" />
       <Folder Include="Accounts/" />
-      <Folder Include="Accounts/Create/" />
       <Folder Include="Interfaces/Services/Impl/" />
-      <Folder Include="Interfaces\Authentication\" />
     </ItemGroup>
 
 </Project>
