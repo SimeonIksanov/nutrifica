@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Infrastructure.Authentication;
+using Nutrifica.Infrastructure.Clock;
 using Nutrifica.Infrastructure.Persistence;
 using Nutrifica.Infrastructure.Services;
 
@@ -56,9 +58,9 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services
-            .AddSingleton<IDateTimeService, DateTimeService>()
+            .AddSingleton<IDateTimeProvider, DateTimeProvider>()
             .AddScoped<IPasswordHasherService, PasswordHasherService>();
-        
+
         return services;
     }
 
@@ -66,7 +68,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddDbContext<AppDbContext>(
             options => options.UseInMemoryDatabase("InMemory"));
-        
+
         return services;
     }
 }

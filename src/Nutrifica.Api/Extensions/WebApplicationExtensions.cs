@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Nutrifica.Application.Interfaces.Services;
-using Nutrifica.Domain.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate;
+using Nutrifica.Domain.Shared;
 using Nutrifica.Infrastructure.Persistence;
 
 namespace Nutrifica.Api.Extensions;
@@ -23,18 +24,18 @@ public static class WebApplicationExtensions
     private static User CreateMainUser(IPasswordHasherService ph)
     {
         var user = User.Create(username: "admin",
-            firstName: "f",
-            middleName: "m",
-            lastname: "l",
+            firstName: FirstName.Create("f"),
+            middleName: MiddleName.Create("m"),
+            lastname: LastName.Create("l"),
             phoneNumber: null,
-            email: "email",
+            email: Email.Create("email"),
             supervisorId: null);
-        
+
         var ps = ph.HashPassword("admin");
-        
+
         user.Account.PasswordHash = ps.hashed;
         user.Account.Salt = ps.salt;
-        
+
         return user;
     }
 }

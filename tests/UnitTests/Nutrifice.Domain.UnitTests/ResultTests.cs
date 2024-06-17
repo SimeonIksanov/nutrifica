@@ -8,28 +8,28 @@ public class ResultTests
     public void Result_WhenFailed_HasError()
     {
         // Arrange
-        var sut = Result.Fail("fail");
+        var sut = Result.Failure(Error.NullValue);
 
         // Act
 
         // Assert
-        Assert.True(sut.Failure);
-        Assert.False(sut.Success);
-        Assert.Equal("fail", sut.Message);
+        Assert.True(sut.IsFailure);
+        Assert.False(sut.IsSuccess);
+        Assert.Equal(sut.Error, Error.NullValue);
     }
 
     [Fact]
     public void Result_WhenSucceeded_HasNoError()
     {
         // Arrange
-        var sut = Result.Ok();
+        var sut = Result.Success();
 
         // Act
 
         // Assert
-        Assert.True(sut.Success);
-        Assert.False(sut.Failure);
-        Assert.True(string.IsNullOrEmpty(sut.Message));
+        Assert.True(sut.IsSuccess);
+        Assert.False(sut.IsFailure);
+        Assert.Equal(Error.None, sut.Error);
     }
 
     [Fact]
@@ -38,29 +38,29 @@ public class ResultTests
         var o = new Object();
         // Arrange
 
-        var sut = Result<Object>.Ok(o);
+        var sut = Result<Object>.Success(o);
         // Act
 
         // Assert
-        Assert.True(sut.Success);
-        Assert.False(sut.Failure);
+        Assert.True(sut.IsSuccess);
+        Assert.False(sut.IsFailure);
         Assert.Equal(o, sut.Value);
-        Assert.True(string.IsNullOrEmpty(sut.Message));
+        Assert.Equal(Error.None, sut.Error);
     }
 
     [Fact]
-    public void Result_WhenFailed_ThrowsIfTryGetValue()
+    public void Result_WhenGetValueOnFailedResult_Throws()
     {
         // Arrange
-        var sut = Result<Object>.Fail("fail");
+        var sut = Result.Failure<Object>(Error.NullValue);
 
         // Act
         var action = () => sut.Value;
 
         // Assert
-        Assert.False(sut.Success);
-        Assert.True(sut.Failure);
-        Assert.Equal("fail", sut.Message);
+        Assert.False(sut.IsSuccess);
+        Assert.True(sut.IsFailure);
+        Assert.Equal(Error.NullValue, sut.Error);
         Assert.Throws<InvalidOperationException>(action);
     }
 }

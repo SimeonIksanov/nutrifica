@@ -33,9 +33,9 @@ public partial class Login : IDisposable //: ComponentBase
     public async Task HandleFormSubmit()
     {
         var authResult = await _authenticationService.LoginAsync(_model, _cancellationTokenSource!.Token);
-        if (authResult.Failure)
+        if (authResult.IsFailure)
         {
-            _messageStore?.Add(()=>_model, authResult.Message);
+            _messageStore?.Add(() => _model, authResult.Error.Description);
         }
     }
 

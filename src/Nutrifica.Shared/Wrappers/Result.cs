@@ -2,9 +2,9 @@ namespace Nutrifica.Shared.Wrappers;
 
 public interface IResult
 {
-    bool Success { get; }
-    bool Failure { get; }
-    string Message { get; }
+    bool IsSuccess { get; }
+    bool IsFailure { get; }
+    Error Error { get; }
 }
 
 public interface IResult<T> : IResult
@@ -13,43 +13,40 @@ public interface IResult<T> : IResult
 }
 public class Result : IResult
 {
-    public string Message { get; } = null!;
-
-    public bool Success => string.IsNullOrEmpty(Message);
-    public bool Failure => !Success;
-
-    protected Result() { }
-
-    protected Result(string message)
+    protected Result(bool success, Error error)
     {
-        if (String.IsNullOrEmpty(message))
-            throw new ArgumentException();
-
-        Message = message;
+        if (success && error != Error.None) throw new InvalidOperationException();
+        if (!success && error == Error.None) throw new InvalidOperationException();
+        IsSuccess = success;
+        Error = error;
     }
+    public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
+    public Error Error { get; }
 
-    public static Result Fail(string message) { return new Result(message); }
-    public static Result Ok() { return new Result(); }
+    public static Result Success() => new Result(true, Error.None);
+    public static Result Failure(Error error) => new Result(false, error);
+    public static Result<TValue> Success<TValue>(TValue value) => new(value, true, Error.None);
+    public static Result<TValue> Failure<TValue>(Error error) => new(default!, false, error);
+    public static Result<TValue> Create<TValue>(TValue value) => value is null
+        ? Failure<TValue>(Error.NullValue)
+        : Success<TValue>(value);
 }
 
-public class Result<T> : Result, IResult<T>
+public class Result<TValue> : Result, IResult<TValue>
 {
-    private readonly T _value;
-    
-    public new static Result<T> Fail(string message) => new(message);
-    public static Result<T> Ok(T value) => new(value);
+    private readonly TValue _value;
 
-    protected Result(T value)
+
+    protected internal Result(TValue value, bool isSuccess, Error error)
+        : base(isSuccess, error)
     {
         _value = value;
     }
-    
-    protected Result(string message) : base(message)
-    {
-        _value = default!;
-    }
 
-    public T Value => Success
-        ? _value 
+    public TValue Value => IsSuccess
+        ? _value
         : throw new InvalidOperationException($"You can't access .{nameof(Value)} when .{nameof(Success)} is false");
+
+    public static implicit operator Result<TValue>(TValue value) => Create(value);
 }
