@@ -16,9 +16,10 @@ public class LoginCommandHandlerTests
 {
     private readonly Mock<IJwtFactory> _jwtFactoryMock = new();
     private readonly Mock<IPasswordHasherService> _passwordHasherMock = new();
-    private readonly LoginCommandHandler _sut = null!;
+    private readonly LoginCommandHandler _sut;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IUserRepository> _userRepositoryMock = new();
+    private readonly LoginCommand _command;
 
     public LoginCommandHandlerTests()
     {
@@ -27,15 +28,14 @@ public class LoginCommandHandlerTests
             _passwordHasherMock.Object,
             _userRepositoryMock.Object,
             _unitOfWorkMock.Object);
+        _command = new() { Username = "admin", Password = "admin" };
     }
 
     [Fact]
     public async void Handle_When_InvalidUsernameProvided_Should_ReturnErrorUserBadLoginOrPass()
     {
-        var command = new LoginCommand { Username = "admin", Password = "admin" };
-
         // Act
-        Result<TokenResponse> result = await _sut.Handle(command, default);
+        Result<TokenResponse> result = await _sut.Handle(_command, default);
 
         // Assert
         Assert.True(result.IsFailure);
@@ -48,15 +48,10 @@ public class LoginCommandHandlerTests
         // Arrange
         User userInStore = CreateUser();
 
-        _userRepositoryMock
-            .Setup(x => x.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userInStore)
-            .Verifiable();
-
-        var command = new LoginCommand { Username = "admin", Password = "admin" };
+        SetupUserRepositoryMock(userInStore);
 
         // Act
-        Result<TokenResponse> result = await _sut.Handle(command, default);
+        Result<TokenResponse> result = await _sut.Handle(_command, default);
 
         // Assert
         _userRepositoryMock.VerifyAll();
@@ -70,31 +65,15 @@ public class LoginCommandHandlerTests
         // Arrange
         User userInStore = CreateUser();
 
-        _jwtFactoryMock
-            .Setup(x => x.GenerateAccessToken(userInStore))
-            .Returns("jwt")
+        SetupJwtFactoryMock(userInStore);
+        SetupPasswordHasherMock();
+        SetupUserRepositoryMock(userInStore);
+        _unitOfWorkMock
+            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Verifiable();
-        _jwtFactoryMock
-            .Setup(x => x.GenerateRefreshToken(It.IsAny<string>()))
-            .Returns(new RefreshToken { Token = "token" })
-            .Verifiable();
-
-        _passwordHasherMock
-            .Setup(x => x.Verify("admin", It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(true)
-            .Verifiable();
-
-        _userRepositoryMock
-            .Setup(x => x.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userInStore)
-            .Verifiable();
-        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Verifiable();
-
-        var command = new LoginCommand { Username = "admin", Password = "admin" };
 
         // Act
-        Result<TokenResponse> result = await _sut.Handle(command, default);
+        Result<TokenResponse> result = await _sut.Handle(_command, default);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -114,26 +93,46 @@ public class LoginCommandHandlerTests
         User userInStore = CreateUser();
         userInStore.Enabled = false;
 
-        _passwordHasherMock
-            .Setup(x => x.Verify("admin", It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(true)
-            .Verifiable();
-
-        _userRepositoryMock
-            .Setup(x => x.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userInStore)
-            .Verifiable();
-
-        var command = new LoginCommand { Username = "admin", Password = "admin" };
+        SetupPasswordHasherMock();
+        SetupUserRepositoryMock(userInStore);
 
         // Act
-        Result<TokenResponse> result = await _sut.Handle(command, default);
+        Result<TokenResponse> result = await _sut.Handle(_command, default);
 
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal(UserErrors.Disabled, result.Error);
         _userRepositoryMock.VerifyAll();
         _passwordHasherMock.VerifyAll();
+    }
+
+    private void SetupPasswordHasherMock()
+    {
+        _passwordHasherMock
+            .Setup(x => x.Verify("admin", It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(true)
+            .Verifiable();
+    }
+
+    private void SetupUserRepositoryMock(User userInStore)
+    {
+        _userRepositoryMock
+            .Setup(x => x.GetByUsernameAsync(userInStore.Account.Username, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(userInStore)
+            .Verifiable();
+    }
+
+    private void SetupJwtFactoryMock(User userInStore)
+    {
+        _jwtFactoryMock
+            .Setup(x => x.GenerateAccessToken(userInStore))
+            .Returns("jwt")
+            .Verifiable();
+
+        _jwtFactoryMock
+            .Setup(x => x.GenerateRefreshToken(It.IsAny<string>()))
+            .Returns(new RefreshToken { Token = "token" })
+            .Verifiable();
     }
 
     private static User CreateUser()
@@ -143,7 +142,7 @@ public class LoginCommandHandlerTests
             FirstName.Create("fn"),
             MiddleName.Create("mn"),
             LastName.Create("ln"),
-            null, null, null);
+            null!, null!, null);
         user.Account.Salt = "value";
         user.Account.PasswordHash = "value";
         return user;
