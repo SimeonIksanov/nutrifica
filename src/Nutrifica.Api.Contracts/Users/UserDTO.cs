@@ -2,7 +2,7 @@ using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Api.Contracts.Users;
 
-public record UserDTO(
+public record UserDto(
     Guid Id,
     string Username,
     string FirstName,

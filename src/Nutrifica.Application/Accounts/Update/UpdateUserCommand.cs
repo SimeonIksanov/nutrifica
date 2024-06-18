@@ -18,4 +18,4 @@ public record UpdateUserCommand(
     UserRole Role,
     bool Enabled,
     string DisableReason,
-    UserId? SupervisorId) : ICommand<UserDTO>;
+    UserId? SupervisorId) : ICommand<UserDto>;

@@ -13,7 +13,6 @@ namespace Nutrifica.Application.UnitTests.Accounts.Create;
 
 public class CreateUserCommandHandlerTests
 {
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
 
     private CreateUserCommand _command;
@@ -21,10 +20,10 @@ public class CreateUserCommandHandlerTests
 
     public CreateUserCommandHandlerTests()
     {
-        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        Mock<IUnitOfWork> unitOfWorkMock = new();
         _userRepositoryMock = new Mock<IUserRepository>();
         _command = CreateCommand();
-        _sut = new CreateUserCommandHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object);
+        _sut = new CreateUserCommandHandler(_userRepositoryMock.Object, unitOfWorkMock.Object);
     }
 
     [Fact]
@@ -36,7 +35,7 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDTO>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.NotEmpty(actual.Value.Supervisor);
     }
@@ -47,7 +46,7 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDTO>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.Empty(actual.Value.Supervisor);
     }
@@ -58,7 +57,7 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDTO>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.Empty(actual.Value.Supervisor);
     }
@@ -68,7 +67,7 @@ public class CreateUserCommandHandlerTests
     {
         var actual = await _sut.Handle(_command, default);
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDTO>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.NotEqual(DateTime.MinValue, actual.Value.CreatedAt); // (actual.Value.CreatedAt);
     }

@@ -19,7 +19,9 @@
 
     <ItemGroup>
       <Folder Include="Abstractions/Clock/" />
+      <Folder Include="Clients\Delete\" />
       <Folder Include="Interfaces/Services/Impl/" />
+      <Folder Include="Orders\" />
     </ItemGroup>
 
 </Project>

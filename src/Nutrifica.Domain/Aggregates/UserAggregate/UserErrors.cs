@@ -1,6 +1,6 @@
 ﻿using Nutrifica.Shared.Wrappers;
 
-namespace Nutrifica.Domain;
+namespace Nutrifica.Domain.Aggregates.UserAggregate;
 
 public static class UserErrors
 {

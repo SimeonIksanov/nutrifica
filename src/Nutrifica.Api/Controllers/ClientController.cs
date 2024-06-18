@@ -1,6 +1,8 @@
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using Nutrifica.Api.Contracts.Clients;
 
 namespace Nutrifica.Api.Controllers
@@ -16,15 +18,15 @@ namespace Nutrifica.Api.Controllers
         {
             // _mediatr = mediatr;
         }
-        
+
         /// <summary>
         /// Get Clients
         /// </summary>
         /// <returns></returns>
         [HttpPost("logout")]
-        public async Task<ActionResult<ICollection<ClientDTO>>> Get(CancellationToken ct)
+        public async Task<ActionResult<ICollection<CreatedClientDto>>> Get(CancellationToken ct)
         {
-            return Ok(Array.Empty<ClientDTO>());
+            return Ok(Array.Empty<CreatedClientDto>());
         }
     }
 }

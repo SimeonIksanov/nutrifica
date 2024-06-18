@@ -12,28 +12,32 @@ namespace Nutrifica.Domain.Aggregates.OrderAggregate;
 
 public sealed class Order : Entity<OrderId>, IAggregateRoot
 {
+    private readonly HashSet<UserId> _managers;
+    private readonly List<OrderItem> _orderItems;
     private Order() { }
+
+    private Order(UserId createdBy)
+    {
+        _managers = new HashSet<UserId> { createdBy };
+        Status = OrderStatus.New;
+        State = State.Active;
+        CreatedAt = DateTime.UtcNow;
+    }
 
     public ClientId ClientId { get; private set; } = null!;
     public OrderStatus Status { get; private set; }
     public State State { get; set; }
     public DateTime CreatedAt { get; init; }
-    public ICollection<OrderItem> Items { get; private set; } = null!;
     public Money TotalSum { get; }
-    public HashSet<UserId> Operators { get; private set; } = null!;
+    public IReadOnlyCollection<OrderItem> Items => _orderItems.ToList();
+    public IReadOnlyCollection<UserId> Managers => _managers.ToList();
 
     public static Order Create(ClientId clientId, UserId userId)
     {
-        ArgumentNullException.ThrowIfNull(clientId);
-        ArgumentNullException.ThrowIfNull(userId);
-
-        var order = new Order
+        var order = new Order(userId)
         {
             Id = OrderId.CreateUnique(),
-            Status = OrderStatus.New,
-            ClientId = clientId,
-            Operators = new HashSet<UserId> { userId },
-            State = State.Active
+            ClientId = clientId
         };
         return order;
     }

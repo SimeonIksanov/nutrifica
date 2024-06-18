@@ -21,7 +21,7 @@ public class UsersController : ApiController
     [HttpPost("logout")]
     public async Task<IActionResult> Get(CancellationToken ct)
     {
-        return Ok(Array.Empty<UserDTO>());
+        return Ok(Array.Empty<UserDto>());
     }
 
 

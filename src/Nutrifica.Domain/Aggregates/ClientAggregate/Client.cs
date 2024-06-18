@@ -1,3 +1,6 @@
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.OrderAggregate.ValueObjects;
@@ -10,7 +13,18 @@ namespace Nutrifica.Domain.Aggregates.ClientAggregate;
 
 public sealed class Client : Entity<ClientId>, IAggregateRoot
 {
+    private readonly HashSet<UserId> _managers; // Пользователи которые могут манипулировать клиентом
+    private readonly List<OrderId> _orderIds;
+    private readonly List<PhoneCallId> _phoneCallIds;
     private Client() { }
+
+    private Client(UserId createdBy)
+    {
+        _managers = new HashSet<UserId> { createdBy };
+        State = State.Active;
+        Status = Status.New;
+        CreatedAt = DateTime.UtcNow;
+    }
 
     public FirstName FirstName { get; set; }
     public MiddleName MiddleName { get; set; }
@@ -21,9 +35,9 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot
     public Comment Comment { get; set; }
     public PhoneNumber PhoneNumber { get; set; } = null!;
     public string Source { get; set; } = string.Empty;
-    public HashSet<UserId> Operators { get; private set; } = null!;
-    public ICollection<OrderId> OrderIds { get; private set; } = null!;
-    public ICollection<PhoneCallId> PhoneCallIds { get; private set; } = null!;
+    public IReadOnlyCollection<UserId> Managers => _managers.ToList();
+    public IReadOnlyCollection<OrderId> OrderIds => _orderIds.ToList();
+    public IReadOnlyCollection<PhoneCallId> PhoneCallIds => _phoneCallIds.ToList();
 
     public DateTime CreatedAt { get; private set; }
     public UserId CreatedBy { get; private set; } = null!;
@@ -33,10 +47,7 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot
     public static Client Create(FirstName firstName, MiddleName middleName, LastName lastName,
         PhoneNumber phoneNumber, Address address, Comment comment, UserId createdBy, string source)
     {
-        ArgumentNullException.ThrowIfNull(phoneNumber);
-        ArgumentNullException.ThrowIfNull(createdBy);
-
-        var client = new Client
+        var client = new Client(createdBy)
         {
             Id = ClientId.CreateUnique(),
             FirstName = firstName,
@@ -46,9 +57,7 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot
             Address = address,
             Comment = comment,
             CreatedBy = createdBy,
-            Source = source,
-            State = State.Active,
-            Status = Status.New
+            Source = source
         };
         client.RaiseDomainEvent(new ClientCreatedDomainEvent(client.Id));
         return client;
