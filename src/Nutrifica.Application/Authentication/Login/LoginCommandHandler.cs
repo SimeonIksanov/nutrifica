@@ -5,7 +5,6 @@ using Nutrifica.Domain;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.Entities;
-using Nutrifica.Domain.Shared;
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Authentication.Login;
@@ -31,7 +30,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, TokenRes
 
     public async Task<Result<TokenResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByUsernameAsync(request.Username);
+        var user = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken);
         if (user is null)
         {
             return Result.Failure<TokenResponse>(UserErrors.BadLoginOrPassword);
@@ -52,7 +51,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, TokenRes
         var response = new TokenResponse(jwt, refreshToken.Token);
 
         user.Account.RefreshTokens = new List<RefreshToken>() { refreshToken };
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success(response);
     }
 }

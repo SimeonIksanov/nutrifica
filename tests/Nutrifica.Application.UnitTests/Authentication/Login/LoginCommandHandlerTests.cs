@@ -91,7 +91,8 @@ public class LoginCommandHandlerTests
     {
         // Arrange
         User userInStore = CreateUser();
-        userInStore.Enabled = false;
+        // userInStore.Enabled = false;
+        userInStore.Disable("test disable");
 
         SetupPasswordHasherMock();
         SetupUserRepositoryMock(userInStore);

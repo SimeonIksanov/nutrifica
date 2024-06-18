@@ -34,23 +34,26 @@ public sealed class User : Entity<UserId>, IAggregateRoot
             LastName = lastname,
             PhoneNumber = phoneNumber,
             Email = email,
-            Enabled = true,
-            Role = UserRole.Operator,
             SupervisorId = supervisorId,
+            Role = UserRole.Operator,
+            CreatedAt = DateTime.UtcNow,
+            Enabled = true,
         };
 
         user.RaiseDomainEvent(new UserCreatedDomainEvent(user.Id));
         return user;
     }
 
-    protected User() { }
+    private User()
+    {
+    }
 
-    public UserAccount Account { get; set; }
+    public UserAccount Account { get; private set; }
 
-    public bool Enabled { get; set; }
+    public bool Enabled { get; private set; }
+    public string DisableReason { get; private set; } = string.Empty;
 
     public DateTime CreatedAt { get; private set; }
-    public DateTime? FiredAt { get; private set; }
 
     public FirstName FirstName { get; set; }
     public MiddleName MiddleName { get; set; }
@@ -63,6 +66,19 @@ public sealed class User : Entity<UserId>, IAggregateRoot
     public UserId? SupervisorId { get; set; } = null!;
     public ICollection<ClientId> ClientIds { get; private set; } = null!;
     public UserRole Role { get; set; }
+
+    public void Enable()
+    {
+        Enabled = true;
+        DisableReason = string.Empty;
+    }
+
+    public void Disable(string reason)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(reason, nameof(reason));
+        Enabled = false;
+        DisableReason = reason;
+    }
 
     public override string ToString() => FullName;
 }

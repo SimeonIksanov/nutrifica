@@ -7,10 +7,18 @@ public static class UserErrors
     public static Error BadLoginOrPassword = new Error(
         "User.BadLoginOrPassword",
         "Bad username or password.");
+    
+    public static Error WrongPassword = new Error(
+        "User.WrongPassword",
+        "Wrong password specified.");
 
     public static Error UserNotFound = new Error(
         "User.UserNotFound",
         "User not found.");
+
+    public static Error SupervisorNotFound = new Error(
+        "User.SupervisorNotFound",
+        "Supervisor not found.");
 
     public static Error BadJwt = new Error(
         "User.BadJwt",
@@ -30,5 +38,10 @@ public static class UserErrors
     public static Error Disabled = new Error(
         "User.Disabled",
         "User is disabled."
+    );
+
+    public static Error DisableReasonNotSpecified = new Error(
+        "User.DisableReasonNotSpecified",
+        "Disable reason not specified."
     );
 }

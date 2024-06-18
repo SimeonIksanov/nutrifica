@@ -17,7 +17,7 @@ public abstract class ValueObject : IEquatable<ValueObject>
         if (other is null || other.GetType() != GetType())
             return false;
 
-        return Equals(other);
+        return Equals((ValueObject)other);
     }
 
     public static bool operator ==(ValueObject left, ValueObject right) => left.Equals(right);

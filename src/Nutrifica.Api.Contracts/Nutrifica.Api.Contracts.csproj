@@ -10,4 +10,8 @@
       <Folder Include="Orders\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Nutrifica.Shared\Nutrifica.Shared.csproj" />
+    </ItemGroup>
+
 </Project>
