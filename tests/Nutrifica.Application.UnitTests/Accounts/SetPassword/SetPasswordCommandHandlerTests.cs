@@ -4,7 +4,6 @@ using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.UnitTests.Utils;
 using Nutrifica.Application.Users.SetPassword;
-using Nutrifica.Domain;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
@@ -36,7 +35,7 @@ public class SetPasswordCommandHandlerTests
         var command = new SetPasswordCommand(user.Id, "cur", "new");
 
         _userRepositoryMock
-            .Setup(x => x.GetByIdWithPasswordHashAsync(user.Id, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdIncludeAccountAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _passwordHasherServiceMock
             .Setup(x => x.Verify(command.CurrentPassword, user.Account.PasswordHash, user.Account.Salt))
@@ -58,7 +57,7 @@ public class SetPasswordCommandHandlerTests
         var user = UserUtils.CreateUser();
         var command = new SetPasswordCommand(user.Id, "", "new");
         _userRepositoryMock
-            .Setup(x => x.GetByIdWithPasswordHashAsync(user.Id, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdIncludeAccountAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _passwordHasherServiceMock
             .Setup(x => x.HashPassword(command.NewPassword))
@@ -76,7 +75,7 @@ public class SetPasswordCommandHandlerTests
     {
         var command = new SetPasswordCommand(UserId.CreateUnique(), "", "new");
         _userRepositoryMock
-            .Setup(x => x.GetByIdWithPasswordHashAsync(command.Id, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdIncludeAccountAsync(command.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(null as User);
 
         var actual = await _sut.Handle(command, default);
@@ -92,7 +91,7 @@ public class SetPasswordCommandHandlerTests
         var user = UserUtils.CreateUser();
         var command = new SetPasswordCommand(user.Id, "wrong", "new");
         _userRepositoryMock
-            .Setup(x => x.GetByIdWithPasswordHashAsync(user.Id, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdIncludeAccountAsync(user.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
         _passwordHasherServiceMock
             .Setup(x => x.Verify(command.CurrentPassword, user.Account.PasswordHash, user.Account.Salt))

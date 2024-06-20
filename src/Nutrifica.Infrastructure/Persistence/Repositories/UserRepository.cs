@@ -28,16 +28,11 @@ public class UserRepository : IUserRepository
         return await _context.Set<User>().FirstOrDefaultAsync(x => x.Id == userId, ct);
     }
 
-    public async Task<User?> GetByIdWithRefreshTokensAsync(UserId userId, CancellationToken ct = default)
+    public async Task<User?> GetByIdIncludeAccountAsync(UserId userId, CancellationToken ct = default)
     {
         return await _context.Set<User>()
-            .Include(x=>x.Account)
+            .Include(x => x.Account)
             .FirstOrDefaultAsync(x => x.Id == userId, ct);
-    }
-
-    public Task<User?> GetByIdWithPasswordHashAsync(UserId userId, CancellationToken ct = default)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<User?> GetByUsernameAsync(string username, CancellationToken ct = default)
@@ -47,7 +42,8 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(x => x.Account.Username == username, cancellationToken: ct);
     }
 
-    public Task<IPagedList<UserModel>> GetByFilterAsync(UserQueryParams requestQueryParams, CancellationToken cancellationToken)
+    public Task<IPagedList<UserModel>> GetByFilterAsync(UserQueryParams requestQueryParams,
+        CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

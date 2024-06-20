@@ -23,7 +23,7 @@ public class SetPasswordCommandHandler : ICommandHandler<SetPasswordCommand>
 
     public async Task<Result> Handle(SetPasswordCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdWithPasswordHashAsync(request.Id, cancellationToken);
+        var user = await _userRepository.GetByIdIncludeAccountAsync(request.Id, cancellationToken);
         if (user is null)
         {
             return Result.Failure(UserErrors.UserNotFound);

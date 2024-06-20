@@ -37,7 +37,7 @@ public class LogoutCommandHandler : ICommandHandler<LogoutCommand>
         }
 
         var user = await _userRepository
-            .GetByIdWithRefreshTokensAsync(userId, cancellationToken);
+            .GetByIdIncludeAccountAsync(userId, cancellationToken);
 
         if (user is null)
         {

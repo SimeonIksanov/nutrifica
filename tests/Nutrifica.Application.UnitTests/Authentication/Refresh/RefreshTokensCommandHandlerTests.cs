@@ -177,7 +177,7 @@ public class RefreshTokensCommandHandlerTests
             .Setup(x => x.GetUserIdAsync(_command.Jwt))
             .ReturnsAsync(user.Id);
         _userRepositoryMock
-            .Setup(x => x.GetByIdWithRefreshTokensAsync(user.Id, default))
+            .Setup(x => x.GetByIdIncludeAccountAsync(user.Id, default))
             .ReturnsAsync(user);
     }
 }
