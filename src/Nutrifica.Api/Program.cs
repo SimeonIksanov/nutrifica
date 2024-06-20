@@ -27,7 +27,7 @@ public class Program
         {
             // app.UseSwagger();
             // app.UseSwaggerUI();
-            // app.SeedDevelopmentData();
+            app.SeedDevelopmentData();
             app.UseCors("Open");
         }
         else

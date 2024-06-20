@@ -3,6 +3,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using Nutrifica.Api.Contracts.Users;
+using Nutrifica.Application.Users.Get;
+using Nutrifica.Shared.QueryParameters;
 
 namespace Nutrifica.Api.Controllers;
 
@@ -21,7 +23,10 @@ public class UsersController : ApiController
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken ct)
     {
-        return Ok(Array.Empty<UserResponse>());
+        var command = new GetUsersQuery(new UserQueryParams());
+        var result = await _mediator.Send(command, ct);
+
+        return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
 
     /// <summary>
