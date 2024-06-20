@@ -1,4 +1,5 @@
 using Nutrifica.Api.Contracts.Users;
+using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Abstractions.Messaging;
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Persistence;

@@ -3,9 +3,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 
 using Nutrifica.Domain.Abstractions;
-using Nutrifica.Domain.Aggregates.ClientAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate;
-using Nutrifica.Infrastructure.Persistence.Configurations;
 
 namespace Nutrifica.Infrastructure.Persistence;
 

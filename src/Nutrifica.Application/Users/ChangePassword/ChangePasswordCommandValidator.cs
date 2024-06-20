@@ -1,11 +1,11 @@
 using FluentValidation;
 
-namespace Nutrifica.Application.Users.SetPassword;
+namespace Nutrifica.Application.Users.ChangePassword;
 
-public class SetPasswordCommandValidator : AbstractValidator<SetPasswordCommand>
+public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
 {
     private const int PasswordMinLength = 6;
-    public SetPasswordCommandValidator()
+    public ChangePasswordCommandValidator()
     {
         RuleFor(x => x.Id)
             .NotNull()
@@ -16,7 +16,7 @@ public class SetPasswordCommandValidator : AbstractValidator<SetPasswordCommand>
             });
 
         RuleFor(x => x.CurrentPassword)
-            .NotNull();
+            .NotEmpty();
 
         RuleFor(x => x.NewPassword)
             .NotEmpty()

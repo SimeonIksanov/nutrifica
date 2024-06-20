@@ -5,15 +5,15 @@ using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Shared.Wrappers;
 
-namespace Nutrifica.Application.Users.SetPassword;
+namespace Nutrifica.Application.Users.ResetPassword;
 
-public class SetPasswordCommandHandler : ICommandHandler<SetPasswordCommand>
+public class ResetPasswordCommandHandler : ICommandHandler<ResetPasswordCommand>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasherService _passwordHasherService;
 
-    public SetPasswordCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork,
+    public ResetPasswordCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork,
         IPasswordHasherService passwordHasherService)
     {
         _userRepository = userRepository;
@@ -21,19 +21,12 @@ public class SetPasswordCommandHandler : ICommandHandler<SetPasswordCommand>
         _passwordHasherService = passwordHasherService;
     }
 
-    public async Task<Result> Handle(SetPasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdIncludeAccountAsync(request.Id, cancellationToken);
         if (user is null)
         {
             return Result.Failure(UserErrors.UserNotFound);
-        }
-
-        // TODO: Permissions required here
-        if (!string.IsNullOrWhiteSpace(request.CurrentPassword) &&
-            !_passwordHasherService.Verify(request.CurrentPassword, user.Account.PasswordHash, user.Account.Salt))
-        {
-            return Result.Failure(UserErrors.WrongPassword);
         }
 
         var pair = _passwordHasherService.HashPassword(request.NewPassword);

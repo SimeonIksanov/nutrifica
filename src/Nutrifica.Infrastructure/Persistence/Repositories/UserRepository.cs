@@ -56,6 +56,7 @@ public class UserRepository : IUserRepository
             : query.OrderBy(GetSortProperty(requestQueryParams));
 
         var users = query
+            .Include(x=>x.Account)
             .GroupJoin(_context.Set<User>(),
                 o => o.SupervisorId,
                 i => i.Id,

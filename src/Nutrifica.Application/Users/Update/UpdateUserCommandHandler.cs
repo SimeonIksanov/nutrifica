@@ -1,4 +1,5 @@
 using Nutrifica.Api.Contracts.Users;
+using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Abstractions.Messaging;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Mappings;
@@ -36,7 +37,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserR
             return Result.Failure<UserResponse>(UserErrors.DisableReasonNotSpecified);
         }
 
-        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
+        var user = await _userRepository.GetByIdIncludeAccountAsync(request.Id, cancellationToken);
         if (user is null)
         {
             return Result.Failure<UserResponse>(UserErrors.UserNotFound);

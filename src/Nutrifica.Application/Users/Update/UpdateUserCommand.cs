@@ -1,4 +1,5 @@
 using Nutrifica.Api.Contracts.Users;
+using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Abstractions.Messaging;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;

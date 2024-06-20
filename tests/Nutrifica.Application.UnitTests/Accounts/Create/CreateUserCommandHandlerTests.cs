@@ -1,6 +1,7 @@
 using Moq;
 
 using Nutrifica.Api.Contracts.Users;
+using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.UnitTests.Utils;
 using Nutrifica.Application.Users.Create;

@@ -1,8 +1,8 @@
 using Nutrifica.Shared.Enums;
 
-namespace Nutrifica.Api.Contracts.Users;
+namespace Nutrifica.Api.Contracts.Users.Requests;
 
-public record UserResponse(
+public record UserUpdateRequest(
     Guid Id,
     string Username,
     string FirstName,
@@ -10,10 +10,7 @@ public record UserResponse(
     string LastName,
     string Email,
     string PhoneNumber,
+    UserRole Role,
     bool Enabled,
     string DisableReason,
-    Guid? SupervisorId,
-    string SupervisorName,
-    UserRole Role,
-    DateTime CreatedAt
-);
+    Guid? SupervisorId);

@@ -1,4 +1,5 @@
 using Nutrifica.Api.Contracts.Users;
+using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Models.Users;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 

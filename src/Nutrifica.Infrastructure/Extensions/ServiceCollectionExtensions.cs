@@ -75,8 +75,9 @@ public static class ServiceCollectionExtensions
 
         services
             .AddScoped<IUserRepository, UserRepository>()
-            .AddScoped<IClientRepository, ClientRepository>()
-            .AddScoped<IUnitOfWork, AppDbContext>();
+            .AddScoped<IClientRepository, ClientRepository>();
+
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
 
         return services;
     }
