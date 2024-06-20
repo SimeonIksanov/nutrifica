@@ -23,4 +23,10 @@ public class PhoneNumber : ValueObject
     }
 
     public override string ToString() => Value;
+
+    #region Workaroud for filtering with 'searchTerm'
+
+    public static explicit operator string(PhoneNumber phoneNumber) => phoneNumber.Value;
+
+    #endregion
 }

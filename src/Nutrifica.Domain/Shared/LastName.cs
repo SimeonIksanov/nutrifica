@@ -4,13 +4,20 @@ namespace Nutrifica.Domain.Shared;
 
 public class LastName : ValueObject
 {
-    public static LastName Create(string value) => new LastName(value);
     private LastName(string value) => Value = value;
-    public string Value { get; set; } = string.Empty;
+    public static LastName Create(string value) => new LastName(value);
+    public string Value { get; set; }
+
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value;
     }
-    public override string ToString() => Value;
-}
 
+    public override string ToString() => Value;
+
+    #region Workaroud for filtering with 'searchTerm'
+
+    public static explicit operator string(LastName lastName) => lastName.Value;
+
+    #endregion
+}
