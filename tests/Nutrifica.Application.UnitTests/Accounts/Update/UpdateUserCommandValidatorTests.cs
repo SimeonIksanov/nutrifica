@@ -1,6 +1,6 @@
 using FluentValidation.TestHelper;
 
-using Nutrifica.Application.Accounts.Update;
+using Nutrifica.Application.Users.Update;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Domain.Shared;
@@ -16,7 +16,7 @@ public class UpdateUserCommandValidatorTests
     public void Validate_When_IdNull_Should_Fail()
     {
         // Arrange
-        UpdateUserCommand command = CreateValidCommand() with { Id = null };
+        UpdateUserCommand command = CreateValidCommand() with { Id = null! };
 
         // Act
         var result = _sut.Validate(command);

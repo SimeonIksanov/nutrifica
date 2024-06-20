@@ -1,7 +1,5 @@
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-
 using Nutrifica.Domain.Abstractions;
+using Nutrifica.Domain.Aggregates.ClientAggregate.Entities;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.OrderAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
@@ -13,14 +11,14 @@ namespace Nutrifica.Domain.Aggregates.ClientAggregate;
 
 public sealed class Client : Entity<ClientId>, IAggregateRoot
 {
-    private readonly HashSet<UserId> _managers; // Пользователи которые могут манипулировать клиентом
-    private readonly List<OrderId> _orderIds;
-    private readonly List<PhoneCallId> _phoneCallIds;
+    private readonly HashSet<UserId> _managerIds = null!; // Пользователи которые могут манипулировать клиентом
+    private readonly List<OrderId> _orderIds = null!;
+    private readonly List<PhoneCall> _phoneCalls = null!;
     private Client() { }
 
     private Client(UserId createdBy)
     {
-        _managers = new HashSet<UserId> { createdBy };
+        _managerIds = new HashSet<UserId> { createdBy };
         State = State.Active;
         Status = Status.New;
         CreatedAt = DateTime.UtcNow;
@@ -35,9 +33,9 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot
     public Comment Comment { get; set; }
     public PhoneNumber PhoneNumber { get; set; } = null!;
     public string Source { get; set; } = string.Empty;
-    public IReadOnlyCollection<UserId> Managers => _managers.ToList();
+    public IReadOnlyCollection<UserId> ManagerIds => _managerIds.ToList();
     public IReadOnlyCollection<OrderId> OrderIds => _orderIds.ToList();
-    public IReadOnlyCollection<PhoneCallId> PhoneCallIds => _phoneCallIds.ToList();
+    public IReadOnlyCollection<PhoneCall> PhoneCalls => _phoneCalls.ToList();
 
     public DateTime CreatedAt { get; private set; }
     public UserId CreatedBy { get; private set; } = null!;

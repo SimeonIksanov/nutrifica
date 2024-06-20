@@ -6,7 +6,7 @@ using MediatR;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Nutrifica.Application.CommandAndQueries.Common.Behaviors;
+using Nutrifica.Application.Abstractions.Behaviors;
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Impl;
 

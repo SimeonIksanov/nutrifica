@@ -6,12 +6,15 @@ namespace Nutrifica.Domain.Aggregates.ClientAggregate.Entities;
 
 public class PhoneCall : Entity<int>
 {
-    public static PhoneCall Create(ICollection<ProductId> productIds, string comment, UserId createdBy)
+    public static PhoneCall Create(
+        //ICollection<ProductId> productIds,
+        string comment,
+        UserId createdBy)
     {
         var call = new PhoneCall
         {
             CreatedBy = createdBy,
-            ProductIds = productIds,
+            // ProductIds = productIds, 
             Comment = comment
         };
         return call;
@@ -22,5 +25,5 @@ public class PhoneCall : Entity<int>
     public string Comment { get; set; } = string.Empty;
     public DateTime CreatedAt { get; init; }
     public UserId CreatedBy { get; init; } = null!;
-    public ICollection<ProductId> ProductIds { get; set; } = null!;
+    // public ICollection<ProductId> ProductIds { get; set; } = null!;
 }

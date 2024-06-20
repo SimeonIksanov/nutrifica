@@ -14,4 +14,4 @@ public record CreateClientCommand(
     Comment Comment,
     PhoneNumber PhoneNumber,
     string Source,
-    UserId CreatedBy) : ICommand<CreatedClientDto>;
+    UserId CreatedBy) : ICommand<ClientResponse>;

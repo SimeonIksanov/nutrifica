@@ -64,7 +64,6 @@ public sealed class User : Entity<UserId>, IAggregateRoot
     public PhoneNumber PhoneNumber { get; set; } = null!;
 
     public UserId? SupervisorId { get; set; } = null!;
-    public ICollection<ClientId> ClientIds { get; private set; } = null!;
     public UserRole Role { get; set; }
 
     public void Enable()

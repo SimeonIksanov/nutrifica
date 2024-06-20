@@ -1,8 +1,9 @@
 using Moq;
 
 using Nutrifica.Api.Contracts.Users;
-using Nutrifica.Application.Accounts.Create;
+using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.UnitTests.Utils;
+using Nutrifica.Application.Users.Create;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate;
@@ -35,9 +36,9 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDto>(actual.Value);
+        Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.NotEmpty(actual.Value.Supervisor);
+        Assert.NotEmpty(actual.Value.SupervisorName);
     }
 
     [Fact]
@@ -46,9 +47,9 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDto>(actual.Value);
+        Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.Empty(actual.Value.Supervisor);
+        Assert.Empty(actual.Value.SupervisorName);
     }
 
     [Fact]
@@ -57,9 +58,9 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDto>(actual.Value);
+        Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.Empty(actual.Value.Supervisor);
+        Assert.Empty(actual.Value.SupervisorName);
     }
 
     [Fact]
@@ -67,7 +68,7 @@ public class CreateUserCommandHandlerTests
     {
         var actual = await _sut.Handle(_command, default);
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserDto>(actual.Value);
+        Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.NotEqual(DateTime.MinValue, actual.Value.CreatedAt); // (actual.Value.CreatedAt);
     }

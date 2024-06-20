@@ -1,7 +1,8 @@
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Nutrifica.Shared;
+
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Api.Controllers;
@@ -17,29 +18,35 @@ public class ApiController : ControllerBase
         _mediator = mediator;
     }
 
-    protected IActionResult HandleFailure(Result result)
-    {
-        return result switch
+    protected IActionResult HandleFailure(Result result) =>
+        result switch
         {
             { IsSuccess: true } => throw new InvalidOperationException(),
-            IValidationResult validationResult => BadRequest(CreateProblemDetails("Validation Error",
-                StatusCodes.Status400BadRequest, result.Error.Description, validationResult.Errors)),
-            _ => BadRequest(CreateProblemDetails("Bad Request", StatusCodes.Status400BadRequest, result.Error.Description))
+            IValidationResult validationResult =>
+                BadRequest(
+                    CreateProblemDetails(
+                        "Validation Error",
+                        StatusCodes.Status400BadRequest,
+                        result.Error,
+                        validationResult.Errors)),
+            _ => BadRequest(
+                CreateProblemDetails(
+                    "Bad Request",
+                    StatusCodes.Status400BadRequest,
+                    result.Error))
         };
-    }
 
-    private static ProblemDetails CreateProblemDetails(string title,
+    private static ProblemDetails CreateProblemDetails(
+        string title,
         int status,
-        string errorMessage,
-        Error[] errors=null)
-    {
-        return new()
+        Error error,
+        Error[]? errors = null) =>
+        new()
         {
             Title = title,
-            //Type =
-            Detail = errorMessage,
+            Type = error.Code,
+            Detail = error.Description,
             Status = status,
             Extensions = { { nameof(errors), errors } }
         };
-    }
 }

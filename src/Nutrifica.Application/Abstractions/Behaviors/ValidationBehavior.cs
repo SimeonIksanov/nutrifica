@@ -1,9 +1,11 @@
 using FluentValidation;
+
 using MediatR;
+
 using Nutrifica.Application.Abstractions.Messaging;
 using Nutrifica.Shared.Wrappers;
 
-namespace Nutrifica.Application.CommandAndQueries.Common.Behaviors;
+namespace Nutrifica.Application.Abstractions.Behaviors;
 
 public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IBaseCommand

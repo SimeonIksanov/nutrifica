@@ -13,4 +13,4 @@ public record UpdateClientCommand(
     Address Address,
     Comment Comment,
     PhoneNumber PhoneNumber,
-    string Source) : ICommand<UpdatedClientDto>;
+    string Source) : ICommand<ClientResponse>;

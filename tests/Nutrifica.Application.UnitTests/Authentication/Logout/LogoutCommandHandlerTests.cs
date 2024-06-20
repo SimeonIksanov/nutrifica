@@ -9,6 +9,7 @@ using Nutrifica.Domain.Shared;
 using Nutrifica.Domain;
 using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Interfaces.Services.Impl;
+using Nutrifica.Application.Interfaces.Services.Persistence;
 
 namespace Nutrifica.Application.UnitTests.Authentication.Logout;
 

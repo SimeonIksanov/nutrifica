@@ -4,7 +4,9 @@ namespace Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 public class Comment : ValueObject
 {
-    public string Value { get; set; } = string.Empty;
+    public static Comment Create(string value) => new Comment(value);
+    private Comment(string value) => Value = value;
+    public string Value { get; } = string.Empty;
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value;

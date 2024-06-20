@@ -3,11 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+
 using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Interfaces.Services;
+using Nutrifica.Application.Interfaces.Services.Persistence;
+using Nutrifica.Domain.Abstractions;
 using Nutrifica.Infrastructure.Authentication;
 using Nutrifica.Infrastructure.Clock;
 using Nutrifica.Infrastructure.Persistence;
+using Nutrifica.Infrastructure.Persistence.Repositories;
 using Nutrifica.Infrastructure.Services;
 
 namespace Nutrifica.Infrastructure.Extensions;
@@ -68,6 +72,11 @@ public static class ServiceCollectionExtensions
     {
         services.AddDbContext<AppDbContext>(
             options => options.UseInMemoryDatabase("InMemory"));
+
+        services
+            .AddScoped<IUserRepository, UserRepository>()
+            .AddScoped<IClientRepository, ClientRepository>()
+            .AddScoped<IUnitOfWork, AppDbContext>();
 
         return services;
     }

@@ -7,11 +7,11 @@
     <DataAnnotationsValidator />
     @* <ValidationSummary /> *@
     
-    <InputText @bind-Value="_model.Username" />
-    <ValidationMessage For="()=>_model.Username"/>
+    <InputText @bind-Value="Model.Username" />
+    <ValidationMessage For="()=>Model.Username"/>
     
-    <InputText @bind-Value="_model.Password"/>
-    <ValidationMessage For="()=>_model.Password"/>
+    <InputText @bind-Value="Model.Password"/>
+    <ValidationMessage For="()=>Model.Password"/>
     
     <button type="submit">Login</button>
 </EditForm>

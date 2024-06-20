@@ -1,5 +1,6 @@
 using Nutrifica.Api.Contracts.Clients;
 using Nutrifica.Application.Abstractions.Messaging;
+using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Mappings;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate;
@@ -7,7 +8,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.Update;
 
-public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, UpdatedClientDto>
+public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, ClientResponse>
 {
     private readonly IClientRepository _clientRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -19,19 +20,19 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, U
     }
 
 
-    public async Task<Result<UpdatedClientDto>> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ClientResponse>> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
     {
         var client = await _clientRepository.GetByIdAsync(request.Id, cancellationToken);
         if (client is null)
         {
-            return Result.Failure<UpdatedClientDto>(ClientErrors.ClientNotFound);
+            return Result.Failure<ClientResponse>(ClientErrors.ClientNotFound);
         }
 
         MapToClient(request, client);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var dto = client.ToUpdatedClientDto();
+        var dto = client.ToClientResponse();
         return Result.Success(dto);
     }
 

@@ -1,8 +1,9 @@
 using Moq;
 
-using Nutrifica.Application.Accounts.SetPassword;
 using Nutrifica.Application.Interfaces.Services;
+using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.UnitTests.Utils;
+using Nutrifica.Application.Users.SetPassword;
 using Nutrifica.Domain;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.UserAggregate;

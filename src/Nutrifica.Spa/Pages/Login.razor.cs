@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+
 using Nutrifica.Api.Contracts.Authentication;
 using Nutrifica.Spa.Infrastructure.Services.Authentication;
 
@@ -9,15 +11,15 @@ namespace Nutrifica.Spa.Pages;
 public partial class Login : IDisposable //: ComponentBase
 {
     [Inject] private IAuthenticationService _authenticationService { get; set; }
-    private TokenRequest _model { get; set; }
+    private LoginModel Model { get; set; } = null!;
     private EditContext? _editContext;
     private ValidationMessageStore? _messageStore;
     private CancellationTokenSource? _cancellationTokenSource;
 
     protected override void OnInitialized()
     {
-        _model = new();
-        _editContext = new EditContext(_model);
+        Model = new();
+        _editContext = new EditContext(Model);
         _editContext.OnValidationRequested += HandleValidationRequested;
         _messageStore = new(_editContext);
         _cancellationTokenSource = new();
@@ -32,10 +34,11 @@ public partial class Login : IDisposable //: ComponentBase
 
     public async Task HandleFormSubmit()
     {
-        var authResult = await _authenticationService.LoginAsync(_model, _cancellationTokenSource!.Token);
+        var request = new TokenRequest(Model.Username, Model.Password);
+        var authResult = await _authenticationService.LoginAsync(request, _cancellationTokenSource!.Token);
         if (authResult.IsFailure)
         {
-            _messageStore?.Add(() => _model, authResult.Error.Description);
+            _messageStore?.Add(() => Model, authResult.Error.Description);
         }
     }
 
@@ -49,11 +52,11 @@ public partial class Login : IDisposable //: ComponentBase
     }
 }
 
-public class LoginForm
+public class LoginModel
 {
-    [Required(AllowEmptyStrings = false, ErrorMessage = "Login не может быть пустым!")]
-    public string Login { get; set; } = string.Empty;
-    
+    [Required(AllowEmptyStrings = false, ErrorMessage = "Username не может быть пустым!")]
+    public string Username { get; set; } = string.Empty;
+
     [Required(AllowEmptyStrings = false, ErrorMessage = "Password не может быть пустым!")]
     public string Password { get; set; } = string.Empty;
 }

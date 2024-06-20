@@ -1,8 +1,10 @@
 ﻿using MediatR;
+
 using Microsoft.Extensions.Logging;
+
 using Nutrifica.Application.Abstractions.Messaging;
 
-namespace Nutrifica.Application;
+namespace Nutrifica.Application.Abstractions.Behaviors;
 
 public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IBaseCommand

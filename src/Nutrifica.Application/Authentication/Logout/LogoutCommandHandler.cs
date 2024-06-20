@@ -1,6 +1,7 @@
 using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Abstractions.Messaging;
 using Nutrifica.Application.Interfaces.Services;
+using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Domain;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.UserAggregate;
