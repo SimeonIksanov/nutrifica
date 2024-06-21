@@ -4,7 +4,6 @@ namespace Nutrifica.Application.Users.ResetPassword;
 
 public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
 {
-    private const int PasswordMinLength = 6;
     public ResetPasswordCommandValidator()
     {
         RuleFor(x => x.Id)
@@ -14,6 +13,6 @@ public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordComm
 
         RuleFor(x => x.NewPassword)
             .NotEmpty()
-            .MinimumLength(PasswordMinLength);
+            .MinimumLength(UserConstants.PasswordMinLength);
     }
 }

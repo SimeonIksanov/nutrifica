@@ -26,9 +26,8 @@ public sealed class User : Entity<UserId>, IAggregateRoot
 
         var user = new User
         {
-            // Username = username,
             Id = UserId.CreateUnique(),
-            Account = new UserAccount() { Username = username },
+            Account = new UserAccount() { Username = username, PasswordHash = "", Salt = ""},
             FirstName = firstName,
             MiddleName = middleName,
             LastName = lastname,

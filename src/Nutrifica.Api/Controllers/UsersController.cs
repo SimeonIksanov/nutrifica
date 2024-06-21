@@ -123,6 +123,7 @@ public class UsersController : ApiController
     public async Task<IActionResult> ChangePassword([FromRoute] Guid id, [FromBody] UserChangePasswordRequest request,
         CancellationToken ct)
     {
+        if (id != request.Id) return BadRequest();
         var command = new ChangePasswordCommand(UserId.Create(id), request.CurrentPassword, request.NewPassword);
         Result result = await _mediator.Send(command, ct);
         return result.IsSuccess ? NoContent() : HandleFailure(result);
@@ -140,6 +141,7 @@ public class UsersController : ApiController
     public async Task<IActionResult> ResetPassword([FromRoute] Guid id, [FromBody] UserResetPasswordRequest request,
         CancellationToken ct)
     {
+        if (id != request.Id) return BadRequest();
         var command = new ResetPasswordCommand(UserId.Create(id), request.NewPassword);
         Result result = await _mediator.Send(command, ct);
         return result.IsSuccess ? NoContent() : HandleFailure(result);

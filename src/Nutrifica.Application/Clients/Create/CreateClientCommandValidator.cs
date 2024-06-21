@@ -1,5 +1,6 @@
 using FluentValidation;
 
+using Nutrifica.Application.Users;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 namespace Nutrifica.Application.Clients.Create;
@@ -12,19 +13,19 @@ public class CreateClientCommandValidator : AbstractValidator<CreateClientComman
             .NotNull()
             .DependentRules(() => RuleFor(x => x.FirstName.Value)
                 .NotNull()
-                .MaximumLength(20));
+                .MaximumLength(UserConstants.FirstNameMaxLength));
 
         RuleFor(x => x.MiddleName)
             .NotNull()
             .DependentRules(() => RuleFor(x => x.MiddleName.Value)
                 .NotNull()
-                .MaximumLength(20));
+                .MaximumLength(UserConstants.MiddleNameMaxLength));
 
         RuleFor(x => x.LastName)
             .NotNull()
             .DependentRules(() => RuleFor(x => x.LastName.Value)
                 .NotNull()
-                .MaximumLength(20));
+                .MaximumLength(UserConstants.LastNameMaxLength));
 
         RuleFor(x => x.Address)
             .NotNull()
@@ -40,9 +41,11 @@ public class CreateClientCommandValidator : AbstractValidator<CreateClientComman
             .NotNull()
             .DependentRules(() => RuleFor(x => x.PhoneNumber.Value)
                 .NotEmpty()
-                .MaximumLength(20));
+                .MaximumLength(UserConstants.PhoneNumberMaxLength));
 
-        RuleFor(x => x.Source).NotEmpty().MaximumLength(20);
+        RuleFor(x => x.Source)
+            .NotEmpty()
+            .MaximumLength(ClientConstants.SourceMaxLength);
 
         RuleFor(x => x.CreatedBy)
             .NotNull()
@@ -55,12 +58,23 @@ public class AddressValidator : AbstractValidator<Address>
 {
     public AddressValidator()
     {
-        RuleFor(x => x.City).NotEmpty().MaximumLength(50);
-        RuleFor(x => x.Country).NotEmpty().MaximumLength(50);
-        RuleFor(x => x.Comment).NotNull();
-        RuleFor(x => x.Region).NotNull().MaximumLength(50);
-        RuleFor(x => x.Street).NotEmpty().MaximumLength(50);
-        RuleFor(x => x.ZipCode).NotEmpty().MaximumLength(6);
+        RuleFor(x => x.City)
+            .NotEmpty()
+            .MaximumLength(ClientAddressConstants.CityMaxLength);
+        RuleFor(x => x.Country)
+            .NotEmpty()
+            .MaximumLength(ClientAddressConstants.CountryMaxLength);
+        RuleFor(x => x.Comment)
+            .NotNull();
+        RuleFor(x => x.Region)
+            .NotNull()
+            .MaximumLength(ClientAddressConstants.RegionMaxLength);
+        RuleFor(x => x.Street)
+            .NotEmpty()
+            .MaximumLength(ClientAddressConstants.StreetMaxLength);
+        RuleFor(x => x.ZipCode)
+            .NotEmpty()
+            .MaximumLength(ClientAddressConstants.ZipCodeMaxLength);
     }
 }
 

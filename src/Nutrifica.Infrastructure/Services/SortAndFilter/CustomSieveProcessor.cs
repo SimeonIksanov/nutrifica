@@ -1,3 +1,4 @@
+#nullable disable
 using Microsoft.Extensions.Options;
 
 using Nutrifica.Application.Models.Users;

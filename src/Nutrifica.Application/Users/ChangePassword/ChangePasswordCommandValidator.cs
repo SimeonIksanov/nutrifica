@@ -4,7 +4,6 @@ namespace Nutrifica.Application.Users.ChangePassword;
 
 public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
 {
-    private const int PasswordMinLength = 6;
     public ChangePasswordCommandValidator()
     {
         RuleFor(x => x.Id)
@@ -20,6 +19,6 @@ public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCo
 
         RuleFor(x => x.NewPassword)
             .NotEmpty()
-            .MinimumLength(PasswordMinLength);
+            .MinimumLength(UserConstants.PasswordMinLength);
     }
 }

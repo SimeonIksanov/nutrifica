@@ -1,6 +1,5 @@
 using Moq;
 
-using Nutrifica.Api.Contracts.Users;
 using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.UnitTests.Utils;
@@ -39,7 +38,7 @@ public class CreateUserCommandHandlerTests
         Assert.True(actual.IsSuccess);
         Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.NotEmpty(actual.Value.SupervisorName);
+        Assert.NotNull(actual.Value.Supervisor);
     }
 
     [Fact]
@@ -50,7 +49,7 @@ public class CreateUserCommandHandlerTests
         Assert.True(actual.IsSuccess);
         Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.Empty(actual.Value.SupervisorName);
+        Assert.Null(actual.Value.Supervisor);
     }
 
     [Fact]
@@ -61,7 +60,7 @@ public class CreateUserCommandHandlerTests
         Assert.True(actual.IsSuccess);
         Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.Empty(actual.Value.SupervisorName);
+        Assert.Null(actual.Value.Supervisor);
     }
 
     [Fact]

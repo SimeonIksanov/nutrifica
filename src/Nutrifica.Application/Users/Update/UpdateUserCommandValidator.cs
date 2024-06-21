@@ -14,35 +14,34 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 
         RuleFor(x => x.Username)
             .NotEmpty()
-            .MaximumLength(30);
+            .MaximumLength(UserConstants.UsernameMaxLength);
 
         RuleFor(x => x.FirstName)
             .NotNull()
             .DependentRules(() => RuleFor(x => x.FirstName.Value)
                 .NotEmpty()
-                .MaximumLength(50));
+                .MaximumLength(UserConstants.FirstNameMaxLength));
 
         RuleFor(x => x.MiddleName)
             .NotNull()
             .DependentRules(() => RuleFor(x => x.MiddleName.Value)
-                .NotEmpty()
-                .MaximumLength(50));
+                .MaximumLength(UserConstants.MiddleNameMaxLength));
 
         RuleFor(x => x.LastName)
             .NotNull()
             .DependentRules(() => RuleFor(x => x.LastName.Value)
                 .NotEmpty()
-                .MaximumLength(50));
+                .MaximumLength(UserConstants.LastNameMaxLength));
 
         RuleFor(x => x.PhoneNumber)
             .NotNull()
             .DependentRules(() => RuleFor(x => x.PhoneNumber.Value)
-                .MaximumLength(15));
+                .MaximumLength(UserConstants.PhoneNumberMaxLength));
 
         RuleFor(x => x.Email)
             .NotNull()
             .DependentRules(() => RuleFor(x => x.Email.Value)
-                .MaximumLength(50));
+                .MaximumLength(UserConstants.EmailMaxLength));
 
         RuleFor(x => x.DisableReason)
             .NotEmpty().When(x => x.Enabled is false)
