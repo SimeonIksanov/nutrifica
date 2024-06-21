@@ -1,9 +1,9 @@
 using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Abstractions.Messaging;
 using Nutrifica.Application.Interfaces.Services;
-using Nutrifica.Shared.QueryParameters;
+using Nutrifica.Application.Shared;
 
 namespace Nutrifica.Application.Users.Get;
 
 public record GetUsersQuery(
-    UserQueryParams QueryParams) : IQuery<IPagedList<UserResponse>>;
+    QueryParams queryParams) : IQuery<IPagedList<UserResponse>>;

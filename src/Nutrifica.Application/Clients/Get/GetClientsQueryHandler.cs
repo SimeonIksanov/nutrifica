@@ -19,7 +19,7 @@ public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, IPagedList<
     public async Task<Result<IPagedList<ClientResponse>>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
     {
         var clientPagedList = await _clientRepository
-                .GetByFilterAsync(request.QueryParams, cancellationToken);
+                .GetByFilterAsync(request.sieveModel, cancellationToken);
 
         var clientResponsePagedList = clientPagedList.ProjectItems(x => x.ToClientResponse());
         return Result.Success<IPagedList<ClientResponse>>(clientResponsePagedList);

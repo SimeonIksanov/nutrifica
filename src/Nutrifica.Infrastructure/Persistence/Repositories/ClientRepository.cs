@@ -5,7 +5,6 @@ using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Models.Clients;
 using Nutrifica.Domain.Aggregates.ClientAggregate;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
-using Nutrifica.Shared.QueryParameters;
 
 namespace Nutrifica.Infrastructure.Persistence.Repositories;
 
@@ -32,7 +31,7 @@ public class ClientRepository : IClientRepository
             .FirstOrDefaultAsync(x => x.Id == clientId);
     }
 
-    public Task<IPagedList<ClientModel>> GetByFilterAsync(ClientQueryParams requestQueryParams, CancellationToken cancellationToken)
+    public Task<IPagedList<ClientModel>> GetByFilterAsync(object sieveModel, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

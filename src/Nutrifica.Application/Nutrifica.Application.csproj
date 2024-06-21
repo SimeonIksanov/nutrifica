@@ -21,7 +21,6 @@
       <Folder Include="Clients\Delete\" />
       <Folder Include="Interfaces/Services/Impl/" />
       <Folder Include="Orders\" />
-      <Folder Include="Shared\" />
     </ItemGroup>
 
 </Project>

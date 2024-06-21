@@ -118,5 +118,6 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
 
         builder
             .OwnsOne(x => x.Address);
+        builder.Ignore(x => x.FullName);
     }
 }

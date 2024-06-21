@@ -22,7 +22,7 @@ public class GetUsersQueryHandler : IQueryHandler<GetUsersQuery, IPagedList<User
         CancellationToken cancellationToken)
     {
         var userPagedList = await _userRepository
-            .GetByFilterAsync(request.QueryParams, cancellationToken);
+            .GetByFilterAsync(request.queryParams, cancellationToken);
 
         var responseList = userPagedList
             .ProjectItems(x => x.ToUserResponse());

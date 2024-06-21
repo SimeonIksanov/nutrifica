@@ -12,7 +12,6 @@ public record UserModel(
     string PhoneNumber,
     bool Enabled,
     string DisableReason,
-    Guid? SupervisorId,
-    string SupervisorName,
+    UserFullName? Supervisor,
     UserRole Role,
     DateTime CreatedAt);

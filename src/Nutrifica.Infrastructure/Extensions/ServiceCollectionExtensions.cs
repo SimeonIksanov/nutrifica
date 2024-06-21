@@ -13,6 +13,10 @@ using Nutrifica.Infrastructure.Clock;
 using Nutrifica.Infrastructure.Persistence;
 using Nutrifica.Infrastructure.Persistence.Repositories;
 using Nutrifica.Infrastructure.Services;
+using Nutrifica.Infrastructure.Services.SortAndFilter;
+
+using Sieve.Models;
+using Sieve.Services;
 
 namespace Nutrifica.Infrastructure.Extensions;
 
@@ -24,7 +28,8 @@ public static class ServiceCollectionExtensions
         services
             .AddJwtAuthentication(configuration)
             .AddPersistence()
-            .AddServices();
+            .AddServices()
+            .AddSieveSortingAndFiltering(configuration);
 
         return services;
     }
@@ -79,6 +84,14 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
 
+        return services;
+    }
+
+    private static IServiceCollection AddSieveSortingAndFiltering(this IServiceCollection services,
+        ConfigurationManager configuration)
+    {
+        services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
+        services.Configure<SieveOptions>(configuration.GetSection(nameof(SieveOptions)));
         return services;
     }
 }

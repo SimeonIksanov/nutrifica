@@ -14,8 +14,7 @@ public record UserResponse(
     string PhoneNumber,
     bool Enabled,
     string DisableReason,
-    Guid? SupervisorId,
-    string SupervisorName,
+    UserFullNameResponse? Supervisor,
     UserRole Role,
     DateTime CreatedAt
 );

@@ -1,23 +1,26 @@
-using System.Linq.Expressions;
-
 using Microsoft.EntityFrameworkCore;
 
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Models.Users;
+using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
-using Nutrifica.Shared.QueryParameters;
+
+using Sieve.Models;
+using Sieve.Services;
 
 namespace Nutrifica.Infrastructure.Persistence.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly AppDbContext _context;
+    private readonly ISieveProcessor _sieveProcessor;
 
-    public UserRepository(AppDbContext context)
+    public UserRepository(AppDbContext context, ISieveProcessor sieveProcessor)
     {
         _context = context;
+        _sieveProcessor = sieveProcessor;
     }
 
     public void Add(User user)
@@ -44,16 +47,10 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(x => x.Account.Username == username, cancellationToken: ct);
     }
 
-    public async Task<IPagedList<UserModel>> GetByFilterAsync(UserQueryParams requestQueryParams,
+    public async Task<IPagedList<UserModel>> GetByFilterAsync(QueryParams queryParams,
         CancellationToken cancellationToken)
     {
         IQueryable<User> query = _context.Set<User>();
-
-        query = FilterWithSearchTerm(query, requestQueryParams);
-
-        query = requestQueryParams.SortOrder == "desc"
-            ? query.OrderByDescending(GetSortProperty(requestQueryParams))
-            : query.OrderBy(GetSortProperty(requestQueryParams));
 
         var users = query
             .Include(x => x.Account)
@@ -61,48 +58,29 @@ public class UserRepository : IUserRepository
                 o => o.SupervisorId,
                 i => i.Id,
                 (i, ol) => new { Employee = i, Supervisors = ol })
-            .SelectMany(arg => arg.Supervisors.DefaultIfEmpty(), (e, s) => new UserModel(
-                e.Employee.Id.Value,
-                e.Employee.Account.Username,
-                e.Employee.FirstName.Value,
-                e.Employee.MiddleName.Value,
-                e.Employee.LastName.Value,
-                e.Employee.Email.Value,
-                e.Employee.PhoneNumber.Value,
-                e.Employee.Enabled,
-                e.Employee.DisableReason,
-                Equals(null, s) ? null : s.Id.Value,
-                Equals(null, s) ? "" : s.FullName,
-                e.Employee.Role,
-                e.Employee.CreatedAt));
+            .SelectMany(arg => arg.Supervisors.DefaultIfEmpty(), (e, s) =>
+                new UserModel(
+                    e.Employee.Id.Value,
+                    e.Employee.Account.Username,
+                    e.Employee.FirstName.Value,
+                    e.Employee.MiddleName.Value,
+                    e.Employee.LastName.Value,
+                    e.Employee.Email.Value,
+                    e.Employee.PhoneNumber.Value,
+                    e.Employee.Enabled,
+                    e.Employee.DisableReason,
+                    Equals(s, null)
+                        ? null
+                        : new UserFullName(s.Id.Value, s.FirstName.Value, s.MiddleName.Value, s.LastName.Value),
+                    e.Employee.Role,
+                    e.Employee.CreatedAt));
 
-        return await PagedList<UserModel>.CreateAsync(users, requestQueryParams.Page, requestQueryParams.PageSize);
+        return await PagedList<UserModel>.CreateAsync(_sieveProcessor, queryParams, users,
+            cancellationToken);
     }
 
     public Task<UserModel?> GetDetailedByIdAsync(UserId id, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
-
-    private IQueryable<User> FilterWithSearchTerm(IQueryable<User> queryable, UserQueryParams requestQueryParams) =>
-        string.IsNullOrWhiteSpace(requestQueryParams.SearchTerm)
-            ? queryable
-            : queryable.Where(x =>
-                ((string)x.FirstName).Contains(requestQueryParams.SearchTerm)
-                || ((string)x.MiddleName).Contains(requestQueryParams.SearchTerm)
-                || ((string)x.LastName).Contains(requestQueryParams.SearchTerm)
-                || ((string)x.PhoneNumber).Contains(requestQueryParams.SearchTerm)
-            );
-
-    private static Expression<Func<User, object>> GetSortProperty(UserQueryParams requestQueryParams) =>
-        requestQueryParams.SortColumn?.ToLower() switch
-        {
-            "firstname" => u => u.FirstName,
-            "middlename" => u => u.MiddleName,
-            "lastname" => u => u.LastName,
-            "role" => u => u.Role,
-            "email" => u => u.Email,
-            "phonenumber" => u => u.PhoneNumber,
-            _ => user => user.CreatedAt
-        };
 }

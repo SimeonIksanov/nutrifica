@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Nutrifica.Api.Contracts.Users.Requests;
 using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Interfaces.Services;
+using Nutrifica.Application.Shared;
 using Nutrifica.Application.Users.ChangePassword;
 using Nutrifica.Application.Users.Create;
 using Nutrifica.Application.Users.Get;
@@ -14,8 +15,9 @@ using Nutrifica.Application.Users.Update;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Domain.Shared;
-using Nutrifica.Shared.QueryParameters;
 using Nutrifica.Shared.Wrappers;
+
+using Sieve.Models;
 
 namespace Nutrifica.Api.Controllers;
 
@@ -32,7 +34,7 @@ public class UsersController : ApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] UserQueryParams queryParams, CancellationToken ct)
+    public async Task<IActionResult> Get([FromQuery] QueryParams queryParams, CancellationToken ct)
     {
         var command = new GetUsersQuery(queryParams);
         Result<IPagedList<UserResponse>> result = await _mediator.Send(command, ct);

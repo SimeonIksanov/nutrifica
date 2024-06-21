@@ -55,6 +55,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(
                 x => x!.Value,
                 x => UserId.Create(x));
+        builder.Ignore(x => x.FullName);
         // builder.Property(x => x.Role).HasConversion<string>();
     }
 }
