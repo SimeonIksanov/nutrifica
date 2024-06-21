@@ -2,7 +2,7 @@ using Nutrifica.Domain.Common.Models;
 
 namespace Nutrifica.Domain.Shared;
 
-public class LastName : ValueObject
+public class LastName : ValueObject, IComparable
 {
     private LastName(string value) => Value = value;
     public static LastName Create(string value) => new LastName(value);
@@ -14,6 +14,11 @@ public class LastName : ValueObject
     }
 
     public override string ToString() => Value;
+    public int CompareTo(object? obj)
+    {
+        var other = obj as LastName;
+        return Value.CompareTo(other.Value);
+    }
 
     #region Workaroud for filtering with 'searchTerm'
 

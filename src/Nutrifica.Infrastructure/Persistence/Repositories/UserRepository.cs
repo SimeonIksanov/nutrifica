@@ -56,7 +56,7 @@ public class UserRepository : IUserRepository
             : query.OrderBy(GetSortProperty(requestQueryParams));
 
         var users = query
-            .Include(x=>x.Account)
+            .Include(x => x.Account)
             .GroupJoin(_context.Set<User>(),
                 o => o.SupervisorId,
                 i => i.Id,
@@ -95,7 +95,7 @@ public class UserRepository : IUserRepository
             );
 
     private static Expression<Func<User, object>> GetSortProperty(UserQueryParams requestQueryParams) =>
-        requestQueryParams.SortColumn.ToLower() switch
+        requestQueryParams.SortColumn?.ToLower() switch
         {
             "firstname" => u => u.FirstName,
             "middlename" => u => u.MiddleName,

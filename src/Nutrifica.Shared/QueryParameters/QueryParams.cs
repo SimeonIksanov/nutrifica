@@ -1,12 +1,20 @@
 namespace Nutrifica.Shared.QueryParameters;
 
-public abstract record QueryParams(
-    string SortColumn = "id",
-    string SortOrder = "asc",
-    int Page = 1,
-    int PageSize = 10,
-    string? SearchTerm = null);
+public abstract record QueryParams
+{
+    public virtual string SortColumn { get; init; } = "id";
+    public virtual string SortOrder { get; init; } = "asc";
+    public virtual int Page { get; init; } = 1;
+    public virtual int PageSize { get; init; } = 10;
+    public virtual string? SearchTerm { get; init; } = null;
+}
 
-public record UserQueryParams(string SortColumn = "name") : QueryParams;
-public record ClientQueryParams(string SortColumn = "name") : QueryParams;
-    
+public record UserQueryParams : QueryParams
+{
+    public override string SortColumn { get; init; } = "LastName";
+}
+
+public record ClientQueryParams : QueryParams
+{
+    public override string SortColumn { get; init; } = "LastName";
+}
