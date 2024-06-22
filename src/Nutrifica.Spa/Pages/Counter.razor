@@ -1,6 +1,16 @@
 ﻿@page "/counter"
+@using Microsoft.AspNetCore.Components.Authorization
 
 <PageTitle>Counter</PageTitle>
+
+<AuthorizeView >
+    <Authorized>
+        The user is authorized
+    </Authorized>
+    <NotAuthorized>
+        The user is not authorized
+    </NotAuthorized>
+</AuthorizeView>
 
 <h1>Counter</h1>
 

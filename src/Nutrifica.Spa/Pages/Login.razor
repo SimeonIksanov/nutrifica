@@ -1,17 +1,54 @@
 @page "/Login"
+@using Nutrifica.Shared.Wrappers
 @layout BaseLayout
 
-<h3>Login</h3>
+<div class="d-flex align-items-center py-4 bg-body-tertiary min-vh-100">
+    <div class="form-signin w-100 m-auto">
+        <EditForm OnValidSubmit="HandleFormSubmit" EditContext="_editContext">
+            <h1 class="h3 mb-3 fw-normal">Вход</h1>
+            @if (ShowAuthError)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @AuthError
+                </div>
+            }
+            <DataAnnotationsValidator/>
+            <div class="form-floating">
+                <InputText @bind-Value="Model.Username" type="text" class="form-control" id="username" placeholder="username" autocomplete="username"/>
+                <label for="username">Имя пользователя</label>
+                <ValidationMessage For="() => Model.Username"/>
+            </div>
+            <div class="form-floating">
+                <InputText @bind-Value="Model.Password" type="password" class="form-control" id="current-password" placeholder="Password" autocomplete="current-password"/>
+                <label for="current-password">Пароль</label>
+                <ValidationMessage For="() => Model.Password"/>
+            </div>
 
-<EditForm OnValidSubmit="HandleFormSubmit" EditContext="_editContext">
-    <DataAnnotationsValidator />
-    @* <ValidationSummary /> *@
-    
-    <InputText @bind-Value="Model.Username" />
-    <ValidationMessage For="()=>Model.Username"/>
-    
-    <InputText @bind-Value="Model.Password"/>
-    <ValidationMessage For="()=>Model.Password"/>
-    
-    <button type="submit">Login</button>
-</EditForm>
+            <div class="form-check text-start my-3">
+                <input class="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault">
+                <label class="form-check-label" for="flexCheckDefault">
+                    Запомнить меня
+                </label>
+            </div>
+            <button class="btn btn-primary w-100 py-2" type="submit">Войти</button>
+        </EditForm>
+    </div>
+
+</div>
+
+
+@* *@
+@* <h3>Login</h3> *@
+@* *@
+@* <EditForm OnValidSubmit="HandleFormSubmit" EditContext="_editContext"> *@
+@*     <DataAnnotationsValidator /> *@
+@*     $1$ <ValidationSummary /> #1# *@
+@*      *@
+@*     <InputText @bind-Value="Model.Username" /> *@
+@*     <ValidationMessage For="()=>Model.Username"/> *@
+@*      *@
+@*     <InputText @bind-Value="Model.Password"/> *@
+@*     <ValidationMessage For="()=>Model.Password"/> *@
+@*      *@
+@*     <button type="submit">Login</button> *@
+@* </EditForm> *@

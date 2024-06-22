@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services
-            .AddScoped<IAuthenticationService, AuthenticationService>();
+            .AddScoped<IUserService, UserService>();
         return services;
     }
 

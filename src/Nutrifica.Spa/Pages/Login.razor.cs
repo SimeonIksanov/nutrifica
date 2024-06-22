@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 
 using Nutrifica.Api.Contracts.Authentication;
@@ -10,11 +11,15 @@ namespace Nutrifica.Spa.Pages;
 
 public partial class Login : IDisposable //: ComponentBase
 {
-    [Inject] private IAuthenticationService _authenticationService { get; set; }
+    [Inject] private IUserService UserService { get; set; }
+    [Inject] private NutrificaAuthenticationStateProvider _authenticationStateProvider { get; set; }
+    [Inject] private NavigationManager NavigationManager { get; set; }
     private LoginModel Model { get; set; } = null!;
     private EditContext? _editContext;
     private ValidationMessageStore? _messageStore;
     private CancellationTokenSource? _cancellationTokenSource;
+    private bool ShowAuthError { get; set; }
+    private string AuthError { get; set; }
 
     protected override void OnInitialized()
     {
@@ -34,12 +39,16 @@ public partial class Login : IDisposable //: ComponentBase
 
     public async Task HandleFormSubmit()
     {
+        ShowAuthError = false;
         var request = new TokenRequest(Model.Username, Model.Password);
-        var authResult = await _authenticationService.LoginAsync(request, _cancellationTokenSource!.Token);
-        if (authResult.IsFailure)
+        var result = await _authenticationStateProvider.LoginAsync(request, _cancellationTokenSource!.Token);
+        if (result.IsFailure)
         {
-            _messageStore?.Add(() => Model, authResult.Error.Description);
+            AuthError = result.Error.Description;
+            ShowAuthError = true;
+            return;
         }
+        NavigationManager.NavigateTo("/");
     }
 
     public void Dispose()
@@ -49,14 +58,15 @@ public partial class Login : IDisposable //: ComponentBase
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
+        _authenticationStateProvider?.Dispose();
     }
 }
 
 public class LoginModel
 {
-    [Required(AllowEmptyStrings = false, ErrorMessage = "Username не может быть пустым!")]
+    [Required(AllowEmptyStrings = false, ErrorMessage = "Имя пользователя не может быть пустым!")]
     public string Username { get; set; } = string.Empty;
 
-    [Required(AllowEmptyStrings = false, ErrorMessage = "Password не может быть пустым!")]
+    [Required(AllowEmptyStrings = false, ErrorMessage = "Пароль не может быть пустым!")]
     public string Password { get; set; } = string.Empty;
 }
