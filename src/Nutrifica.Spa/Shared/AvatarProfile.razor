@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Nutrifica.Spa.Infrastructure.Services.Authentication
+@inject NutrificaAuthenticationStateProvider AuthStateProvider;
+<AuthorizeView>
+    <Authorized>
+        <MudMenu FullWidth="true" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopCenter">
+            <ActivatorContent>
+                <MudChip
+                    Icon="@Icons.Material.Filled.Person"
+                    Color="Color.Primary">
+                    Привет, @AuthStateProvider.CurrentUser.FirstName
+                </MudChip>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem OnClick="OnChangePasswordClicked">
+                    Сменить пароль
+                </MudMenuItem>
+                <MudMenuItem OnClick="OnLogoutClicked">
+                    Выйти
+                </MudMenuItem>
+            </ChildContent>
+        </MudMenu>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+
+    public void OnLogoutClicked()
+    {
+        AuthStateProvider.Logout();
+    }
+
+    private void OnChangePasswordClicked(MouseEventArgs obj)
+    {
+        Console.WriteLine("OnChangePasswordClicked");
+    }
+
+}

@@ -1,0 +1,33 @@
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" class="align-content-center pa-4">
+    <EditForm OnValidSubmit="HandleFormSubmit" EditContext="_editContext">
+        <MudCard Class="">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Вход</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <DataAnnotationsValidator/>
+                <MudTextField
+                    Label="Имя пользователя"
+                    @bind-Value="Model.Username"/>
+                <ValidationMessage
+                    For="() => Model.Username"/>
+
+                <MudTextField
+                    Label="Пароль"
+                    @bind-Value="Model.Password"
+                    InputType="InputType.Password"/>
+                <ValidationMessage
+                    For="() => Model.Password"/>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton
+                    ButtonType="ButtonType.Submit"
+                    Variant="Variant.Filled"
+                    Color="Color.Primary"
+                    Class="ml-auto">
+                    Войти
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+</MudContainer>

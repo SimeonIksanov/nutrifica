@@ -1,25 +1,27 @@
 using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 
+using MudBlazor;
+
 using Nutrifica.Api.Contracts.Authentication;
+using Nutrifica.Shared.Wrappers;
 using Nutrifica.Spa.Infrastructure.Services.Authentication;
+using Nutrifica.Spa.Infrastructure.Services.Storage;
 
-namespace Nutrifica.Spa.Pages;
+namespace Nutrifica.Spa.Shared;
 
-public partial class Login : IDisposable //: ComponentBase
+public partial class LoginComponent : IDisposable //: ComponentBase
 {
-    [Inject] private IUserService UserService { get; set; }
-    [Inject] private NutrificaAuthenticationStateProvider _authenticationStateProvider { get; set; }
-    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject] private NutrificaAuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
     private LoginModel Model { get; set; } = null!;
     private EditContext? _editContext;
     private ValidationMessageStore? _messageStore;
     private CancellationTokenSource? _cancellationTokenSource;
-    private bool ShowAuthError { get; set; }
-    private string AuthError { get; set; }
 
     protected override void OnInitialized()
     {
@@ -33,22 +35,29 @@ public partial class Login : IDisposable //: ComponentBase
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
     {
         _messageStore?.Clear();
-        // _messageStore?.Add(()=>Model.Login, "тестовое сообщение об ошибке");
-        // _messageStore?.Add(()=>Model, "тестовое сообщение об ошибке");
     }
 
     public async Task HandleFormSubmit()
     {
-        ShowAuthError = false;
-        var request = new TokenRequest(Model.Username, Model.Password);
-        var result = await _authenticationStateProvider.LoginAsync(request, _cancellationTokenSource!.Token);
+        IResult<User> result;
+        try
+        {
+            var request = new TokenRequest(Model.Username, Model.Password);
+            result = await AuthenticationStateProvider.LoginAsync(request, _cancellationTokenSource!.Token);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            result = Result.Failure<User>(new Error("Exception", ex.Message));
+        }
+
         if (result.IsFailure)
         {
-            AuthError = result.Error.Description;
-            ShowAuthError = true;
+            Snackbar.Add(result.Error.Description, Severity.Error);
             return;
         }
-        NavigationManager.NavigateTo("/");
+
+        NavigationManager.NavigateTo(string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl);
     }
 
     public void Dispose()
@@ -58,7 +67,8 @@ public partial class Login : IDisposable //: ComponentBase
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
-        _authenticationStateProvider?.Dispose();
+        AuthenticationStateProvider.Dispose();
+        Snackbar.Dispose();
     }
 }
 

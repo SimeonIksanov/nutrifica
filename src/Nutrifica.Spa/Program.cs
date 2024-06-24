@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
+using MudBlazor;
+
 using Nutrifica.Spa.Extensions;
 using Nutrifica.Spa.Infrastructure.Services.Authentication;
 using Nutrifica.Spa.Infrastructure.Services.Storage;
+
+using MudBlazor.Services;
 
 namespace Nutrifica.Spa;
 
@@ -25,10 +30,17 @@ public class Program
         builder
             .Services
             .AddClientServices(builder);
+
+        builder.Services.AddMudServices(config =>
+        {
+            config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopRight;
+            config.SnackbarConfiguration.ShowCloseIcon = true;
+            config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+        });
         //
         builder
             .Services
-            .AddScoped<IDataStorage,MemoryDataStorage>()
+            .AddScoped<IDataStorage, MemoryDataStorage>()
             .AddScoped<UserService>()
             .AddScoped<NutrificaAuthenticationStateProvider>()
             .AddScoped<AuthenticationStateProvider>(sp =>
