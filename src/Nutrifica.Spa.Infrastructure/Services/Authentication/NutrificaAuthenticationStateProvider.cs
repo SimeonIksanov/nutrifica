@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 using Nutrifica.Api.Contracts.Authentication;
 using Nutrifica.Shared.Wrappers;
-using Nutrifica.Spa.Infrastructure.Services.Storage;
+using Nutrifica.Spa.Infrastructure.Models;
 
 namespace Nutrifica.Spa.Infrastructure.Services.Authentication;
 
 public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider, IDisposable
 {
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
 
-    public NutrificaAuthenticationStateProvider(UserService userService)
+    public NutrificaAuthenticationStateProvider(IUserService userService)
     {
         _userService = userService;
         AuthenticationStateChanged += OnAuthenticationStateChangedAsync;
@@ -25,18 +25,11 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var principal = new ClaimsPrincipal();
-        User? user = _userService.FetchUserFromBrowser();
+        User? user = await _userService.FetchUserFromBrowser();
         if (user is null)
         {
             return new AuthenticationState(principal);
         }
-
-        // User? authenticatedUser = await _userService.SendRefreshTokensRequestAsync();
-        // if (authenticatedUser is not null)
-        // {
-        //     principal = authenticatedUser.ToClaimsPrincipal();
-        //     CurrentUser = authenticatedUser;
-        // }
         principal = user.ToClaimsPrincipal();
         CurrentUser = user;
 
@@ -58,9 +51,10 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
         return result;
     }
 
-    public void Logout()
+    public async Task Logout(CancellationToken cancellationToken)
     {
-        _userService.ClearBrowserUserData();
+        await _userService.SendLogoutRequest(cancellationToken);
+        await _userService.ClearBrowserUserData();
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal())));
     }
 

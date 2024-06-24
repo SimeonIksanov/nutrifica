@@ -16,4 +16,8 @@
       <ProjectReference Include="..\Nutrifica.Spa.Infrastructure\Nutrifica.Spa.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\js\LocalStorageAccessor.js" />
+    </ItemGroup>
+
 </Project>

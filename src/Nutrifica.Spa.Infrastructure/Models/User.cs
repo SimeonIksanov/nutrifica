@@ -2,27 +2,7 @@ using System.Security.Claims;
 
 using Nutrifica.Shared.Enums;
 
-namespace Nutrifica.Spa.Infrastructure.Services.Storage;
-
-public class MemoryDataStorage : IDataStorage
-{
-    private readonly Dictionary<string, string> _storage = new();
-
-    public bool HasKey(string key) => _storage.ContainsKey(key);
-    public string GetValue(string key) => _storage[key];
-    public bool TryGetValue(string key, out string? value) => _storage.TryGetValue(key, out value);
-    public void SetValue(string key, string value) => _storage[key]= value;
-    public void Clear() => _storage.Clear();
-}
-
-public interface IDataStorage
-{
-    bool HasKey(string key);
-    string GetValue(string key);
-    bool TryGetValue(string key, out string? value);
-    void SetValue(string key, string value);
-    void Clear();
-}
+namespace Nutrifica.Spa.Infrastructure.Models;
 
 public class User
 {

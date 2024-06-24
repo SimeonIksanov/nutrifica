@@ -7,8 +7,8 @@ using MudBlazor;
 
 using Nutrifica.Api.Contracts.Authentication;
 using Nutrifica.Shared.Wrappers;
+using Nutrifica.Spa.Infrastructure.Models;
 using Nutrifica.Spa.Infrastructure.Services.Authentication;
-using Nutrifica.Spa.Infrastructure.Services.Storage;
 
 namespace Nutrifica.Spa.Shared;
 
@@ -53,7 +53,7 @@ public partial class LoginComponent : IDisposable //: ComponentBase
 
         if (result.IsFailure)
         {
-            Snackbar.Add(result.Error.Description, Severity.Error);
+            Snackbar.Add(result.Error.Description, Severity.Error, options => options.CloseAfterNavigation = true);
             return;
         }
 

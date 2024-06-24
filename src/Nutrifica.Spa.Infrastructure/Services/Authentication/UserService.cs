@@ -3,19 +3,20 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
 
+using Blazored.LocalStorage;
+
 using Nutrifica.Api.Contracts.Authentication;
 using Nutrifica.Shared.Wrappers;
 using Nutrifica.Spa.Infrastructure.Models;
-using Nutrifica.Spa.Infrastructure.Services.Storage;
 
 namespace Nutrifica.Spa.Infrastructure.Services.Authentication;
 
 public class UserService : IUserService
 {
     private readonly HttpClient _httpClient;
-    private readonly IDataStorage _storage;
+    private readonly ILocalStorageService  _storage;
 
-    public UserService(HttpClient httpClient, IDataStorage storage)
+    public UserService(HttpClient httpClient, ILocalStorageService  storage)
     {
         _httpClient = httpClient;
         _storage = storage;
@@ -23,82 +24,136 @@ public class UserService : IUserService
 
     public async Task<IResult<User>> SendAuthenticateRequestAsync(TokenRequest request, CancellationToken ct)
     {
-        var response = await _httpClient.PostAsJsonAsync(
-            requestUri: Routes.AuthenticationEndpoints.Login,
-            value: request,
-            options: JsonSerializerOptions.Default,
-            cancellationToken: ct);
+        HttpResponseMessage response;
+        try
+        {
+            response = await _httpClient.PostAsJsonAsync(
+                requestUri: Routes.AuthenticationEndpoints.Login,
+                value: request,
+                cancellationToken: ct);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return Result.Failure<User>(new Error("HttpRequestFailure", ex.Message));
+        }
 
         if (!response.IsSuccessStatusCode)
         {
-            var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken: ct);
-            return Result.Failure<User>(new Error(response?.ReasonPhrase?? "Unknown error", problemDetails?.Detail??"unknown error"));
+            var problemDetails = await response
+                .Content
+                .ReadFromJsonAsync<ProblemDetails>(cancellationToken: ct);
+            return Result.Failure<User>(new Error(response.ReasonPhrase ?? "HttpRequestUnsuccessful",
+                problemDetails?.Detail ?? "unknown error"));
         }
 
         var tokenResponse = await ParseResponse(response, ct);
         if (tokenResponse is null)
         {
-            return Result.Failure<User>(new Error("Unknown error", "unknown error"));;
+            return Result.Failure<User>(new Error("Jwt.ParseError", "unknown error"));
         }
 
         var claimPrincipal = CreateClaimPrincipalFromToken(tokenResponse.Jwt);
         var user = User.FromClaimsPrincipal(claimPrincipal);
-        PersistUserToBrowser(tokenResponse);
+        await PersistUserToBrowser(tokenResponse, ct);
         return Result.Success(user);
     }
 
-    public async Task<User?> SendRefreshTokensRequestAsync(CancellationToken ct = default)
+    public async Task<IResult<User>> TryRefreshTokensRequestAsync(CancellationToken ct = default)
     {
-        if (_storage.TryGetValue(nameof(RefreshTokenRequest.Jwt), out string? jwt)
-            && _storage.TryGetValue(nameof(RefreshTokenRequest.RefreshToken), out string? refreshToken))
+        string? jwt = await _storage.GetItemAsStringAsync(nameof(RefreshTokenRequest.Jwt), ct);
+        string? refreshToken = await _storage.GetItemAsStringAsync(nameof(RefreshTokenRequest.RefreshToken), ct);
+
+        if (string.IsNullOrWhiteSpace(jwt) || string.IsNullOrWhiteSpace(refreshToken))
         {
-            var response = await _httpClient.PostAsJsonAsync(
-                requestUri: Routes.AuthenticationEndpoints.RefreshToken,
-                value: new RefreshTokenRequest(jwt!, refreshToken!),
-                JsonSerializerOptions.Default,
-                ct);
-            if (!response.IsSuccessStatusCode)
-            {
-                return null;
-            }
-
-            TokenResponse? tokenResponse = await ParseResponse(response, ct);
-            if (tokenResponse is null)
-            {
-                return null;
-            }
-
-            var claimPrincipal = CreateClaimPrincipalFromToken(tokenResponse.Jwt);
-            var user = User.FromClaimsPrincipal(claimPrincipal);
-            PersistUserToBrowser(tokenResponse);
-            return user;
+            return Result.Failure<User>(
+                new Error("Unauthenticated", "Unauthenticated or authentication timeout expired."));
         }
 
-        return null;
+        HttpResponseMessage response;
+        try
+        {
+            response = await _httpClient.PostAsJsonAsync(
+                requestUri: Routes.AuthenticationEndpoints.RefreshToken,
+                value: new RefreshTokenRequest(jwt, refreshToken),
+                ct);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return Result.Failure<User>(new Error("HttpRequestFailure", ex.Message));
+        }
+        if (!response.IsSuccessStatusCode)
+        {
+            var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken: ct);
+            return Result.Failure<User>(new Error(response.ReasonPhrase ?? "HttpRequestUnsuccessful",
+                problemDetails?.Detail ?? "unknown error"));
+        }
+
+        TokenResponse? tokenResponse = await ParseResponse(response, ct);
+        if (tokenResponse is null)
+        {
+            return Result.Failure<User>(new Error("Jwt.ParseError", "unknown error"));
+        }
+
+        var claimPrincipal = CreateClaimPrincipalFromToken(tokenResponse.Jwt);
+        var user = User.FromClaimsPrincipal(claimPrincipal);
+        await PersistUserToBrowser(tokenResponse, ct);
+        return Result.Success(user);
     }
 
-
-    public User? FetchUserFromBrowser()
+    public async Task SendLogoutRequest(CancellationToken ct)
     {
-        if (_storage.TryGetValue(nameof(TokenResponse.Jwt), out string? jwt))
+        string? jwt = await _storage.GetItemAsStringAsync(nameof(RefreshTokenRequest.Jwt), ct);
+        string? refreshToken = await _storage.GetItemAsStringAsync(nameof(RefreshTokenRequest.RefreshToken), ct);
+
+        if (string.IsNullOrWhiteSpace(jwt) || string.IsNullOrWhiteSpace(refreshToken))
         {
-            var claimsPrincipal = CreateClaimPrincipalFromToken(jwt!);
+            await ClearBrowserUserData();
+        }
+
+        LogoutRequest request = new LogoutRequest(jwt!, refreshToken!);
+        try
+        {
+            var _ = await _httpClient.PostAsJsonAsync(Routes.AuthenticationEndpoints.LogOut, request, ct);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public async Task<User?> FetchUserFromBrowser()
+    {
+        string? jwt = await _storage.GetItemAsStringAsync(nameof(TokenResponse.Jwt));
+        if (string.IsNullOrWhiteSpace(jwt))
+            return null;
+
+        var claimsPrincipal = CreateClaimPrincipalFromToken(jwt);
+        if (IsValidToken(jwt))
+        {
             return User.FromClaimsPrincipal(claimsPrincipal);
         }
 
-        // return User.FromClaimsPrincipal(new ClaimsPrincipal(new ClaimsIdentity()));
+        var result = await TryRefreshTokensRequestAsync();
+        if (result.IsSuccess)
+        {
+            return result.Value;
+        }
+
+        await _storage.ClearAsync();
         return null;
     }
 
-    public void ClearBrowserUserData()
+    public async Task ClearBrowserUserData()
     {
-        _storage.Clear();
+        await _storage.ClearAsync();
     }
 
-    private void PersistUserToBrowser(TokenResponse tokenResponse)
+    private async Task PersistUserToBrowser(TokenResponse tokenResponse, CancellationToken ct = default)
     {
-        _storage.SetValue(nameof(TokenResponse.Jwt), tokenResponse.Jwt);
-        _storage.SetValue(nameof(TokenResponse.RefreshToken), tokenResponse.RefreshToken);
+        await _storage.SetItemAsStringAsync(nameof(TokenResponse.Jwt), tokenResponse.Jwt, ct);
+        await _storage.SetItemAsStringAsync(nameof(TokenResponse.RefreshToken), tokenResponse.RefreshToken, ct);
     }
 
     private ClaimsPrincipal CreateClaimPrincipalFromToken(string jwt)
@@ -107,11 +162,23 @@ public class UserService : IUserService
         var tokenHandler = new JwtSecurityTokenHandler();
         if (tokenHandler.CanReadToken(jwt))
         {
-            var jwtSecutityToken = tokenHandler.ReadJwtToken(jwt);
-            identity = new ClaimsIdentity(jwtSecutityToken.Claims, "Nutrifica");
+            var jwtSecurityToken = tokenHandler.ReadJwtToken(jwt);
+            identity = new ClaimsIdentity(jwtSecurityToken.Claims, "Nutrifica");
         }
 
         return new ClaimsPrincipal(identity);
+    }
+
+    private bool IsValidToken(string jwt)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        if (tokenHandler.CanReadToken(jwt))
+        {
+            var jwtSecurityToken = tokenHandler.ReadJwtToken(jwt);
+            return jwtSecurityToken.ValidFrom < DateTime.UtcNow && DateTime.UtcNow < jwtSecurityToken.ValidTo;
+        }
+
+        return false;
     }
 
     private static async Task<TokenResponse?> ParseResponse(HttpResponseMessage response, CancellationToken ct)

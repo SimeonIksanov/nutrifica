@@ -1,6 +1,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Nutrifica.Spa.Infrastructure.Services.Authentication
 @inject NutrificaAuthenticationStateProvider AuthStateProvider;
+@implements IDisposable
+
 <AuthorizeView>
     <Authorized>
         <MudMenu FullWidth="true" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopCenter">
@@ -24,15 +26,24 @@
 </AuthorizeView>
 
 @code {
+    private CancellationTokenSource? _cancellationTokenSource;
 
-    public void OnLogoutClicked()
+    public async Task OnLogoutClicked()
     {
-        AuthStateProvider.Logout();
+        _cancellationTokenSource = new();
+        await AuthStateProvider.Logout(_cancellationTokenSource!.Token);
     }
 
     private void OnChangePasswordClicked(MouseEventArgs obj)
     {
         Console.WriteLine("OnChangePasswordClicked");
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
     }
 
 }

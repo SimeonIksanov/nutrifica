@@ -4,11 +4,11 @@ namespace Nutrifica.Spa.Infrastructure.Models;
 
 public class ProblemDetails
 {
-    public string Type { get; set; }
-    public string Title { get; set; }
+    public string Type { get; set; } = String.Empty;
+    public string Title { get; set; } = String.Empty;
     public int Status { get; set; }
-    public string Detail { get; set; }
-    public ICollection<Error> Errors { get; set; }
+    public string Detail { get; set; } = String.Empty;
+    public ICollection<Error> Errors { get; set; } = null!;
 }
 
 /*
