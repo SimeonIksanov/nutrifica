@@ -16,12 +16,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("Users");
 
         ConfigureProperties(builder);
-
-        builder
-            .HasOne<UserAccount>(user => user.Account)
-            .WithOne(userAccount => userAccount.User)
-            .HasForeignKey<UserAccount>("userId")
-            .IsRequired();
+        ConfigureAccountTable(builder);
     }
 
     private static void ConfigureProperties(EntityTypeBuilder<User> builder)
@@ -57,5 +52,32 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 x => UserId.Create(x));
         builder.Ignore(x => x.FullName);
         // builder.Property(x => x.Role).HasConversion<string>();
+    }
+
+    private static void ConfigureAccountTable(EntityTypeBuilder<User> builder)
+    {
+        // builder
+        //     .HasOne<UserAccount>(user => user.Account)
+        //     .WithOne(userAccount => userAccount.User)
+        //     .HasForeignKey<UserAccount>("userId")
+        //     .IsRequired();
+        builder.OwnsOne<UserAccount>(u => u.Account, uab =>
+        {
+            uab.ToTable("UserAccount");
+            uab.WithOwner().HasForeignKey("UserId");
+            uab.HasKey("Id", "UserId");
+
+            uab.OwnsMany(x => x.RefreshTokens, rtb =>
+            {
+                rtb.ToTable("RefreshTokens");
+                rtb.WithOwner().HasForeignKey("AccountId", "UserId");
+                rtb.HasKey(nameof(RefreshToken.Id), "UserId", "AccountId");
+
+                rtb.Ignore(x => x.IsActive);
+                rtb.Ignore(x => x.IsRevoked);
+                rtb.Ignore(x => x.IsExpired);
+            });
+
+        });
     }
 }

@@ -39,6 +39,7 @@ public class AuthenticationController : ApiController
     /// <param name="request">Request object</param>
     /// <param name="ct">Cancellation Token</param>
     /// <returns>Status 200 OK</returns>
+    [AllowAnonymous]
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(RefreshTokenRequest request, CancellationToken ct)
     {
