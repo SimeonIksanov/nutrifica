@@ -5,7 +5,11 @@
 
 <AuthorizeView>
     <Authorized>
-        <MudMenu FullWidth="true" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopCenter">
+        <MudMenu
+            FullWidth="false"
+            AnchorOrigin="Origin.BottomLeft"
+            TransformOrigin="Origin.TopCenter"
+            Dense="true">
             <ActivatorContent>
                 <MudChip
                     Icon="@Icons.Material.Filled.Person"
@@ -13,11 +17,17 @@
                     Привет, @AuthStateProvider.CurrentUser.FirstName
                 </MudChip>
             </ActivatorContent>
+            
             <ChildContent>
-                <MudMenuItem OnClick="OnChangePasswordClicked">
+                <MudMenuItem
+                    OnClick="OnChangePasswordClicked">
                     Сменить пароль
                 </MudMenuItem>
-                <MudMenuItem OnClick="OnLogoutClicked">
+                
+                <MudMenuItem
+                    Icon="@Icons.Material.Filled.Logout"
+                    IconSize="Size.Small"
+                    OnClick="OnLogoutClicked">
                     Выйти
                 </MudMenuItem>
             </ChildContent>

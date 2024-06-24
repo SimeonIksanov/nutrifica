@@ -1,6 +1,6 @@
 ﻿@page "/{counter:int?}"
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager navManager
-@implements IDisposable
 
 @inject IJSRuntime JSRuntime
 
@@ -8,10 +8,16 @@
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+Welcome to your new app.<br/>
+
+<AuthorizeView >
+    <Authorized>
+        The user is authorized
+    </Authorized>
+    <NotAuthorized>
+        The user is not authorized
+    </NotAuthorized>
+</AuthorizeView>
 
 <div>@Counter_</div>
 <button class="btn btn-primary" @onclick="OnClick">Click Me!</button>
-<SubComponent @bind-Param="Counter_"/>
-
-<Test />
