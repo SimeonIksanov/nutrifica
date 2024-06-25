@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
 
+using Nutrifica.Spa.Infrastructure.MiddleWares;
 using Nutrifica.Spa.Infrastructure.Services.Authentication;
 
 namespace Nutrifica.Spa.Extensions;
@@ -16,6 +17,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddHttpClients(builder)
+            .AddDelegateHandlers()
             .AddLocalStorage()
             .AddMudBlazor()
             .AddServices();
@@ -26,7 +28,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services
-            .AddScoped<IUserService, UserService>()
+            .AddScoped<IAuthenticationService, AuthenticationService>()
             .AddScoped<NutrificaAuthenticationStateProvider>()
             .AddScoped<AuthenticationStateProvider>(sp =>
                 sp.GetRequiredService<NutrificaAuthenticationStateProvider>())
@@ -36,20 +38,26 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddHttpClients(this IServiceCollection services, WebAssemblyHostBuilder builder)
     {
-        services.AddScoped(sp => new HttpClient
-        {
-            BaseAddress = new Uri(builder.Configuration.GetSection("backend")["uri"] ??
-                                  throw new KeyNotFoundException("No backend URI specified"))
-        });
-        // services.AddHttpClient<AuthenticationService>(client =>
-        // {
-        //     client.BaseAddress = new Uri(builder.Configuration.GetSection("backend")["uri"] ?? throw new KeyNotFoundException("No backend URI specified"));
-        // });
+        services.AddHttpClient("apiBackend", client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetSection("backend")["uri"] ??
+                                             throw new KeyNotFoundException("No backend URI specified"));
+            })
+            .AddHttpMessageHandler<TokenRefreshDelegateHandler>()
+            .AddHttpMessageHandler<JwtInjectorDelegateHandler>();
 
         services.AddHttpClient("blazorBackend", client =>
         {
             client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddDelegateHandlers(this IServiceCollection services)
+    {
+        services.AddTransient<TokenRefreshDelegateHandler>();
+        services.AddTransient<JwtInjectorDelegateHandler>();
 
         return services;
     }

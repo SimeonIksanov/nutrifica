@@ -10,11 +10,11 @@ namespace Nutrifica.Spa.Infrastructure.Services.Authentication;
 
 public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider, IDisposable
 {
-    private readonly IUserService _userService;
+    private readonly IAuthenticationService _authService;
 
-    public NutrificaAuthenticationStateProvider(IUserService userService)
+    public NutrificaAuthenticationStateProvider(IAuthenticationService authService)
     {
-        _userService = userService;
+        _authService = authService;
         AuthenticationStateChanged += OnAuthenticationStateChangedAsync;
     }
 
@@ -25,7 +25,7 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var principal = new ClaimsPrincipal();
-        User? user = await _userService.FetchUserFromBrowser();
+        User? user = await _authService.FetchUserFromBrowser();
         if (user is null)
         {
             return new AuthenticationState(principal);
@@ -40,7 +40,7 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
     {
         var principal = new ClaimsPrincipal();
 
-        var result = await _userService.SendAuthenticateRequestAsync(request, ct);
+        var result = await _authService.SendAuthenticateRequestAsync(request, ct);
         if (result.IsSuccess)
         {
             principal = new ClaimsPrincipal(result.Value.ToClaimsPrincipal());
@@ -53,8 +53,8 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
 
     public async Task Logout(CancellationToken cancellationToken)
     {
-        await _userService.SendLogoutRequest(cancellationToken);
-        await _userService.ClearBrowserUserData();
+        await _authService.SendLogoutRequest(cancellationToken);
+        await _authService.ClearBrowserUserData();
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal())));
     }
 
