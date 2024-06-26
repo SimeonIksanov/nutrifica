@@ -46,10 +46,12 @@ public static class ServiceCollectionExtensions
             .AddHttpMessageHandler<TokenRefreshDelegateHandler>()
             .AddHttpMessageHandler<JwtInjectorDelegateHandler>();
 
+        services.AddHttpClient("apiBackendWoHandlers",config =>
+            config.BaseAddress = new Uri(builder.Configuration.GetSection("backend")["uri"] ??
+                                         throw new KeyNotFoundException("No backend URI specified")));
+
         services.AddHttpClient("blazorBackend", client =>
-        {
-            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
-        });
+            client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
         return services;
     }

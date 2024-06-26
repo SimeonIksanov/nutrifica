@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
@@ -81,11 +82,14 @@ public class AuthenticationService : IAuthenticationService
             return;
         }
 
-        var request = new LogoutRequest(jwt, refreshToken);
+        var requestBody = new LogoutRequest(jwt, refreshToken);
         try
         {
-            _ = await CreateHttpClient()
-                .PostAsJsonAsync(AuthenticationEndpoints.LogOut, request, ct);
+            using var request = new HttpRequestMessage(HttpMethod.Post, AuthenticationEndpoints.LogOut);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+            request.Content = JsonContent.Create(requestBody);
+            var response = await CreateHttpClient()
+                .SendAsync(request, ct);
         }
         catch (Exception ex)
         {
@@ -121,7 +125,7 @@ public class AuthenticationService : IAuthenticationService
     public async Task<string?> GetJwtFromStorage(CancellationToken ct = default) =>
         await _storage.GetItemAsStringAsync(nameof(TokenResponse.Jwt), ct);
 
-    private HttpClient CreateHttpClient() => _httpClient ??= _httpClientFactory.CreateClient("apiBackend");
+    private HttpClient CreateHttpClient() => _httpClient ??= _httpClientFactory.CreateClient("apiBackendWoHandlers");
 
     private async Task<IResult> SendRefreshTokensRequestAsync(string jwt, string refreshToken,
         CancellationToken ct = default)
