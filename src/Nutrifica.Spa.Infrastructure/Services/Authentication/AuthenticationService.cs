@@ -78,7 +78,6 @@ public class AuthenticationService : IAuthenticationService
 
         if (string.IsNullOrWhiteSpace(jwt) || string.IsNullOrWhiteSpace(refreshToken))
         {
-            await ClearBrowserUserData();
             return;
         }
 
@@ -156,6 +155,8 @@ public class AuthenticationService : IAuthenticationService
         {
             return Result.Failure(new Error("Jwt.ParseError", "unknown error"));
         }
+
+        await PersistUserToBrowser(tokenResponse, ct);
 
         return Result.Success();
     }
