@@ -1,0 +1,12 @@
+@page "/Logout"
+@using Nutrifica.Spa.Infrastructure.Services.Authentication
+@inject NutrificaAuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthenticationStateProvider.Logout(default);
+        NavigationManager.NavigateTo("/login");
+    }
+}
