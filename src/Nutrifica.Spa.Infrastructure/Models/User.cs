@@ -1,6 +1,7 @@
 using System.Security.Claims;
 
 using Nutrifica.Shared.Enums;
+using Nutrifica.Spa.Infrastructure.Services.Authentication;
 
 namespace Nutrifica.Spa.Infrastructure.Models;
 
@@ -23,7 +24,7 @@ public class User
                     new Claim(ClaimTypes.Surname, LastName),
                     new Claim(ClaimTypes.Role, Role)
                 },
-                "Nutrifica"));
+                nameof(NutrificaAuthenticationStateProvider)));
 
     public static User FromClaimsPrincipal(ClaimsPrincipal principal) =>
         new User()

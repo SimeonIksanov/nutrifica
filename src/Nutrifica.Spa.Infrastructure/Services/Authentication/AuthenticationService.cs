@@ -4,8 +4,6 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
 
-using Blazored.LocalStorage;
-
 using Nutrifica.Api.Contracts.Authentication;
 using Nutrifica.Shared.Wrappers;
 using Nutrifica.Spa.Infrastructure.Models;
@@ -16,13 +14,13 @@ namespace Nutrifica.Spa.Infrastructure.Services.Authentication;
 public class AuthenticationService : IAuthenticationService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILocalStorageService _storage;
+    private readonly ITokenService _tokenService;
     private HttpClient? _httpClient;
 
-    public AuthenticationService(IHttpClientFactory httpClientFactory, ILocalStorageService storage)
+    public AuthenticationService(IHttpClientFactory httpClientFactory, ITokenService tokenService)
     {
         _httpClientFactory = httpClientFactory;
-        _storage = storage;
+        _tokenService = tokenService;
     }
 
     public async Task<IResult<User>> SendAuthenticateRequestAsync(TokenRequest request, CancellationToken ct)
@@ -37,7 +35,7 @@ public class AuthenticationService : IAuthenticationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex);
             return Result.Failure<User>(new Error("HttpRequestFailure", ex.Message));
         }
 
@@ -58,23 +56,17 @@ public class AuthenticationService : IAuthenticationService
         return Result.Success(ConvertToUser(tokenResponse.Jwt));
     }
 
-    public async Task<bool> IsJwtValidAsync(CancellationToken ct)
-    {
-        string? jwt = await GetJwtFromStorage(ct);
-        return IsValidToken(jwt);
-    }
-
     public async Task<IResult> SendRefreshTokensRequestAsync(CancellationToken ct)
     {
-        string? jwt = await GetJwtFromStorage(ct);
-        string? refreshToken = await GetRefreshTokenFromStorage(ct);
+        string jwt = await _tokenService.GetAccessTokenAsync(ct);
+        string refreshToken = await _tokenService.GetRefreshTokenAsync(ct);
         return await SendRefreshTokensRequestAsync(jwt, refreshToken, ct);
     }
 
     public async Task SendLogoutRequest(CancellationToken ct)
     {
-        string? jwt = await GetJwtFromStorage(ct);
-        string? refreshToken = await GetRefreshTokenFromStorage(ct);
+        string jwt = await _tokenService.GetAccessTokenAsync(ct);
+        string refreshToken = await _tokenService.GetRefreshTokenAsync(ct);
 
         if (string.IsNullOrWhiteSpace(jwt) || string.IsNullOrWhiteSpace(refreshToken))
         {
@@ -87,42 +79,41 @@ public class AuthenticationService : IAuthenticationService
             using var request = new HttpRequestMessage(HttpMethod.Post, AuthenticationEndpoints.LogOut);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
             request.Content = JsonContent.Create(requestBody);
-            var response = await CreateHttpClient()
+            _ = await CreateHttpClient()
                 .SendAsync(request, ct);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex);
         }
     }
 
     public async Task<User?> FetchUserFromBrowser()
     {
-        string? jwt = await GetJwtFromStorage();
-
-        if (string.IsNullOrWhiteSpace(jwt)) return null;
+        string jwt = await _tokenService.GetAccessTokenAsync(default);
+        if (string.IsNullOrWhiteSpace(jwt))
+        {
+            return null;
+        }
 
         ClaimsPrincipal claimsPrincipal = CreateClaimPrincipalFromToken(jwt);
-        if (IsValidToken(jwt))
+        if (!await _tokenService.IsAccessTokenExpiredAsync())
         {
             return User.FromClaimsPrincipal(claimsPrincipal);
         }
 
-        string? refreshToken = await GetRefreshTokenFromStorage();
+        string refreshToken = await _tokenService.GetRefreshTokenAsync(default);
         if (!string.IsNullOrWhiteSpace(refreshToken) &&
             (await SendRefreshTokensRequestAsync(jwt, refreshToken)).IsSuccess)
         {
-            return ConvertToUser(await GetJwtFromStorage());
+            return ConvertToUser(await _tokenService.GetAccessTokenAsync(default));
         }
 
-        await _storage.ClearAsync();
+        await _tokenService.ClearAsync(default);
         return null;
     }
 
-    public async Task ClearBrowserUserData() => await _storage.ClearAsync();
-
-    public async Task<string?> GetJwtFromStorage(CancellationToken ct = default) =>
-        await _storage.GetItemAsStringAsync(nameof(TokenResponse.Jwt), ct);
+    public async Task ClearBrowserUserData() => await _tokenService.ClearAsync(default);
 
     private HttpClient CreateHttpClient() => _httpClient ??= _httpClientFactory.CreateClient("apiBackendWoHandlers");
 
@@ -163,11 +154,11 @@ public class AuthenticationService : IAuthenticationService
 
     private async Task PersistUserToBrowser(TokenResponse tokenResponse, CancellationToken ct = default)
     {
-        await _storage.SetItemAsStringAsync(nameof(TokenResponse.Jwt), tokenResponse.Jwt, ct);
-        await _storage.SetItemAsStringAsync(nameof(TokenResponse.RefreshToken), tokenResponse.RefreshToken, ct);
+        await _tokenService.SaveAccessTokenAsync(tokenResponse.Jwt, ct);
+        await _tokenService.SaveRefreshTokenAsync(tokenResponse.RefreshToken, ct);
     }
 
-    private ClaimsPrincipal CreateClaimPrincipalFromToken(string? jwt)
+    private ClaimsPrincipal CreateClaimPrincipalFromToken(string jwt)
     {
         var identity = new ClaimsIdentity();
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -180,18 +171,6 @@ public class AuthenticationService : IAuthenticationService
         return new ClaimsPrincipal(identity);
     }
 
-    private bool IsValidToken(string? jwt)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        if (tokenHandler.CanReadToken(jwt))
-        {
-            JwtSecurityToken? jwtSecurityToken = tokenHandler.ReadJwtToken(jwt);
-            return jwtSecurityToken.ValidFrom < DateTime.UtcNow && DateTime.UtcNow < jwtSecurityToken.ValidTo;
-        }
-
-        return false;
-    }
-
     private static async Task<T?> ParseResponse<T>(HttpResponseMessage response, CancellationToken ct)
     {
         var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -199,10 +178,7 @@ public class AuthenticationService : IAuthenticationService
         return tokenResponse;
     }
 
-    private async Task<string?> GetRefreshTokenFromStorage(CancellationToken ct = default) =>
-        await _storage.GetItemAsStringAsync(nameof(TokenResponse.RefreshToken), ct);
-
-    private User ConvertToUser(string? jwt)
+    private User ConvertToUser(string jwt)
     {
         ClaimsPrincipal claimPrincipal = CreateClaimPrincipalFromToken(jwt);
         return User.FromClaimsPrincipal(claimPrincipal);

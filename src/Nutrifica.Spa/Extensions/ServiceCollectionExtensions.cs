@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
 
-using Nutrifica.Spa.Infrastructure.MiddleWares;
+using Nutrifica.Spa.Infrastructure.Services;
 using Nutrifica.Spa.Infrastructure.Services.Authentication;
+using Nutrifica.Spa.Infrastructure.Services.Users;
+using Nutrifica.Spa.MiddleWares;
 
 namespace Nutrifica.Spa.Extensions;
 
@@ -29,10 +31,12 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddScoped<IAuthenticationService, AuthenticationService>()
+            .AddScoped<IUserService, UserService>()
             .AddScoped<NutrificaAuthenticationStateProvider>()
             .AddScoped<AuthenticationStateProvider>(sp =>
                 sp.GetRequiredService<NutrificaAuthenticationStateProvider>())
-            .AddAuthorizationCore();
+            .AddAuthorizationCore()
+            .AddScoped<ITokenService, TokenService>();
         return services;
     }
 
@@ -46,7 +50,7 @@ public static class ServiceCollectionExtensions
             .AddHttpMessageHandler<TokenRefreshDelegateHandler>()
             .AddHttpMessageHandler<JwtInjectorDelegateHandler>();
 
-        services.AddHttpClient("apiBackendWoHandlers",config =>
+        services.AddHttpClient("apiBackendWoHandlers", config =>
             config.BaseAddress = new Uri(builder.Configuration.GetSection("backend")["uri"] ??
                                          throw new KeyNotFoundException("No backend URI specified")));
 
@@ -60,6 +64,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<TokenRefreshDelegateHandler>();
         services.AddTransient<JwtInjectorDelegateHandler>();
+        // services.AddTransient<AuthorizationMessageHandler>();
 
         return services;
     }

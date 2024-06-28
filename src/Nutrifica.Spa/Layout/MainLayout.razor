@@ -1,41 +1,43 @@
 ﻿@layout BaseLayout
 @using Nutrifica.Spa.Shared.NavMenu
 @using Nutrifica.Spa.Shared.AppBar
+@using Microsoft.AspNetCore.Components.Authorization
 @inherits LayoutComponentBase
 
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton 
-            Icon="@Icons.Material.Filled.Menu" 
-            Color="Color.Inherit" 
-            Edge="Edge.Start" 
+        <MudIconButton
+            Icon="@Icons.Material.Filled.Menu"
+            Color="Color.Inherit"
+            Edge="Edge.Start"
             OnClick="@((e) => DrawerToggle())"/>
-        
+
         <MudText
             Typo="Typo.h5"
             Class="ml-3">
             Nutrifica
         </MudText>
-        
+
         <MudSpacer/>
-        
-        <NotificationBellComponent/>
-        
-        <AvatarProfileComponent/>
+        <AuthorizeView>
+            <Authorized>
+                <NotificationBellComponent/>
+
+                <AvatarProfileComponent/>
+            </Authorized>
+        </AuthorizeView>
     </MudAppBar>
-    
-    <MudDrawer 
-        @bind-Open="_drawerOpen" 
-        ClipMode="DrawerClipMode.Always" 
+
+    <MudDrawer
+        @bind-Open="_drawerOpen"
+        ClipMode="DrawerClipMode.Always"
         Elevation="2">
         <NavMenuComponent/>
     </MudDrawer>
-    
+
     <MudMainContent>
-        <MudContainer>
-            @Body
-        </MudContainer>
+        @Body
     </MudMainContent>
 </MudLayout>
 

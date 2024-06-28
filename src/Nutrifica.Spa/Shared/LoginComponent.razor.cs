@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 
 using MudBlazor;
@@ -14,7 +15,8 @@ namespace Nutrifica.Spa.Shared;
 
 public partial class LoginComponent : IDisposable //: ComponentBase
 {
-    [Inject] private NutrificaAuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+    // [Inject] private NutrificaAuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
@@ -43,7 +45,7 @@ public partial class LoginComponent : IDisposable //: ComponentBase
         try
         {
             var request = new TokenRequest(Model.Username, Model.Password);
-            result = await AuthenticationStateProvider.LoginAsync(request, _cancellationTokenSource!.Token);
+            result = await ((NutrificaAuthenticationStateProvider)AuthenticationStateProvider).LoginAsync(request, _cancellationTokenSource!.Token);
         }
         catch (Exception ex)
         {
@@ -67,7 +69,7 @@ public partial class LoginComponent : IDisposable //: ComponentBase
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
-        AuthenticationStateProvider.Dispose();
+        ((NutrificaAuthenticationStateProvider)AuthenticationStateProvider).Dispose();
         Snackbar.Dispose();
     }
 }

@@ -1,13 +1,12 @@
 using Nutrifica.Api.Contracts.Clients;
 using Nutrifica.Application.Abstractions.Messaging;
-using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Mappings;
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.Get;
 
-public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, IPagedList<ClientResponse>>
+public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, PagedList<ClientResponse>>
 {
     private readonly IClientRepository _clientRepository;
 
@@ -16,12 +15,17 @@ public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, IPagedList<
         _clientRepository = clientRepository;
     }
 
-    public async Task<Result<IPagedList<ClientResponse>>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedList<ClientResponse>>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
     {
         var clientPagedList = await _clientRepository
                 .GetByFilterAsync(request.sieveModel, cancellationToken);
 
-        var clientResponsePagedList = clientPagedList.ProjectItems(x => x.ToClientResponse());
-        return Result.Success<IPagedList<ClientResponse>>(clientResponsePagedList);
+        var clientResponsePagedList = PagedList<ClientResponse>.Create(
+            clientPagedList.Items.Select(x => x.ToClientResponse()).ToList(),
+            clientPagedList.Page,
+            clientPagedList.PageSize,
+            clientPagedList.TotalCount);
+
+        return Result.Success(clientResponsePagedList);
     }
 }

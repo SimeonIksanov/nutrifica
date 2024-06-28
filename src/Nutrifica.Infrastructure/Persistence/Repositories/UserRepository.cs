@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 
-using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Models.Users;
 using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
+using Nutrifica.Infrastructure.Services.SortAndFilter;
+using Nutrifica.Shared.Wrappers;
 
 using Sieve.Models;
 using Sieve.Services;
@@ -47,7 +48,7 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(x => x.Account.Username == username, cancellationToken: ct);
     }
 
-    public async Task<IPagedList<UserModel>> GetByFilterAsync(QueryParams queryParams,
+    public async Task<PagedList<UserModel>> GetByFilterAsync(QueryParams queryParams,
         CancellationToken cancellationToken)
     {
         IQueryable<User> query = _context.Set<User>();
@@ -75,8 +76,8 @@ public class UserRepository : IUserRepository
                     e.Employee.Role,
                     e.Employee.CreatedAt));
 
-        return await PagedList<UserModel>.CreateAsync(_sieveProcessor, queryParams, users,
-            cancellationToken);
+        var pagedList = await users.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
+        return pagedList;
     }
 
     public Task<UserModel?> GetDetailedByIdAsync(UserId id, CancellationToken cancellationToken)

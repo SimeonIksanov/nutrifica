@@ -20,8 +20,6 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
 
     public User CurrentUser { get; private set; } = new();
 
-    public void Dispose() => AuthenticationStateChanged -= OnAuthenticationStateChangedAsync;
-
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var principal = new ClaimsPrincipal();
@@ -30,6 +28,7 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
         {
             return new AuthenticationState(principal);
         }
+
         principal = user.ToClaimsPrincipal();
         CurrentUser = user;
 
@@ -51,12 +50,25 @@ public class NutrificaAuthenticationStateProvider : AuthenticationStateProvider,
         return result;
     }
 
-    public async Task Logout(CancellationToken cancellationToken)
+    public async Task LogoutAsync(CancellationToken cancellationToken)
     {
         await _authService.SendLogoutRequest(cancellationToken);
         await _authService.ClearBrowserUserData();
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal())));
     }
+
+    public async Task<IResult> RefreshTokensAsync(CancellationToken ct)
+    {
+        var result = await _authService.SendRefreshTokensRequestAsync(ct);
+        if (result.IsFailure)
+        {
+            await _authService.ClearBrowserUserData();
+        }
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        return result;
+    }
+
+    public void Dispose() => AuthenticationStateChanged -= OnAuthenticationStateChangedAsync;
 
     private async void OnAuthenticationStateChangedAsync(Task<AuthenticationState> task)
     {

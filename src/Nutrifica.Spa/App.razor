@@ -5,9 +5,9 @@
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <NotAuthorized>
-                    <RedirectToLoginComponent />
-                </NotAuthorized>
+                @* <NotAuthorized> *@
+                @*     <RedirectToLoginComponent /> *@
+                @* </NotAuthorized> *@
                 <Authorizing>
                     <div>Authorizing...</div>
                 </Authorizing>

@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 
-using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Models.Clients;
 using Nutrifica.Domain.Aggregates.ClientAggregate;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
+using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Infrastructure.Persistence.Repositories;
 
@@ -31,7 +31,7 @@ public class ClientRepository : IClientRepository
             .FirstOrDefaultAsync(x => x.Id == clientId);
     }
 
-    public Task<IPagedList<ClientModel>> GetByFilterAsync(object sieveModel, CancellationToken cancellationToken)
+    public Task<PagedList<ClientModel>> GetByFilterAsync(object sieveModel, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

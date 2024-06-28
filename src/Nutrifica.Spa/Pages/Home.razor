@@ -1,8 +1,6 @@
-﻿@page "/{counter:int?}"
+﻿@page "/"
 @using Microsoft.AspNetCore.Components.Authorization
-@inject NavigationManager navManager
-
-@inject IJSRuntime JSRuntime
+@attribute [AllowAnonymous]
 
 <PageTitle>Home</PageTitle>
 
@@ -19,5 +17,7 @@ Welcome to your new app.<br/>
     </NotAuthorized>
 </AuthorizeView>
 
-<div>@Counter_</div>
-<button class="btn btn-primary" @onclick="OnClick">Click Me!</button>
+@code
+{
+
+}
