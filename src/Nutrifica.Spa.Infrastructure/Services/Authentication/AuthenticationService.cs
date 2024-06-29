@@ -11,6 +11,9 @@ using Nutrifica.Spa.Infrastructure.Routes;
 
 namespace Nutrifica.Spa.Infrastructure.Services.Authentication;
 
+/// <summary>
+///     Service responsible for handling authentication.
+/// </summary>
 public class AuthenticationService : IAuthenticationService
 {
     private readonly IHttpClientFactory _httpClientFactory;
@@ -25,35 +28,17 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<IResult<User>> SendAuthenticateRequestAsync(TokenRequest request, CancellationToken ct)
     {
-        HttpResponseMessage response;
         try
         {
-            response = await CreateHttpClient().PostAsJsonAsync(
-                AuthenticationEndpoints.Login,
-                request,
-                ct);
+            HttpResponseMessage response =
+                await CreateHttpClient().PostAsJsonAsync(AuthenticationEndpoints.Login, request, ct);
+            return await HandleAuthenticationResponse(response, ct);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
             return Result.Failure<User>(new Error("HttpRequestFailure", ex.Message));
         }
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var problemDetails = await ParseResponse<ProblemDetails>(response, ct);
-            return Result.Failure<User>(new Error(response.ReasonPhrase ?? "HttpRequestUnsuccessful",
-                problemDetails?.Detail ?? "unknown error"));
-        }
-
-        var tokenResponse = await ParseResponse<TokenResponse>(response, ct);
-        if (tokenResponse is null)
-        {
-            return Result.Failure<User>(new Error("Jwt.ParseError", "unknown error"));
-        }
-
-        await PersistUserToBrowser(tokenResponse, ct);
-        return Result.Success(ConvertToUser(tokenResponse.Jwt));
     }
 
     public async Task<IResult> SendRefreshTokensRequestAsync(CancellationToken ct)
@@ -91,10 +76,7 @@ public class AuthenticationService : IAuthenticationService
     public async Task<User?> FetchUserFromBrowser()
     {
         string jwt = await _tokenService.GetAccessTokenAsync(default);
-        if (string.IsNullOrWhiteSpace(jwt))
-        {
-            return null;
-        }
+        if (string.IsNullOrWhiteSpace(jwt)) return null;
 
         ClaimsPrincipal claimsPrincipal = CreateClaimPrincipalFromToken(jwt);
         if (!await _tokenService.IsAccessTokenExpiredAsync())
@@ -120,36 +102,38 @@ public class AuthenticationService : IAuthenticationService
     private async Task<IResult> SendRefreshTokensRequestAsync(string jwt, string refreshToken,
         CancellationToken ct = default)
     {
-        HttpResponseMessage response;
         try
         {
-            response = await CreateHttpClient().PostAsJsonAsync(
-                AuthenticationEndpoints.RefreshToken,
-                new RefreshTokenRequest(jwt, refreshToken),
-                ct);
+            HttpResponseMessage response = await CreateHttpClient()
+                .PostAsJsonAsync(AuthenticationEndpoints.RefreshToken, new RefreshTokenRequest(jwt, refreshToken), ct);
+            return await HandleAuthenticationResponse(response, ct);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
             return Result.Failure<User>(new Error("HttpRequestFailure", ex.Message));
         }
+    }
 
+    private async Task<IResult<User>> HandleAuthenticationResponse(HttpResponseMessage response, CancellationToken ct)
+    {
         if (!response.IsSuccessStatusCode)
         {
             var problemDetails = await ParseResponse<ProblemDetails>(response, ct);
-            return Result.Failure(new Error(response.ReasonPhrase ?? "HttpRequestUnsuccessful",
-                problemDetails?.Detail ?? "unknown error"));
+            string code = response.ReasonPhrase ?? "HttpRequestUnsuccessful";
+            string description = problemDetails?.Detail ?? "unknown error";
+            return Result.Failure<User>(new Error(code, description));
         }
 
         var tokenResponse = await ParseResponse<TokenResponse>(response, ct);
         if (tokenResponse is null)
         {
-            return Result.Failure(new Error("Jwt.ParseError", "unknown error"));
+            return Result.Failure<User>(new Error("Jwt.ParseError", "unknown error"));
         }
 
         await PersistUserToBrowser(tokenResponse, ct);
 
-        return Result.Success();
+        return Result.Success(ConvertToUser(tokenResponse.Jwt));
     }
 
     private async Task PersistUserToBrowser(TokenResponse tokenResponse, CancellationToken ct = default)
@@ -174,8 +158,7 @@ public class AuthenticationService : IAuthenticationService
     private static async Task<T?> ParseResponse<T>(HttpResponseMessage response, CancellationToken ct)
     {
         var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var tokenResponse = await response.Content.ReadFromJsonAsync<T>(opts, ct);
-        return tokenResponse;
+        return await response.Content.ReadFromJsonAsync<T>(opts, ct);
     }
 
     private User ConvertToUser(string jwt)
