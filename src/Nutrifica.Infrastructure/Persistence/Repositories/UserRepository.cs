@@ -48,6 +48,11 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(x => x.Account.Username == username, cancellationToken: ct);
     }
 
+    public async Task<int> GetCountByUsernameAsync(string username, CancellationToken ct = default)
+    {
+        return await _context.Set<User>().Where(x => x.Account.Username == username).CountAsync(ct);
+    }
+
     public async Task<PagedList<UserModel>> GetByFilterAsync(QueryParams queryParams,
         CancellationToken cancellationToken)
     {

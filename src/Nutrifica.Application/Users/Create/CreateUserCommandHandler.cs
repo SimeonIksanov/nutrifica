@@ -22,6 +22,9 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserR
 
     public async Task<Result<UserResponse>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        if (await UsernameIsUsed(request.Username, cancellationToken))
+            return Result.Failure<UserResponse>(UserErrors.UsernameIsAlreadyInUse);
+
         User? supervisor = null;
         if (request.SupervisorId is not null && Guid.Empty != request.SupervisorId.Value)
         {
@@ -39,5 +42,10 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserR
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return user.ToUserResponse(supervisor);
+    }
+
+    private async Task<bool> UsernameIsUsed(string username, CancellationToken cancellationToken)
+    {
+        return await _userRepository.GetCountByUsernameAsync(username, cancellationToken) > 0;
     }
 }

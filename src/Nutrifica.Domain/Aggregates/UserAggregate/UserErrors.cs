@@ -44,4 +44,8 @@ public static class UserErrors
         "User.DisableReasonNotSpecified",
         "Disable reason not specified."
     );
+
+    public static Error UsernameIsAlreadyInUse = new Error(
+        "User.UsernameIsAlreadyInUse",
+        "Username is already in use.");
 }

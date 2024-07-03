@@ -12,6 +12,7 @@ public interface IUserRepository
     Task<User?> GetByIdAsync(UserId userId, CancellationToken ct = default);
     Task<User?> GetByIdIncludeAccountAsync(UserId userId, CancellationToken ct = default);
     Task<User?> GetByUsernameAsync(string username, CancellationToken ct = default);
+    Task<int> GetCountByUsernameAsync(string username, CancellationToken ct = default);
     Task<PagedList<UserModel>> GetByFilterAsync(QueryParams queryParams, CancellationToken cancellationToken);
     Task<UserModel?> GetDetailedByIdAsync(UserId id, CancellationToken cancellationToken);
 }

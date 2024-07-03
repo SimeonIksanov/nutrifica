@@ -6,7 +6,7 @@ public class PhoneNumber : ValueObject
 {
     public static PhoneNumber Create(string value)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(value, "phoneNumber");
+        // ArgumentException.ThrowIfNullOrWhiteSpace(value, "phoneNumber");
         return new PhoneNumber(value);
     }
 
