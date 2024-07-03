@@ -1,0 +1,171 @@
+@using System.ComponentModel.DataAnnotations
+@using Nutrifica.Api.Contracts.Users.Requests
+@using Nutrifica.Shared.Wrappers
+@using Nutrifica.Spa.Infrastructure.Services.Users
+@inject IUserService UserService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<EditForm
+    EditContext="_editContext"
+    OnValidSubmit="Submit">
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <ApiResponseAlert Visible="@showError" Error="@Error"/>
+            <MudTextField
+                Label="Username"
+                @bind-Value="Model.Username"
+                Required="true"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"
+                RequiredError="Это поле обязательно к заполнению"/>
+            <ValidationMessage For="() => Model.Username"/>
+
+            <MudTextField
+                Label="Имя"
+                @bind-Value="Model.FirstName"
+                Required="true"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"
+                RequiredError="Это поле обязательно к заполнению"/>
+            <ValidationMessage For="() => Model.FirstName"/>
+
+            <MudTextField
+                Label="Отчество"
+                @bind-Value="Model.MiddleName"
+                Required="false"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"/>
+            <ValidationMessage For="() => Model.MiddleName"/>
+
+            <MudTextField
+                Label="Фамилия"
+                @bind-Value="Model.Lastname"
+                Required="true"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"
+                RequiredError="Это поле обязательно к заполнению"/>
+            <ValidationMessage For="() => Model.Lastname"/>
+
+            <MudTextField
+                Label="Email"
+                @bind-Value="Model.Email"
+                Required="false"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"/>
+            <ValidationMessage For="() => Model.Email"/>
+
+            <MudTextField
+                Label="Телефон"
+                @bind-Value="Model.PhoneNumber"
+                Required="false"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"/>
+            <ValidationMessage For="() => Model.PhoneNumber"/>
+
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Создать
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private ValidationMessageStore? _messageStore;
+    private CreateUserModel Model { get; } = new();
+    private EditContext? _editContext;
+    private CancellationTokenSource _cts = new();
+    private Error? Error;
+    private bool showError = false;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(Model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new(_editContext);
+    }
+
+    async Task Submit()
+    {
+        showError = false;
+        var request = new UserCreateRequest(
+            Model.Username,
+            Model.FirstName,
+            Model.MiddleName,
+            Model.Lastname,
+            Model.Email,
+            Model.PhoneNumber,
+            Model.SupervisorId);
+
+        var createdResult = await UserService
+            .Create(request, _cts.Token);
+        if (createdResult.IsFailure)
+        {
+            Error = createdResult.Error;
+            showError = true;
+            StateHasChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(createdResult.Value));
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        showError = false;
+        _messageStore?.Clear();
+    }
+
+    public void Dispose()
+    {
+        if (_editContext != null)
+            _editContext.OnValidationRequested -= HandleValidationRequested;
+    }
+
+    class CreateUserModel
+    {
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Логин не может быть пустым")]
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        public string Username { get; set; } = string.Empty;
+
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Имя не может быть пустым")]
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        public string MiddleName { get; set; } = string.Empty;
+
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Фамилия не может быть пустой")]
+        public string Lastname { get; set; } = string.Empty;
+
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        // [EmailAddress(ErrorMessage = "Не корректный E-Mail")]
+        public string Email { get; set; } = string.Empty;
+
+        [MaxLength(30, ErrorMessage = "Максимальная длина 30 символов")]
+        // [Required(AllowEmptyStrings = false, ErrorMessage = "Номер телефона не может быть пустым")]
+        // [Phone(ErrorMessage = "Не коррекнтый номер телефона")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public Guid? SupervisorId { get; set; }
+    }
+
+}

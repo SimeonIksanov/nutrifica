@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 
 using MudBlazor;
@@ -13,17 +12,16 @@ using Nutrifica.Spa.Infrastructure.Services.Authentication;
 
 namespace Nutrifica.Spa.Shared;
 
-public partial class LoginComponent : IDisposable //: ComponentBase
+public partial class LoginComponent : IDisposable
 {
-    // [Inject] private NutrificaAuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
-    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+    [Inject] private NutrificaAuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
     private LoginModel Model { get; set; } = null!;
     private EditContext? _editContext;
     private ValidationMessageStore? _messageStore;
-    private CancellationTokenSource? _cancellationTokenSource;
+    private CancellationTokenSource _cancellationTokenSource = new();
 
     protected override void OnInitialized()
     {
@@ -31,7 +29,6 @@ public partial class LoginComponent : IDisposable //: ComponentBase
         _editContext = new EditContext(Model);
         _editContext.OnValidationRequested += HandleValidationRequested;
         _messageStore = new(_editContext);
-        _cancellationTokenSource = new();
     }
 
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
@@ -45,7 +42,7 @@ public partial class LoginComponent : IDisposable //: ComponentBase
         try
         {
             var request = new TokenRequest(Model.Username, Model.Password);
-            result = await ((NutrificaAuthenticationStateProvider)AuthenticationStateProvider).LoginAsync(request, _cancellationTokenSource!.Token);
+            result = await AuthenticationStateProvider.LoginAsync(request, _cancellationTokenSource!.Token);
         }
         catch (Exception ex)
         {
@@ -66,10 +63,9 @@ public partial class LoginComponent : IDisposable //: ComponentBase
     {
         if (_editContext != null)
             _editContext.OnValidationRequested -= HandleValidationRequested;
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-        ((NutrificaAuthenticationStateProvider)AuthenticationStateProvider).Dispose();
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+        AuthenticationStateProvider.Dispose();
         Snackbar.Dispose();
     }
 }
