@@ -53,6 +53,7 @@ public partial class LoginComponent : IDisposable
         if (result.IsFailure)
         {
             Snackbar.Add(result.Error.Description, Severity.Error, options => options.CloseAfterNavigation = true);
+            Model.Password = string.Empty;
             return;
         }
 
