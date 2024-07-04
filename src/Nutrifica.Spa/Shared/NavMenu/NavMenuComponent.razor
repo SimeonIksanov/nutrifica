@@ -1,4 +1,5 @@
-﻿<MudNavMenu Bordered="true">
+﻿@using Nutrifica.Spa.Infrastructure.Routes
+<MudNavMenu Bordered="true">
     <MudNavLink
         Href="/"
         Match="NavLinkMatch.All"
@@ -7,19 +8,19 @@
     </MudNavLink>
     
     <MudNavLink
-        Href="/clients"
+        Href=@PageUrls.Clients
         Icon="@Icons.Material.Filled.People">
         Клиенты
     </MudNavLink>
 
     <MudNavLink
-        Href="/users"
+        Href=@PageUrls.Users
         Icon="@Icons.Material.Filled.Work">
         Пользователи
     </MudNavLink>
     
     <MudNavLink
-        Href="/login">
+        Href=@PageUrls.Login>
         Login
     </MudNavLink>
 </MudNavMenu>

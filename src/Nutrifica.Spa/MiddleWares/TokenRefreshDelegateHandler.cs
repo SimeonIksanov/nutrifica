@@ -22,7 +22,7 @@ public class TokenRefreshDelegateHandler(
             IResult result = await authenticationService.SendRefreshTokensRequestAsync(cancellationToken);
             if (result.IsFailure)
             {
-                navigationManager.NavigateTo("/logout", true);
+                navigationManager.NavigateTo(PageUrls.Logout, true);
             }
         }
 

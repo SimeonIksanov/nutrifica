@@ -137,6 +137,8 @@
     {
         if (_editContext != null)
             _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts?.CancelAsync();
+        _cts?.Dispose();
     }
 
     class CreateUserModel
