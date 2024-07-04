@@ -82,6 +82,7 @@ public static class ServiceCollectionExtensions
             config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopRight;
             config.SnackbarConfiguration.ShowCloseIcon = true;
             config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+            config.SnackbarConfiguration.ClearAfterNavigation = true;
         });
         return services;
     }
