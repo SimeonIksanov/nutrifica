@@ -35,9 +35,7 @@ public class CustomSieveProcessor : SieveProcessor
         mapper.Property<UserModel>(x => x.MiddleName).CanFilter().CanSort();
         mapper.Property<UserModel>(x => x.PhoneNumber).CanFilter().CanSort();
         mapper.Property<UserModel>(x => x.Role).CanFilter().CanSort();
-        mapper.Property<UserModel>(x => x.Supervisor.FirstName).CanFilter().CanSort();
-        mapper.Property<UserModel>(x => x.Supervisor.MiddleName).CanFilter().CanSort();
-        mapper.Property<UserModel>(x => x.Supervisor.LastName).CanFilter().CanSort();
+        // mapper.Property<UserModel>(x => x.SupervisorId).CanFilter().CanSort();
         mapper.Property<UserModel>(x => x.Username).CanFilter().CanSort();
 
         return mapper;

@@ -19,7 +19,7 @@ public static class UserMapping
             user.PhoneNumber.Value,
             user.Enabled,
             user.DisableReason,
-            supervisor is null ? null : new UserFullNameResponse(supervisor.Id.Value,supervisor.FirstName.Value,supervisor.MiddleName.Value,supervisor.LastName.Value),
+            supervisor?.Id.Value ?? null,
             user.Role,
             user.CreatedAt);
     }
@@ -36,7 +36,7 @@ public static class UserMapping
             user.PhoneNumber,
             user.Enabled,
             user.DisableReason,
-            user.Supervisor?.ToUserFullNameResponse(),
+            user.SupervisorId,
             user.Role,
             user.CreatedAt);
     }

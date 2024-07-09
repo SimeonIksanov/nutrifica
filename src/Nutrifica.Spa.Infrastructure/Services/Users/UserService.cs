@@ -38,7 +38,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<IResult<UserResponse>> Create(UserCreateRequest request, CancellationToken cancellationToken)
+    public async Task<IResult<UserResponse>> CreateAsync(UserCreateRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -61,6 +61,29 @@ public class UserService : IUserService
         }
     }
 
+    public async Task<IResult<UserResponse>> UpdateAsync(UserUpdateRequest request, CancellationToken cancellationToken)
+    {
+        var uri = UsersEndpoints.Update(request.Id);
+        try
+        {
+            var response = await GetHttpClient()
+                .PutAsJsonAsync(uri, request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                var userResponse = await ParseResponse<UserResponse>(response, cancellationToken);
+                return Result.Success(userResponse!);
+            }
+
+            var problemDetails = await ParseResponse<ProblemDetails>(response, cancellationToken);
+            var error = ErrorFrom(problemDetails);
+            return Result.Failure<UserResponse>(error);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine(ex);
+            return Result.Failure<UserResponse>(UserServiceErrors.FailedToUpdate);
+        }
+    }
     public async Task<IResult> ChangePasswordAsync(UserChangePasswordRequest request, CancellationToken cancellationToken)
     {
         var uri = UsersEndpoints.ChangePassword(request.Id);

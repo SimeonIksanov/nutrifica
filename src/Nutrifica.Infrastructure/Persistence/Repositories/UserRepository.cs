@@ -8,7 +8,6 @@ using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Infrastructure.Services.SortAndFilter;
 using Nutrifica.Shared.Wrappers;
 
-using Sieve.Models;
 using Sieve.Services;
 
 namespace Nutrifica.Infrastructure.Persistence.Repositories;
@@ -75,9 +74,7 @@ public class UserRepository : IUserRepository
                     e.Employee.PhoneNumber.Value,
                     e.Employee.Enabled,
                     e.Employee.DisableReason,
-                    Equals(s, null)
-                        ? null
-                        : new UserFullName(s.Id.Value, s.FirstName.Value, s.MiddleName.Value, s.LastName.Value),
+                    e.Employee.SupervisorId.Value,
                     e.Employee.Role,
                     e.Employee.CreatedAt));
 

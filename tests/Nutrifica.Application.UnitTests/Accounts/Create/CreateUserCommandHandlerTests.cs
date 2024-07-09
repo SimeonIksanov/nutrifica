@@ -38,7 +38,7 @@ public class CreateUserCommandHandlerTests
         Assert.True(actual.IsSuccess);
         Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.NotNull(actual.Value.Supervisor);
+        Assert.NotNull(actual.Value.SupervisorId);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class CreateUserCommandHandlerTests
         Assert.True(actual.IsSuccess);
         Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.Null(actual.Value.Supervisor);
+        Assert.Null(actual.Value.SupervisorId);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public class CreateUserCommandHandlerTests
         Assert.True(actual.IsSuccess);
         Assert.IsType<UserResponse>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
-        Assert.Null(actual.Value.Supervisor);
+        Assert.Null(actual.Value.SupervisorId);
     }
 
     [Fact]

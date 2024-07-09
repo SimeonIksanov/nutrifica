@@ -1,0 +1,255 @@
+@using System.ComponentModel.DataAnnotations
+@using Nutrifica.Api.Contracts.Users.Requests
+@using Nutrifica.Api.Contracts.Users.Responses
+@using Nutrifica.Shared.Enums
+@using Nutrifica.Shared.Wrappers
+@using Nutrifica.Spa.Infrastructure.Services.Users
+@inject IUserService UserService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<EditForm
+    EditContext="_editContext"
+    OnValidSubmit="Submit">
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <ApiResponseAlert Visible="@_showError" Error="@_error"/>
+
+            <MudTextField Label="Username"
+                          @bind-Value="Model.Username"
+                          For="() => Model.Username"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          RequiredError="Это поле обязательно к заполнению"/>
+            @* <ValidationMessage For="() => Model.Username"/> *@
+
+            <MudTextField Label="Имя"
+                          @bind-Value="Model.FirstName"
+                          For="() => Model.FirstName"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          RequiredError="Это поле обязательно к заполнению"/>
+            @* <ValidationMessage For="() => Model.FirstName"/> *@
+
+            <MudTextField Label="Отчество"
+                          @bind-Value="Model.MiddleName"
+                          For="() => Model.MiddleName"
+                          Required="false"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"/>
+            @* <ValidationMessage For="() => Model.MiddleName"/> *@
+
+            <MudTextField Label="Фамилия"
+                          @bind-Value="Model.Lastname"
+                          For="() => Model.Lastname"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          RequiredError="Это поле обязательно к заполнению"/>
+            @* <ValidationMessage For="() => Model.Lastname"/> *@
+
+            <MudTextField Label="Email"
+                          @bind-Value="Model.Email"
+                          For="() => Model.Email"
+                          Required="false"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"/>
+            @* <ValidationMessage For="() => Model.Email"/> *@
+
+            <MudTextField Label="Телефон"
+                          @bind-Value="Model.PhoneNumber"
+                          For="() => Model.PhoneNumber"
+                          Required="false"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"/>
+            @* <ValidationMessage For="() => Model.PhoneNumber"/> *@
+
+            <MudSelect Label="Роль"
+                       @bind-Value="Model.Role"
+                       T="UserRole"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense">
+                @* @foreach (UserRole item in Enum.GetValues(typeof(UserRole))) { *@
+                @*     <MudSelectItem Value="@item">@item</MudSelectItem> *@
+                @* } *@
+                <MudSelectItem Value="UserRole.Operator">Оператор</MudSelectItem>
+                <MudSelectItem Value="UserRole.Manager">Менеджер</MudSelectItem>
+                <MudSelectItem Value="UserRole.OfficeManager">Офис менеджер</MudSelectItem>
+                <MudSelectItem Value="UserRole.Director">Директор</MudSelectItem>
+            </MudSelect>
+
+            <MudSelect Label="Руководитель"
+                       @bind-Value="Model.SupervisorId"
+                       T="Guid?"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true">
+                <MudSelectItem Value="@(null as Guid?)" >@((MarkupString)"&nbsp;")</MudSelectItem>
+                @foreach (var manager in Managers.Values)
+                {
+                    <MudSelectItem Value="manager.Id" T="Guid?" >
+                        @manager.FirstName @manager.LastName
+                    </MudSelectItem>
+                }
+            </MudSelect>
+            
+            <MudSwitch Label="Активен"
+                       @bind-Value="@ModelEnabled"
+                       Color="Color.Primary"/>
+
+            @if (Model.Enabled == false)
+            {
+                <MudTextField Label="Причина блокировки"
+                              @bind-Value="Model.DisableReason"
+                              For="() => Model.DisableReason"
+                              Required="_userDisabled"
+                              Disabled="@Model.Enabled"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"/>
+                @* <ValidationMessage For="() => Model.DisableReason"/> *@
+            }
+
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Обновить
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public UserResponse User { get; set; } = null!;
+    [Parameter] public IDictionary<Guid, UserResponse> Managers { get; set; } = null!;
+
+    private ValidationMessageStore? _messageStore;
+    private UpdateUserModel Model { get; } = new();
+    private EditContext _editContext = null!;
+    private CancellationTokenSource _cts = new();
+    private Error? _error;
+    private bool _showError = false;
+    private bool _userDisabled => Model.Enabled == false;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(Model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new(_editContext);
+        MapIncomingUserToFormModel();
+    }
+
+    async Task Submit()
+    {
+        _showError = false;
+        var request = new UserUpdateRequest(
+            User.Id,
+            Model.Username,
+            Model.FirstName,
+            Model.MiddleName,
+            Model.Lastname,
+            Model.Email,
+            Model.PhoneNumber,
+            Model.Role,
+            Model.Enabled,
+            Model.DisableReason,
+            Model.SupervisorId);
+
+        var updatedResult = await UserService
+            .UpdateAsync(request, _cts.Token);
+        if (updatedResult.IsFailure)
+        {
+            _error = updatedResult.Error;
+            _showError = true;
+            StateHasChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(updatedResult.Value));
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _showError = false;
+        _messageStore?.Clear();
+    }
+
+    public void Dispose()
+    {
+        if (_editContext != null)
+            _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
+    private void MapIncomingUserToFormModel()
+    {
+        if (User is null) return;
+        Model.Username = User.Username;
+        Model.FirstName = User.FirstName;
+        Model.MiddleName = User.MiddleName;
+        Model.Lastname = User.LastName;
+        Model.Email = User.Email;
+        Model.PhoneNumber = User.PhoneNumber;
+        Model.Role = User.Role;
+        Model.SupervisorId = User.SupervisorId;
+        Model.Enabled = User.Enabled;
+        Model.DisableReason = User.DisableReason;
+    }
+
+    private bool ModelEnabled
+    {
+        get { return Model.Enabled; }
+        set
+        {
+            Model.Enabled = value;
+            if (value) Model.DisableReason = string.Empty;
+        }
+    }
+
+    class UpdateUserModel
+    {
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Логин не может быть пустым")]
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        public string Username { get; set; } = string.Empty;
+
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Имя не может быть пустым")]
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        public string MiddleName { get; set; } = string.Empty;
+
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Фамилия не может быть пустой")]
+        public string Lastname { get; set; } = string.Empty;
+
+        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
+        public string Email { get; set; } = string.Empty;
+
+        [MaxLength(30, ErrorMessage = "Максимальная длина 30 символов")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public UserRole Role { get; set; }
+        public bool Enabled { get; set; }
+        public string DisableReason { get; set; } = string.Empty;
+
+        public Guid? SupervisorId { get; set; }
+    }
+
+}

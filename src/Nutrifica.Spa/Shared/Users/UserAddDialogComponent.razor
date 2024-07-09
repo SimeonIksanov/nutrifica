@@ -113,7 +113,7 @@
             Model.SupervisorId);
 
         var createdResult = await UserService
-            .Create(request, _cts.Token);
+            .CreateAsync(request, _cts.Token);
         if (createdResult.IsFailure)
         {
             Error = createdResult.Error;

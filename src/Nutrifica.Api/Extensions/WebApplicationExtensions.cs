@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.Identity;
-
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Shared;
 using Nutrifica.Infrastructure.Persistence;
+using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Api.Extensions;
 
@@ -19,12 +18,15 @@ public static class WebApplicationExtensions
             .GetRequiredService<AppDbContext>();
         var passHasher = scope.GetRequiredService<IPasswordHasherService>();
 
-        var admin = CreateMainUser(passHasher); 
+        var admin = CreateMainUser(passHasher);
         context.Users.Add(admin);
         var users = CreateUsers(passHasher);
 
         users[1].SupervisorId = admin.Id;
-        
+        users[1].Role = UserRole.OfficeManager;
+
+        users[2].Role = UserRole.Manager;
+
         context.Users.AddRange(users);
         context.SaveChanges();
     }
@@ -44,6 +46,7 @@ public static class WebApplicationExtensions
         user.Account.PasswordHash = ps.hashed;
         user.Account.Salt = ps.salt;
 
+        user.Role = UserRole.Director;
         return user;
     }
 
