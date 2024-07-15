@@ -89,7 +89,7 @@
                        Margin="Margin.Dense"
                        Dense="true">
                 <MudSelectItem Value="@(null as Guid?)" >@((MarkupString)"&nbsp;")</MudSelectItem>
-                @foreach (var manager in Managers.Values)
+                @foreach (var manager in Managers.Values.Where(x=>x.Role>Model.Role))
                 {
                     <MudSelectItem Value="manager.Id" T="Guid?" >
                         @manager.FirstName @manager.LastName

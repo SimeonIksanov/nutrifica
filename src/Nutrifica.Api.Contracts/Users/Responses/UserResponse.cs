@@ -31,4 +31,6 @@ public record UserResponse(
     public Guid? SupervisorId { get; set; } = SupervisorId;
     public UserRole Role { get; set; } = Role;
     public DateTime CreatedAt { get; set; } = CreatedAt;
+
+    public string FullName => string.Join(" ", LastName, FirstName, MiddleName);
 }

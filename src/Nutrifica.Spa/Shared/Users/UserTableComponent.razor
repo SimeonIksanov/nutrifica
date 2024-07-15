@@ -3,7 +3,8 @@
 @inject IDialogService DialogService
 @using System.Linq.Expressions
 @using Nutrifica.Api.Contracts.Users.Responses
-@using Nutrifica.Shared.Wrappers
+@using Nutrifica.Spa.Extensions
+@using Nutrifica.Spa.Infrastructure.Models
 @using Nutrifica.Spa.Infrastructure.Services.Users
 @implements IDisposable
 
@@ -13,14 +14,17 @@
 
     <MudDataGrid
         T="UserResponse"
-        Items="@_users"
+        @ref="_dataGrid"
         Dense="true"
         Striped="true"
         Bordered="true"
         Outlined="false"
         Elevation="0"
-        ColumnResizeMode="ResizeMode.Container"
-        RowStyleFunc="@_rowStyleFunc">
+        ColumnResizeMode="ResizeMode.Column"
+        RowStyleFunc="@_rowStyleFunc"
+        ServerData="FetchUsersAsync"
+        Filterable="true"
+        FilterMode="DataGridFilterMode.Simple">
 
         <ToolBarContent>
             <MudToolBar >
@@ -35,12 +39,13 @@
 
         <Columns>
             <HierarchyColumn/>
-            <PropertyColumn Property="x => x.Id" Editable="false" Hidden="true"/>
-            <PropertyColumn Property="x => x.FirstName"/>
-            <PropertyColumn Property="x => x.LastName"/>
-            <PropertyColumn Property="x => x.PhoneNumber"/>
-            <PropertyColumn Property="ExtractField()" Title="Supervisor"/>
-            <PropertyColumn Property="x => x.Role.ToString()"/>
+            <PropertyColumn Property="x => x.Id" Editable="false" Hidden="true" Sortable="false" Filterable="false"/>
+            <PropertyColumn Property="x => x.FirstName" Title="Имя"/>
+            <PropertyColumn Property="x => x.LastName" Title="Фамилия"/>
+            <PropertyColumn Property="x => x.PhoneNumber" Title="Телефон"/>
+            <PropertyColumn Property="ExtractField()" Title="Руководитель" Sortable="false"/>
+            <PropertyColumn Property="x => x.Role" Title="Роль"/>
+            <PropertyColumn Property="x => x.Enabled" Title="Активен"/>
 
             <TemplateColumn CellClass="d-flex justify-end">
                 <CellTemplate>
@@ -75,16 +80,26 @@
             </MudCard>
         </ChildRowContent>
 
+        <NoRecordsContent>
+            <MudText>No matching records found</MudText>
+        </NoRecordsContent>
+
+        <LoadingContent>
+            <MudText>Loading...</MudText>
+        </LoadingContent>
+
+        <PagerContent>
+            <MudDataGridPager T="UserResponse"/>
+        </PagerContent>
     </MudDataGrid>
 
 </MudContainer>
 
 @code {
-
-    // private PagedList<UserResponse>? usersPagedList;
     private ICollection<UserResponse> _users = Array.Empty<UserResponse>();
     private IDictionary<Guid, UserResponse> _managers = new Dictionary<Guid, UserResponse>();
     private CancellationTokenSource _cancellationTokenSource = new();
+    private MudDataGrid<UserResponse> _dataGrid = null!;
 
     public void Dispose()
     {
@@ -92,26 +107,135 @@
         _cancellationTokenSource.Dispose();
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await LoadUsersAsync();
+        // _dataGrid?.ReloadServerData();
     }
 
-    private async Task LoadUsersAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var result = await UserService.Get(_cancellationTokenSource.Token);
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            _dataGrid.FilterDefinitions.Clear();
+            _dataGrid.FilterDefinitions.Add(new FilterDefinition<UserResponse>
+            {
+                Id = Guid.NewGuid(),
+                Title = "Active",
+                Column = _dataGrid.RenderedColumns.Find(x => x.PropertyName == nameof(UserResponse.Enabled)),
+                Operator = FilterOperator.Boolean.Is,
+                Value = true
+            });
+        }
+    }
+
+    private async Task<GridData<UserResponse>> FetchUsersAsync(GridState<UserResponse> state)
+    {
+        var managersTask = LoadManagersAsync();
+        var usersTask = LoadUsersAsync(state);
+        await Task.WhenAll(managersTask, usersTask);
+        return usersTask.Result;
+    }
+
+    private async Task<GridData<UserResponse>> LoadUsersAsync(GridState<UserResponse> state)
+    {
+        var queryParams = new QueryParams
+        {
+            Page = state.Page + 1,
+            PageSize = state.PageSize
+        };
+        ApplyFilters(state, queryParams);
+        ApplySorts(state, queryParams);
+
+        var result = await UserService.Get(queryParams, _cancellationTokenSource.Token);
         if (result.IsFailure)
         {
             Snackbar.Add(result.Error.Description, Severity.Error);
             _users = Array.Empty<UserResponse>();
-            _managers = new Dictionary<Guid, UserResponse>();
+            return new GridData<UserResponse>();
         }
-        else
+
+        _users = result.Value.Items;
+
+        return new GridData<UserResponse>
         {
-            _users = result.Value.Items;
-            _managers = _users
-                .Where(x => (int)x.Role > 1)
-                .ToDictionary(k => k.Id, v => v);
+            Items = result.Value.Items,
+            TotalItems = result.Value.TotalCount
+        };
+    }
+
+    private async Task LoadManagersAsync()
+    {
+        var managerResult = await UserService.Get(new QueryParams() { Filters = "role>0", PageSize = 100 }, _cancellationTokenSource.Token);
+        if (managerResult.IsSuccess)
+            _managers = managerResult.Value.Items.ToDictionary(x => x.Id, x => x);
+    }
+
+    private static void ApplySorts(GridState<UserResponse> state, QueryParams queryParams)
+    {
+        if (state.SortDefinitions.Count > 0)
+            queryParams.Sorts = state.SortDefinitions
+                .Select(x => x.Descending ? $"-{x.SortBy}" : x.SortBy)
+                .Aggregate("", (a, b) => string.Join(",", a, b));
+    }
+
+    private void ApplyFilters(GridState<UserResponse> state, QueryParams queryParams)
+    {
+        if (state.FilterDefinitions.Count > 0)
+        {
+            string filter1 = state.FilterDefinitions
+                .Where(x => x.Title != "Руководитель")
+                .Select(x => x.ToSieveFilters())
+                .Aggregate("", (a, b) => string.Join(",", a, b));
+            string filter2 = state.FilterDefinitions
+                .Where(x => x.Title == "Руководитель")
+                .Select(x =>
+                {
+                    if (x.Operator == FilterOperator.String.Empty)
+                        return $"{x.Column!.PropertyName}==";
+
+                    if (x.Operator == FilterOperator.String.NotEmpty)
+                        return $"{x.Column!.PropertyName}!=";
+                    if (x.Value is null)
+                        return string.Empty;
+
+                    var supervisorIds = x.Operator! switch
+                    {
+                        FilterOperator.String.StartsWith => _managers
+                            .Where(kv => kv.Value.FullName.StartsWith((string)x.Value, StringComparison.InvariantCultureIgnoreCase))
+                            .Select(kv => kv.Key)
+                            .ToArray(),
+                        FilterOperator.String.EndsWith => _managers
+                            .Where(kv => kv.Value.FullName.EndsWith((string)x.Value, StringComparison.InvariantCultureIgnoreCase))
+                            .Select(kv => kv.Key)
+                            .ToArray(),
+                        FilterOperator.String.Contains => _managers
+                            .Where(kv => kv.Value.FullName.Contains((string)x.Value, StringComparison.InvariantCultureIgnoreCase))
+                            .Select(kv => kv.Key)
+                            .ToArray(),
+                        FilterOperator.String.NotContains => _managers
+                            .Where(kv => !kv.Value.FullName.Contains((string)x.Value, StringComparison.InvariantCultureIgnoreCase))
+                            .Select(kv => kv.Key)
+                            .ToArray(),
+                        FilterOperator.String.Equal => _managers
+                            .Where(kv => kv.Value.FullName.Equals((string)x.Value, StringComparison.InvariantCultureIgnoreCase))
+                            .Select(kv => kv.Key)
+                            .ToArray(),
+                        FilterOperator.String.NotEqual => _managers
+                            .Where(kv => !kv.Value.FullName.Equals((string)x.Value, StringComparison.InvariantCultureIgnoreCase))
+                            .Select(kv => kv.Key)
+                            .ToArray(),
+                        _ => Array.Empty<Guid>()
+                    };
+                    string joinedIds = string.Join("|", supervisorIds);
+                    return $"SupervisorId=={joinedIds}";
+                })
+                .Aggregate("", (a, b) => string.Join(",", a, b));
+            string combined = (new string[] { filter1, filter2 })
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Aggregate(string.Empty, (a, b) => string.Concat(a, ",", b));
+            if (!string.IsNullOrWhiteSpace(combined))
+                queryParams.Filters = combined;
         }
     }
 
@@ -133,7 +257,8 @@
         if (result.Data is UserResponse)
         {
             Snackbar.Add("Пользователь создан", Severity.Success);
-            await LoadUsersAsync();
+            // await LoadUsersAsync();
+            _dataGrid?.ReloadServerData();
         }
     }
 
@@ -160,7 +285,7 @@
     private Expression<Func<UserResponse, string>> ExtractField()
     {
         return x => x.SupervisorId.HasValue && _managers.ContainsKey(x.SupervisorId.Value)
-            ? _managers[x.SupervisorId.Value].LastName
+            ? _managers[x.SupervisorId.Value].FullName
             : string.Empty;
     }
 
@@ -186,7 +311,8 @@
         if (result.Data is UserResponse)
         {
             Snackbar.Add("Данные обновлены", Severity.Success);
-            await LoadUsersAsync();
+            // await LoadUsersAsync();
+            _dataGrid?.ReloadServerData();
         }
     }
 

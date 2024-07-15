@@ -22,9 +22,9 @@ public class UserService : IUserService
         _stateProvider = stateProvider;
     }
 
-    public async Task<IResult<PagedList<UserResponse>>> Get(CancellationToken cancellationToken)
+    public async Task<IResult<PagedList<UserResponse>>> Get(QueryParams queryParams, CancellationToken cancellationToken)
     {
-        var requestUri = UsersEndpoints.Get + "?pagesize=50";
+        var requestUri = UsersEndpoints.Get + $"?pagesize={queryParams.PageSize}&page={queryParams.Page}&filters={queryParams.Filters}&sorts={queryParams.Sorts}";
         try
         {
             var pagedList = await GetHttpClient()
