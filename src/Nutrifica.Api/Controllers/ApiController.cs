@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +21,10 @@ public class ApiController : ControllerBase
         _mediator = mediator;
     }
 
+    // protected Guid CurrentUserId => User.Identity!.IsAuthenticated
+    //     ? Guid.Parse(User.Claims.First(x => x.Type.Equals(ClaimTypes.Sid)).Value)
+    //     : throw new InvalidOperationException("Unauthenticated user.");
+
     protected IActionResult HandleFailure(Result result) =>
         result switch
         {
@@ -30,7 +36,7 @@ public class ApiController : ControllerBase
                         StatusCodes.Status400BadRequest,
                         result.Error,
                         validationResult.Errors)),
-            {Error.Code: "User.BadLoginOrPassword"} =>
+            { Error.Code: "User.BadLoginOrPassword" } =>
                 Unauthorized(
                     CreateProblemDetails(
                         "Unauthorized",

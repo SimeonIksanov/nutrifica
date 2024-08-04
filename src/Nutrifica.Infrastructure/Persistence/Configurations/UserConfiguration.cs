@@ -51,6 +51,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 x => x!.Value,
                 x => UserId.Create(x));
         builder.Ignore(x => x.FullName);
+
+        builder.Property(x => x.CreatedBy)
+            .HasConversion(x => x.Value, x => UserId.Create(x));
+        builder.Property(x => x.LastModifiedBy)
+            .HasConversion(x => x.Value, x => UserId.Create(x));
+
         // builder.Property(x => x.Role).HasConversion<string>();
     }
 
@@ -77,7 +83,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 rtb.Ignore(x => x.IsRevoked);
                 rtb.Ignore(x => x.IsExpired);
             });
-
         });
     }
 }

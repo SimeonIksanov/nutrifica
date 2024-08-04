@@ -49,7 +49,7 @@ public class UpdateClientCommandValidator : AbstractValidator<UpdateClientComman
                 .MaximumLength(UserConstants.PhoneNumberMaxLength));
 
         RuleFor(x => x.Source)
-            .NotEmpty()
+            .NotNull()
             .MaximumLength(ClientConstants.SourceMaxLength);
     }
 }

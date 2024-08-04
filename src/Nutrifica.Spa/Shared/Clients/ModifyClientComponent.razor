@@ -1,0 +1,188 @@
+@using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Shared.Enums
+@using Nutrifica.Spa.Infrastructure.Services.Clients
+@implements IDisposable
+@inject IClientService ClientService
+
+<EditForm EditContext="_editContext"
+          OnValidSubmit="OnSubmitAsync">
+    <MudDialog>
+        <DialogContent>
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
+            
+            <MudTextField Label="Фамилия"
+                          @bind-Value="_model.LastName"
+                          For="() => _model.LastName"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Имя"
+                          @bind-Value="_model.FirstName"
+                          For="() => _model.FirstName"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Отчество"
+                          @bind-Value="_model.MiddleName"
+                          For="() => _model.MiddleName"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Телефон"
+                          @bind-Value="_model.PhoneNumber"
+                          For="() => _model.PhoneNumber"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Источник"
+                          @bind-Value="_model.Source"
+                          For="() => _model.Source"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Комментарий"
+                          @bind-Value="_model.Comment"
+                          For="() => _model.Comment"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudSelect Label="Состояние"
+                       @bind-Value="_model.State"
+                       T="State"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       Class="my-2">
+                <MudSelectItem Value="State.Active">Активный</MudSelectItem>
+                <MudSelectItem Value="State.Archived">Архивирован</MudSelectItem>
+                <MudSelectItem Value="State.Deleted">Удален</MudSelectItem>
+            </MudSelect>
+
+
+            <MudDivider/>
+
+            <MudTextField Label="Страна"
+                          @bind-Value="_model.Address.Country"
+                          For="() => _model.Address.Country"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Регион"
+                          @bind-Value="_model.Address.Region"
+                          For="() => _model.Address.Region"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Город"
+                          @bind-Value="_model.Address.City"
+                          For="() => _model.Address.City"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Улица"
+                          @bind-Value="_model.Address.Street"
+                          For="() => _model.Address.Street"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Индекс"
+                          @bind-Value="_model.Address.ZipCode"
+                          For="() => _model.Address.ZipCode"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+            <MudTextField Label="Комментарий"
+                          @bind-Value="_model.Address.Comment"
+                          For="() => _model.Address.Comment"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Class="my-2"/>
+
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Изменить
+            </MudButton>
+        </DialogActions>
+
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public ClientResponse Client { get; set; } = null!;
+    private ValidationMessageStore _messageStore = null!;
+    private ClientUpdateRequest _model = new ();
+    private EditContext _editContext = null!;
+    private CancellationTokenSource _cts = new();
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(_model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new ValidationMessageStore(_editContext);
+        MapIncomingClientToFormModel();
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    public void Dispose()
+    {
+        _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore?.Clear();
+    }
+
+    private void MapIncomingClientToFormModel()
+    {
+        if (Client is null) return;
+        _model.Id = Client.Id;
+        _model.FirstName = Client.FirstName;
+        _model.MiddleName = Client.MiddleName;
+        _model.LastName = Client.LastName;
+        _model.PhoneNumber = Client.PhoneNumber;
+        _model.Comment = Client.Comment;
+        _model.Source = Client.Source;
+        _model.State = Client.State;
+        _model.Address = Client.Address with {};
+    }
+
+    private async Task OnSubmitAsync()
+    {
+        var result = await ClientService.UpdateAsync(_model, _cts.Token);
+        if (result.IsFailure)
+        {
+            _messageStore.Add(() => _model, result.Error.Description);
+            _editContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(result.Value));
+    }
+}

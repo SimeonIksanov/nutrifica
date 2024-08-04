@@ -8,7 +8,7 @@ public class ProblemDetails
     public string Title { get; set; } = String.Empty;
     public int Status { get; set; }
     public string Detail { get; set; } = String.Empty;
-    public ICollection<Error> Errors { get; set; } = null!;
+    public ICollection<Error>? Errors { get; set; } = null!;
 }
 
 /*

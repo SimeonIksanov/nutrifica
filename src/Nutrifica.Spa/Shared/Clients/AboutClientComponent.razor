@@ -1,0 +1,137 @@
+@using Nutrifica.Api.Contracts.Clients
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="d-flex mud-width-full py-2 my-1">
+    <MudStack Class="mud-width-full px-4">
+        <MudStack Row 
+                  Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.caption" 
+                     Inline="true">
+                О Клиенте
+            </MudText>
+            <MudIconButton Icon="@Icons.Material.Outlined.Edit" 
+                           Size="Size.Small" 
+                           Class="pa-0" 
+                           OnClick="OnModifyClientClick"/>
+        </MudStack>
+
+        <MudDivider/>
+
+        <MudStack Row 
+                  Justify="Justify.SpaceBetween" 
+                  Class="mud-width-full">
+            <MudText Class="hideable">
+                Фамилия
+            </MudText>
+            <MudText Class="hideable">
+                @Client.LastName
+            </MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText Class="hideable">Имя</MudText>
+            <MudText Class="hideable">@Client.FirstName</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText Class="hideable">Отчество</MudText>
+            <MudText Class="hideable">@Client.MiddleName</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Коментарии</MudText>
+            <MudText>@Client.Comment</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Источник</MudText>
+            <MudText>@Client.Source</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Состояние</MudText>
+            <MudText>@Client.State</MudText>
+        </MudStack>
+
+        <MudDivider/>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Телефон</MudText>
+            <MudText>@Client.PhoneNumber</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Регион</MudText>
+            <MudText>@Client.Address.Region</MudText>
+        </MudStack>
+        
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Город</MudText>
+            <MudText>@Client.Address.City</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Улица</MudText>
+            <MudText>@Client.Address.Street</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Комментарий</MudText>
+            <MudText>@Client.Address.Comment</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Страна</MudText>
+            <MudText>@Client.Address.Country</MudText>
+        </MudStack>
+
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText>Индекс</MudText>
+            <MudText>@Client.Address.ZipCode</MudText>
+        </MudStack>
+        
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter] public ClientResponse Client { get; set; } = null!;
+
+    private async Task OnModifyClientClick(MouseEventArgs obj)
+    {
+        var parameters = new DialogParameters<ModifyClientComponent>
+        {
+            { x => x.Client, Client }
+        };
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.TopCenter,
+            CloseOnEscapeKey = true
+        };
+        var dialog = await DialogService.ShowAsync<ModifyClientComponent>("Изменить данные клиента", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        if (result.Data is ClientResponse clientResponse)
+        {
+            Snackbar.Add("Данные клиента изменены", Severity.Success);
+            MapRefreshedClientToExistingObject(clientResponse, Client);
+        }
+    }
+
+    private void MapRefreshedClientToExistingObject(ClientResponse src, ClientResponse dst)
+    {
+        if (src is null || dst is null) return;
+        dst.FirstName = src.FirstName;
+        dst.MiddleName = src.MiddleName;
+        dst.LastName = src.LastName;
+        dst.Comment = src.Comment;
+        dst.Source = src.Source;
+        dst.State = src.State;
+        dst.PhoneNumber = src.PhoneNumber;
+    }
+}

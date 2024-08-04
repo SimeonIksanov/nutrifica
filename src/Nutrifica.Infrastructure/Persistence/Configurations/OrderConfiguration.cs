@@ -7,6 +7,7 @@ using Nutrifica.Domain.Aggregates.OrderAggregate.Entities;
 using Nutrifica.Domain.Aggregates.OrderAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.ProductAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 
 namespace Nutrifica.Infrastructure.Persistence.Configurations;
 
@@ -68,5 +69,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasConversion(
                 x => x.Value,
                 x => ClientId.Create(x));
+        builder.Property(x => x.CreatedBy)
+            .HasConversion(x => x.Value, x => UserId.Create(x));
+        builder.Property(x => x.LastModifiedBy)
+            .HasConversion(x => x.Value, x => UserId.Create(x));
     }
 }

@@ -1,7 +1,6 @@
 using FluentValidation;
 
 using Nutrifica.Application.Users;
-using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 namespace Nutrifica.Application.Clients.Create;
 
@@ -44,37 +43,11 @@ public class CreateClientCommandValidator : AbstractValidator<CreateClientComman
                 .MaximumLength(UserConstants.PhoneNumberMaxLength));
 
         RuleFor(x => x.Source)
-            .NotEmpty()
             .MaximumLength(ClientConstants.SourceMaxLength);
 
-        RuleFor(x => x.CreatedBy)
-            .NotNull()
-            .DependentRules(() => RuleFor(x => x.CreatedBy.Value)
-                .NotEmpty());
+        // RuleFor(x => x.CreatedBy)
+        //     .NotNull()
+        //     .DependentRules(() => RuleFor(x => x.CreatedBy.Value)
+        //         .NotEmpty());
     }
 }
-
-public class AddressValidator : AbstractValidator<Address>
-{
-    public AddressValidator()
-    {
-        RuleFor(x => x.City)
-            .NotEmpty()
-            .MaximumLength(ClientAddressConstants.CityMaxLength);
-        RuleFor(x => x.Country)
-            .NotEmpty()
-            .MaximumLength(ClientAddressConstants.CountryMaxLength);
-        RuleFor(x => x.Comment)
-            .NotNull();
-        RuleFor(x => x.Region)
-            .NotNull()
-            .MaximumLength(ClientAddressConstants.RegionMaxLength);
-        RuleFor(x => x.Street)
-            .NotEmpty()
-            .MaximumLength(ClientAddressConstants.StreetMaxLength);
-        RuleFor(x => x.ZipCode)
-            .NotEmpty()
-            .MaximumLength(ClientAddressConstants.ZipCodeMaxLength);
-    }
-}
-

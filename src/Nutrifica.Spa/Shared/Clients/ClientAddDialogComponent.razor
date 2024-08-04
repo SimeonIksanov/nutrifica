@@ -1,0 +1,180 @@
+@using System.ComponentModel.DataAnnotations
+@using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Spa.Infrastructure.Services.Clients
+@inject IClientService ClientService
+@implements IDisposable
+
+<EditForm
+    EditContext="_editContext"
+    OnValidSubmit="Submit">
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <MudPaper Class="d-flex px-4 pb-4 gap-4" Elevation="0">
+                <MudTextField
+                    Label="Имя"
+                    @bind-Value="Model.FirstName"
+                    For="() => Model.FirstName"
+                    Required="true"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    RequiredError="Это поле обязательно к заполнению"/>
+
+                <MudTextField
+                    Label="Отчество"
+                    @bind-Value="Model.MiddleName"
+                    For="() => Model.MiddleName"
+                    Required="false"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"/>
+
+                <MudTextField
+                    Label="Фамилия"
+                    @bind-Value="Model.LastName"
+                    For="() => Model.LastName"
+                    Required="true"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    RequiredError="Это поле обязательно к заполнению"/>
+            </MudPaper>
+
+            @* <MudDivider/> *@
+            <MudText Typo="Typo.caption">Контакты:</MudText>
+            <MudPaper Class="d-flex px-4 pb-4 gap-4" Elevation="0">
+                <MudTextField
+                    Label="Телефон"
+                    @bind-Value="Model.PhoneNumber"
+                    For="() => Model.PhoneNumber"
+                    Required="false"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"/>
+            </MudPaper>
+
+            @* <MudDivider/> *@
+            <MudText Typo="Typo.caption">Адрес:</MudText>
+
+            <MudPaper Elevation="0"
+                      Class="d-flex flex-wrap gap-4 px-4 pb-4">
+                <MudTextField Label="Страна"
+                              @bind-Value="Model.Address.Country"
+                              For="() => Model.Address.Country"
+                              Required="false"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"/>
+
+                <MudTextField Label="Индекс"
+                              @bind-Value="Model.Address.ZipCode"
+                              For="() => Model.Address.ZipCode"
+                              Required="false"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"/>
+
+                <MudTextField Label="Регион"
+                              @bind-Value="Model.Address.Region"
+                              For="() => Model.Address.Region"
+                              Required="false"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"/>
+
+                <MudTextField Label="Город"
+                              @bind-Value="Model.Address.City"
+                              For="() => Model.Address.City"
+                              Required="false"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"/>
+
+
+                <MudTextField Label="Улица"
+                              @bind-Value="Model.Address.Street"
+                              For="() => Model.Address.Street"
+                              Required="false"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"/>
+
+                <MudTextField Label="Комментарий к адресу"
+                              @bind-Value="Model.Address.Comment"
+                              For="() => Model.Address.Comment"
+                              Required="false"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"/>
+
+            </MudPaper>
+
+            @* <MudDivider/> *@
+
+            <MudTextField
+                Label="Комментарий"
+                @bind-Value="Model.Comment"
+                For="() => Model.Comment"
+                Required="false"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"/>
+
+            <MudTextField
+                Label="Источник"
+                @bind-Value="Model.Source"
+                For="() => Model.Source"
+                Required="false"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"/>
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Создать
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    private ValidationMessageStore _messageStore = null!;
+    private ClientCreateRequest Model { get; } = new();
+    private EditContext _editContext = null!;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(Model);
+        _messageStore = new ValidationMessageStore(_editContext);
+    }
+
+    private CancellationTokenSource _cts = new();
+
+    async Task Submit()
+    {
+        var createdResult = await ClientService
+            .CreateAsync(Model, _cts.Token);
+        if (createdResult.IsFailure)
+        {
+            StateHasChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(createdResult.Value));
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore?.Clear();
+    }
+
+    public void Dispose()
+    {
+        _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+}

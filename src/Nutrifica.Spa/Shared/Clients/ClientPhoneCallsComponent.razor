@@ -1,0 +1,73 @@
+@using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Spa.Infrastructure.Services.Clients
+@implements IDisposable
+@inject IClientService ClientService
+@inject ISnackbar Snackbar
+
+<MudStack>
+    <MudStack Row="true">
+
+        <MudTextField Label="Добавить комментарий"
+                      T="string"
+                      Variant="Variant.Outlined"
+                      @bind-Value="_newComment"
+                      AutoGrow Clearable="true"/>
+        
+        <MudButton StartIcon="@Icons.Material.Outlined.Add"
+                   Variant="Variant.Filled"
+                   OnClick="HandleAddComment"
+                   Color="Color.Primary">
+            Добавить
+        </MudButton>
+    </MudStack>
+
+    <MudDivider DividerType="DividerType.FullWidth"/>
+
+    @foreach (var phoneCall in _phoneCalls)
+    {
+        <PhoneCallComment PhoneCall="phoneCall"/>
+    }
+</MudStack>
+
+
+@code {
+    [Parameter] public Guid ClientId { get; set; }
+    private List<PhoneCallResponse> _phoneCalls = new List<PhoneCallResponse>();
+    private CancellationTokenSource _cts = new();
+    private string _newComment = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchPhoneCallsAsync();
+    }
+
+    private async Task FetchPhoneCallsAsync()
+    {
+        if (ClientId.Equals(Guid.Empty))
+            return;
+        var response = await ClientService.GetPhoneCallsAsync(ClientId, _cts.Token);
+        _phoneCalls.Clear();
+        _phoneCalls.AddRange(response.Value.Items);
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    private async Task HandleAddComment(MouseEventArgs obj)
+    {
+        var request = new PhoneCallCreateRequest() { Comment = _newComment };
+        var result = await ClientService.CreatePhoneCallAsync(ClientId, request, _cts.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add("Не удалось создать звонок", Severity.Error);
+            return;
+        }
+        _phoneCalls.Add(result.Value);
+        Snackbar.Add("Звонок создан", Severity.Success);
+        _newComment = string.Empty;
+    }
+
+}

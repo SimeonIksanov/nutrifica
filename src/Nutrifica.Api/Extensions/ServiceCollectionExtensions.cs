@@ -1,3 +1,6 @@
+using Nutrifica.Api.Services;
+using Nutrifica.Application.Interfaces.Services;
+
 namespace Nutrifica.Api.Extensions;
 
 public static class ServiceCollectionExtensions
@@ -6,6 +9,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddControllers();
         services.ConfigureCors();
+        services.AddScopedServices();
         return services;
     }
 
@@ -31,5 +35,10 @@ public static class ServiceCollectionExtensions
                             .AllowAnyMethod();
                     });
             });
+    }
+
+    private static void AddScopedServices(this IServiceCollection services)
+    {
+        services.AddHttpContextAccessor().AddScoped<ICurrentUserService, CurrentUserService>();
     }
 }

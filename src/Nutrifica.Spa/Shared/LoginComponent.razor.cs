@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
@@ -18,10 +16,10 @@ public partial class LoginComponent : IDisposable
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
-    private LoginModel Model { get; set; } = null!;
-    private EditContext? _editContext;
-    private ValidationMessageStore? _messageStore;
-    private CancellationTokenSource _cancellationTokenSource = new();
+    private TokenRequest Model { get; set; } = null!;
+    private EditContext _editContext = null!;
+    private ValidationMessageStore _messageStore = null!;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     protected override void OnInitialized()
     {
@@ -33,7 +31,7 @@ public partial class LoginComponent : IDisposable
 
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
     {
-        _messageStore?.Clear();
+        _messageStore.Clear();
     }
 
     public async Task HandleFormSubmit()
@@ -41,8 +39,7 @@ public partial class LoginComponent : IDisposable
         IResult<User> result;
         try
         {
-            var request = new TokenRequest(Model.Username, Model.Password);
-            result = await AuthenticationStateProvider.LoginAsync(request, _cancellationTokenSource!.Token);
+            result = await AuthenticationStateProvider.LoginAsync(Model, _cancellationTokenSource!.Token);
         }
         catch (Exception ex)
         {
@@ -69,13 +66,4 @@ public partial class LoginComponent : IDisposable
         AuthenticationStateProvider.Dispose();
         Snackbar.Dispose();
     }
-}
-
-public class LoginModel
-{
-    [Required(AllowEmptyStrings = false, ErrorMessage = "Имя пользователя не может быть пустым!")]
-    public string Username { get; set; } = string.Empty;
-
-    [Required(AllowEmptyStrings = false, ErrorMessage = "Пароль не может быть пустым!")]
-    public string Password { get; set; } = string.Empty;
 }

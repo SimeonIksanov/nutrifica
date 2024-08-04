@@ -9,7 +9,7 @@ using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Domain.Aggregates.UserAggregate;
 
-public sealed class User : Entity<UserId>, IAggregateRoot
+public sealed class User : Entity<UserId>, IAggregateRoot, IAuditableEntity
 {
     public static User Create(
         string username,
@@ -27,7 +27,7 @@ public sealed class User : Entity<UserId>, IAggregateRoot
         var user = new User
         {
             Id = UserId.CreateUnique(),
-            Account = new UserAccount() { Username = username, PasswordHash = "", Salt = ""},
+            Account = new UserAccount() { Username = username, PasswordHash = "", Salt = "" },
             FirstName = firstName,
             MiddleName = middleName,
             LastName = lastname,
@@ -35,7 +35,6 @@ public sealed class User : Entity<UserId>, IAggregateRoot
             Email = email,
             SupervisorId = supervisorId,
             Role = UserRole.Operator,
-            CreatedAt = DateTime.UtcNow,
             Enabled = true,
         };
 
@@ -52,12 +51,14 @@ public sealed class User : Entity<UserId>, IAggregateRoot
     public bool Enabled { get; private set; }
     public string DisableReason { get; private set; } = string.Empty;
 
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedOn { get; set; }
+    public UserId CreatedBy { get; set; }
+    public DateTime LastModifiedOn { get; set; }
+    public UserId LastModifiedBy { get; set; }
 
     public FirstName FirstName { get; set; }
     public MiddleName MiddleName { get; set; }
     public LastName LastName { get; set; }
-    public string FullName => string.Join(" ", LastName, FirstName, MiddleName).Trim();
 
     public Email Email { get; set; }
     public PhoneNumber PhoneNumber { get; set; } = null!;
@@ -65,6 +66,7 @@ public sealed class User : Entity<UserId>, IAggregateRoot
     public UserId? SupervisorId { get; set; } = null!;
     public UserRole Role { get; set; }
 
+    public string FullName => string.Join(" ", LastName, FirstName, MiddleName).Trim();
     public void Enable()
     {
         Enabled = true;

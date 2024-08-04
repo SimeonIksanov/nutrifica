@@ -7,13 +7,15 @@ public static class AddressMapping
 {
     public static AddressDto ToAddressDto(this Address address)
     {
-        return new AddressDto(
-            address.ZipCode,
-            address.Country,
-            address.Region,
-            address.City,
-            address.Street,
-            address.Comment);
+        return new AddressDto
+        {
+            City = address.City,
+            Comment = address.Comment,
+            Country = address.Country,
+            Region = address.Region,
+            Street = address.Street,
+            ZipCode = address.ZipCode,
+        };
     }
 
     public static Address ToAddress(this AddressDto dto)

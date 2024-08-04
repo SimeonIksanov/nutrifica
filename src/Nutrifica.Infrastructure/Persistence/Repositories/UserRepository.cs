@@ -55,30 +55,25 @@ public class UserRepository : IUserRepository
     public async Task<PagedList<UserModel>> GetByFilterAsync(QueryParams queryParams,
         CancellationToken cancellationToken)
     {
-        IQueryable<User> query = _context.Set<User>();
-
-        var users = query
+        var query = _context.Set<User>()
+            .AsNoTracking()
             .Include(x => x.Account)
-            .GroupJoin(_context.Set<User>(),
-                o => o.SupervisorId,
-                i => i.Id,
-                (i, ol) => new { Employee = i, Supervisors = ol })
-            .SelectMany(arg => arg.Supervisors.DefaultIfEmpty(), (e, s) =>
-                new UserModel(
-                    e.Employee.Id.Value,
-                    e.Employee.Account.Username,
-                    e.Employee.FirstName.Value,
-                    e.Employee.MiddleName.Value,
-                    e.Employee.LastName.Value,
-                    e.Employee.Email.Value,
-                    e.Employee.PhoneNumber.Value,
-                    e.Employee.Enabled,
-                    e.Employee.DisableReason,
-                    e.Employee.SupervisorId.Value,
-                    e.Employee.Role,
-                    e.Employee.CreatedAt));
+            .Select(user => new UserModel(
+                user.Id.Value,
+                user.Account.Username,
+                user.FirstName.Value,
+                user.MiddleName.Value,
+                user.LastName.Value,
+                user.Email.Value,
+                user.PhoneNumber.Value,
+                user.Enabled,
+                user.DisableReason,
+                user.SupervisorId.Value,
+                user.Role,
+                user.CreatedOn));
 
-        var pagedList = await users.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
+        var pagedList =
+            await query.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
     }
 

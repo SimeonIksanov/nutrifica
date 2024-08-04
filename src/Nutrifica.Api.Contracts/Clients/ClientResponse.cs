@@ -1,32 +1,18 @@
+using Nutrifica.Shared.Enums;
+
 namespace Nutrifica.Api.Contracts.Clients;
 
-public sealed record ClientResponse(
-    Guid Id,
-    string FirstName,
-    string MiddleName,
-    string LastName,
-    AddressDto Address,
-    string Comment,
-    string PhoneNumber,
-    string Source,
-    DateTime CreatedAt);
-
-public sealed record ClientDetailedResponse(
-    Guid Id,
-    string FirstName,
-    string MiddleName,
-    string LastName,
-    AddressDto Address,
-    string Comment,
-    string PhoneNumber,
-    string Source,
-    DateTime CreatedAt,
-    ICollection<PhoneCallResponse> phoneCalls);
-
-public record PhoneCallResponse(
-    int Id,
-    DateTime CreatedAt,
-    Guid CreatedById,
-    string CreatedByName,
-    // ICollection<ProductModel> products
-    string Comment);
+public record ClientResponse
+{
+    public Guid Id { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string MiddleName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public AddressDto Address { get; set; }
+    public string Comment { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string Source { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+    public State State { get; set; }
+    public string FullName => string.Join(" ", LastName, FirstName, MiddleName);
+}

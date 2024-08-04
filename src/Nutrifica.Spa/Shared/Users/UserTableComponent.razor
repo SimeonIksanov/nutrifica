@@ -21,18 +21,24 @@
         Outlined="false"
         Elevation="0"
         ColumnResizeMode="ResizeMode.Column"
-        RowStyleFunc="@_rowStyleFunc"
+        RowStyleFunc="@RowStyleFunc"
         ServerData="FetchUsersAsync"
         Filterable="true"
         FilterMode="DataGridFilterMode.Simple">
 
         <ToolBarContent>
-            <MudToolBar >
+            <MudToolBar Class="gap-2">
                 <MudButton
                     @onclick="OnAddClick"
                     Variant="Variant.Outlined"
                     Size="Size.Small">
                     Создать
+                </MudButton>
+
+                <MudButton @onclick="OnRefreshClick"
+                           Variant="Variant.Outlined"
+                           Size="Size.Small">
+                    Обновить
                 </MudButton>
             </MudToolBar>
         </ToolBarContent>
@@ -105,11 +111,6 @@
     {
         _cancellationTokenSource.CancelAsync();
         _cancellationTokenSource.Dispose();
-    }
-
-    protected override void OnInitialized()
-    {
-        // _dataGrid?.ReloadServerData();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -231,7 +232,7 @@
                     return $"SupervisorId=={joinedIds}";
                 })
                 .Aggregate("", (a, b) => string.Join(",", a, b));
-            string combined = (new string[] { filter1, filter2 })
+            string combined = (new[] { filter1, filter2 })
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Aggregate(string.Empty, (a, b) => string.Concat(a, ",", b));
             if (!string.IsNullOrWhiteSpace(combined))
@@ -257,8 +258,7 @@
         if (result.Data is UserResponse)
         {
             Snackbar.Add("Пользователь создан", Severity.Success);
-            // await LoadUsersAsync();
-            _dataGrid?.ReloadServerData();
+            _ = _dataGrid.ReloadServerData();
         }
     }
 
@@ -311,12 +311,16 @@
         if (result.Data is UserResponse)
         {
             Snackbar.Add("Данные обновлены", Severity.Success);
-            // await LoadUsersAsync();
-            _dataGrid?.ReloadServerData();
+            _ = _dataGrid.ReloadServerData();
         }
     }
 
-    private Func<UserResponse, int, string> _rowStyleFunc =>
-        (user, i) => user.Enabled ? string.Empty : "font-style:italic;text-decoration: line-through";
+    private Func<UserResponse, int, string> RowStyleFunc =>
+        (user, _) => user.Enabled ? string.Empty : "font-style:italic;text-decoration: line-through";
+
+    private async Task OnRefreshClick()
+    {
+        await _dataGrid.ReloadServerData();
+    }
 
 }

@@ -1,4 +1,3 @@
-@using System.ComponentModel.DataAnnotations
 @using Nutrifica.Api.Contracts.Users.Requests
 @using Nutrifica.Api.Contracts.Users.Responses
 @using Nutrifica.Shared.Enums
@@ -24,7 +23,6 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           RequiredError="Это поле обязательно к заполнению"/>
-            @* <ValidationMessage For="() => Model.Username"/> *@
 
             <MudTextField Label="Имя"
                           @bind-Value="Model.FirstName"
@@ -33,7 +31,6 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           RequiredError="Это поле обязательно к заполнению"/>
-            @* <ValidationMessage For="() => Model.FirstName"/> *@
 
             <MudTextField Label="Отчество"
                           @bind-Value="Model.MiddleName"
@@ -41,16 +38,14 @@
                           Required="false"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"/>
-            @* <ValidationMessage For="() => Model.MiddleName"/> *@
 
             <MudTextField Label="Фамилия"
-                          @bind-Value="Model.Lastname"
-                          For="() => Model.Lastname"
+                          @bind-Value="Model.LastName"
+                          For="() => Model.LastName"
                           Required="true"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           RequiredError="Это поле обязательно к заполнению"/>
-            @* <ValidationMessage For="() => Model.Lastname"/> *@
 
             <MudTextField Label="Email"
                           @bind-Value="Model.Email"
@@ -58,7 +53,6 @@
                           Required="false"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"/>
-            @* <ValidationMessage For="() => Model.Email"/> *@
 
             <MudTextField Label="Телефон"
                           @bind-Value="Model.PhoneNumber"
@@ -66,16 +60,12 @@
                           Required="false"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"/>
-            @* <ValidationMessage For="() => Model.PhoneNumber"/> *@
 
             <MudSelect Label="Роль"
                        @bind-Value="Model.Role"
                        T="UserRole"
                        Variant="Variant.Outlined"
                        Margin="Margin.Dense">
-                @* @foreach (UserRole item in Enum.GetValues(typeof(UserRole))) { *@
-                @*     <MudSelectItem Value="@item">@item</MudSelectItem> *@
-                @* } *@
                 <MudSelectItem Value="UserRole.Operator">Оператор</MudSelectItem>
                 <MudSelectItem Value="UserRole.Manager">Менеджер</MudSelectItem>
                 <MudSelectItem Value="UserRole.OfficeManager">Офис менеджер</MudSelectItem>
@@ -110,7 +100,6 @@
                               Disabled="@Model.Enabled"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"/>
-                @* <ValidationMessage For="() => Model.DisableReason"/> *@
             }
 
         </DialogContent>
@@ -136,8 +125,8 @@
     [Parameter] public UserResponse User { get; set; } = null!;
     [Parameter] public IDictionary<Guid, UserResponse> Managers { get; set; } = null!;
 
-    private ValidationMessageStore? _messageStore;
-    private UpdateUserModel Model { get; } = new();
+    private ValidationMessageStore _messageStore = null!;
+    private UserUpdateRequest Model { get; } = new();
     private EditContext _editContext = null!;
     private CancellationTokenSource _cts = new();
     private Error? _error;
@@ -155,21 +144,9 @@
     async Task Submit()
     {
         _showError = false;
-        var request = new UserUpdateRequest(
-            User.Id,
-            Model.Username,
-            Model.FirstName,
-            Model.MiddleName,
-            Model.Lastname,
-            Model.Email,
-            Model.PhoneNumber,
-            Model.Role,
-            Model.Enabled,
-            Model.DisableReason,
-            Model.SupervisorId);
 
         var updatedResult = await UserService
-            .UpdateAsync(request, _cts.Token);
+            .UpdateAsync(Model, _cts.Token);
         if (updatedResult.IsFailure)
         {
             _error = updatedResult.Error;
@@ -200,10 +177,11 @@
     private void MapIncomingUserToFormModel()
     {
         if (User is null) return;
+        Model.Id = User.Id;
         Model.Username = User.Username;
         Model.FirstName = User.FirstName;
         Model.MiddleName = User.MiddleName;
-        Model.Lastname = User.LastName;
+        Model.LastName = User.LastName;
         Model.Email = User.Email;
         Model.PhoneNumber = User.PhoneNumber;
         Model.Role = User.Role;
@@ -221,35 +199,4 @@
             if (value) Model.DisableReason = string.Empty;
         }
     }
-
-    class UpdateUserModel
-    {
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Логин не может быть пустым")]
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        public string Username { get; set; } = string.Empty;
-
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Имя не может быть пустым")]
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        public string FirstName { get; set; } = string.Empty;
-
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        public string MiddleName { get; set; } = string.Empty;
-
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Фамилия не может быть пустой")]
-        public string Lastname { get; set; } = string.Empty;
-
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        public string Email { get; set; } = string.Empty;
-
-        [MaxLength(30, ErrorMessage = "Максимальная длина 30 символов")]
-        public string PhoneNumber { get; set; } = string.Empty;
-
-        public UserRole Role { get; set; }
-        public bool Enabled { get; set; }
-        public string DisableReason { get; set; } = string.Empty;
-
-        public Guid? SupervisorId { get; set; }
-    }
-
 }

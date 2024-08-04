@@ -15,17 +15,18 @@ public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, PagedList<C
         _clientRepository = clientRepository;
     }
 
-    public async Task<Result<PagedList<ClientResponse>>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedList<ClientResponse>>> Handle(GetClientsQuery request,
+        CancellationToken cancellationToken)
     {
         var clientPagedList = await _clientRepository
-                .GetByFilterAsync(request.sieveModel, cancellationToken);
+            .GetByFilterAsync(request.QueryParams, cancellationToken);
 
-        var clientResponsePagedList = PagedList<ClientResponse>.Create(
+        var responseList = PagedList<ClientResponse>.Create(
             clientPagedList.Items.Select(x => x.ToClientResponse()).ToList(),
             clientPagedList.Page,
             clientPagedList.PageSize,
             clientPagedList.TotalCount);
 
-        return Result.Success(clientResponsePagedList);
+        return Result.Success(responseList);
     }
 }

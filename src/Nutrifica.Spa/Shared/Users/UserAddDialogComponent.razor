@@ -42,12 +42,12 @@
 
             <MudTextField
                 Label="Фамилия"
-                @bind-Value="Model.Lastname"
+                @bind-Value="Model.LastName"
                 Required="true"
                 Variant="Variant.Outlined"
                 Margin="Margin.Dense"
                 RequiredError="Это поле обязательно к заполнению"/>
-            <ValidationMessage For="() => Model.Lastname"/>
+            <ValidationMessage For="() => Model.LastName"/>
 
             <MudTextField
                 Label="Email"
@@ -84,12 +84,12 @@
 </EditForm>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
 
     private ValidationMessageStore? _messageStore;
-    private CreateUserModel Model { get; } = new();
+    private UserCreateRequest Model { get; } = new();
     private EditContext? _editContext;
-    private CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _cts = new();
     private Error? Error;
     private bool showError = false;
 
@@ -103,17 +103,9 @@
     async Task Submit()
     {
         showError = false;
-        var request = new UserCreateRequest(
-            Model.Username,
-            Model.FirstName,
-            Model.MiddleName,
-            Model.Lastname,
-            Model.Email,
-            Model.PhoneNumber,
-            Model.SupervisorId);
 
         var createdResult = await UserService
-            .CreateAsync(request, _cts.Token);
+            .CreateAsync(Model, _cts.Token);
         if (createdResult.IsFailure)
         {
             Error = createdResult.Error;
@@ -140,34 +132,4 @@
         _cts?.CancelAsync();
         _cts?.Dispose();
     }
-
-    class CreateUserModel
-    {
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Логин не может быть пустым")]
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        public string Username { get; set; } = string.Empty;
-
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Имя не может быть пустым")]
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        public string FirstName { get; set; } = string.Empty;
-
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        public string MiddleName { get; set; } = string.Empty;
-
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Фамилия не может быть пустой")]
-        public string Lastname { get; set; } = string.Empty;
-
-        [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]
-        // [EmailAddress(ErrorMessage = "Не корректный E-Mail")]
-        public string Email { get; set; } = string.Empty;
-
-        [MaxLength(30, ErrorMessage = "Максимальная длина 30 символов")]
-        // [Required(AllowEmptyStrings = false, ErrorMessage = "Номер телефона не может быть пустым")]
-        // [Phone(ErrorMessage = "Не коррекнтый номер телефона")]
-        public string PhoneNumber { get; set; } = string.Empty;
-
-        public Guid? SupervisorId { get; set; }
-    }
-
 }

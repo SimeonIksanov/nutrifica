@@ -39,6 +39,8 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
                     .HasConversion(
                         x => x.Value,
                         x => UserId.Create(x));
+                pcb.Property(x => x.LastModifiedBy)
+                    .HasConversion(x => x.Value, x => UserId.Create(x));
             });
         builder
             .Navigation(x => x.PhoneCalls)
@@ -115,9 +117,10 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .HasConversion(
                 x => x.Value,
                 x => UserId.Create(x));
+        builder.Property(x => x.LastModifiedBy)
+            .HasConversion(x => x.Value, x => UserId.Create(x));
 
         builder
             .OwnsOne(x => x.Address);
-        builder.Ignore(x => x.FullName);
     }
 }

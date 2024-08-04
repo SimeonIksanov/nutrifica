@@ -7,6 +7,11 @@ namespace Nutrifica.Application.Mappings;
 
 public static class UserMapping
 {
+    public static UserModel ToUserModel(this User user) =>
+        new UserModel(user.Id.Value, user.Account.Username, user.FirstName.Value, user.MiddleName.Value,
+            user.LastName.Value, user.Email.Value, user.PhoneNumber.Value, user.Enabled, user.DisableReason,
+            user.SupervisorId?.Value ?? null, user.Role, user.CreatedOn);
+
     public static UserResponse ToUserResponse(this User user, User? supervisor)
     {
         return new UserResponse(
@@ -21,7 +26,7 @@ public static class UserMapping
             user.DisableReason,
             supervisor?.Id.Value ?? null,
             user.Role,
-            user.CreatedAt);
+            user.CreatedOn);
     }
 
     public static UserResponse ToUserResponse(this UserModel user)
@@ -38,7 +43,7 @@ public static class UserMapping
             user.DisableReason,
             user.SupervisorId,
             user.Role,
-            user.CreatedAt);
+            user.CreatedOn);
     }
 
     public static UserFullNameResponse ToUserFullNameResponse(this UserFullName fullName) =>

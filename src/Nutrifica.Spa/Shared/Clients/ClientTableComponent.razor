@@ -1,0 +1,158 @@
+@using MudBlazor.Utilities
+@using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Spa.Infrastructure.Models
+@using Nutrifica.Spa.Infrastructure.Routes
+@using Nutrifica.Spa.Infrastructure.Services.Clients
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IClientService ClientService
+@inject NavigationManager NavigationManager
+@implements IDisposable
+<h3>ClientTableComponent</h3>
+
+<MudContainer
+    Gutters="true"
+    MaxWidth="MaxWidth.False">
+
+    <MudDataGrid RowClick="@RowClicked"
+                 T="ClientResponse"
+                 @ref="_dataGrid"
+                 Dense="true"
+                 Striped="true"
+                 Bordered="true"
+                 Outlined="false"
+                 Elevation="0"
+                 ColumnResizeMode="ResizeMode.Column"
+                 ServerData="FetchClientsAsync"
+                 Filterable="true"
+                 FilterMode="DataGridFilterMode.Simple">
+
+        <ToolBarContent>
+            <MudToolBar Class="gap-2">
+                <MudButton
+                    @onclick="OnAddClick"
+                    Variant="Variant.Outlined"
+                    Size="Size.Small">
+                    Создать
+                </MudButton>
+
+                <MudButton
+                    @onclick="OnUpdateClick"
+                    Variant="Variant.Outlined"
+                    Size="Size.Small">
+                    Обновить
+                </MudButton>
+            </MudToolBar>
+        </ToolBarContent>
+
+        <Columns>
+            <HierarchyColumn T="ClientResponse"/>
+            <PropertyColumn Property="x => x.FullName" Title="ФИО"/>
+            <PropertyColumn Property="x => x.PhoneNumber" Title="Номер Телефона"/>
+            @* <PropertyColumn Property="x => ShortComment(x)" Title="Комментарий"/> *@
+            <PropertyColumn Property="x => x.Comment" Title="Комментарий"/>
+            <PropertyColumn Property="x => x.Source" Title="Источник" Hideable="true"/>
+            <PropertyColumn Property="x => x.State" Title="Состояние"/>
+        </Columns>
+
+        <ChildRowContent>
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">@context.Item.FullName</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText>This element is number @context.Item.CreatedAt</MudText>
+                    <MudText>This element has a molar mass of @context.Item.PhoneNumber</MudText>
+                    <MudText>Комментарии:<MudText Inline="false">@context.Item.Comment</MudText></MudText>
+                </MudCardContent>
+            </MudCard>
+        </ChildRowContent>
+        
+        <PagerContent>
+            <MudDataGridPager T="ClientResponse"/>
+        </PagerContent>
+
+    </MudDataGrid>
+
+</MudContainer>
+
+@code {
+    private MudDataGrid<ClientResponse> _dataGrid = null!;
+    private CancellationTokenSource _cancellationTokenSource = new();
+
+    private async Task<GridData<ClientResponse>> FetchClientsAsync(GridState<ClientResponse> state)
+    {
+        var queryParams = new QueryParams
+        {
+            Page = state.Page + 1,
+            PageSize = state.PageSize
+        };
+        // ApplyFilters(state, queryParams);
+        ApplySorts(state, queryParams);
+
+        var result = await ClientService.GetAsync(queryParams, _cancellationTokenSource.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+            return new GridData<ClientResponse>();
+        }
+
+        return new GridData<ClientResponse>
+        {
+            Items = result.Value.Items,
+            TotalItems = result.Value.TotalCount
+        };
+    }
+
+    private void RowClicked(DataGridRowClickEventArgs<ClientResponse> eventArgs)
+    {
+        NavigationManager.NavigateTo(PageUrls.ClientDetails(eventArgs.Item.Id));
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.CancelAsync();
+        _cancellationTokenSource.Dispose();
+    }
+
+    private async Task OnAddClick()
+    {
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.TopCenter,
+            CloseOnEscapeKey = true
+        };
+        var dialog = await DialogService.ShowAsync<ClientAddDialogComponent>("Регистрация клиента", options);
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        if (result.Data is ClientResponse)
+        {
+            Snackbar.Add("Пользователь создан", Severity.Success);
+            _ = _dataGrid.ReloadServerData();
+        }
+    }
+
+    private string ShortComment(ClientResponse client) =>
+        client.Comment.Substring(0, Math.Min(50, client.Comment.Length));
+
+    private async Task OnUpdateClick()
+    {
+        await _dataGrid.ReloadServerData();
+    }
+
+    private static void ApplySorts(GridState<ClientResponse> state, QueryParams queryParams)
+    {
+        if (state.SortDefinitions.Count > 0)
+            queryParams.Sorts = state.SortDefinitions
+                .Select(x => x.Descending ? $"-{x.SortBy}" : x.SortBy)
+                // .Aggregate("", (a, b) => string.Join(",", a, b));
+                .Aggregate((a, b) => string.Join(",", a, b));
+    }
+}

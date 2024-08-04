@@ -1,4 +1,5 @@
 using Nutrifica.Domain.Abstractions;
+using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 
 namespace Nutrifica.Domain.Common.Models;
 
@@ -10,13 +11,20 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>> where TId : notnull
     protected Entity() { }
     protected Entity(TId id) => Id = id;
 
+    // public UserId? CreatedBy { get; set; } = null!; //!!!!!!!!!!!!!!!! if remove set; ef core starts complain. Must FIX it
+    // public DateTime CreatedOn { get; }
+    // public UserId LastModifiedBy { get; } = null!;
+    // public DateTime LastModifiedOn { get; }
+
     public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.ToList();
     public void ClearDomainEvents() => _domainEvents.Clear();
     protected void RaiseDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+
     public bool Equals(Entity<TId>? other)
     {
         return other is not null && Id.Equals(other.Id);
     }
+
     public override bool Equals(object? other)
         => other is not null && other is Entity<TId> entity && Id.Equals(entity.Id);
 

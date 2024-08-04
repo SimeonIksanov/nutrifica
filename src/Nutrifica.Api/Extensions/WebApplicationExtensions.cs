@@ -1,6 +1,7 @@
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Domain.Shared;
 using Nutrifica.Infrastructure.Persistence;
 using Nutrifica.Shared.Enums;
@@ -40,6 +41,8 @@ public static class WebApplicationExtensions
             phoneNumber: PhoneNumber.Create("123"),
             email: Email.Create("email"),
             supervisorId: null);
+        user.CreatedBy = UserId.Create(Guid.Empty);
+        user.LastModifiedBy = UserId.Create(Guid.Empty);
 
         var ps = ph.HashPassword("admin");
 
@@ -164,6 +167,8 @@ public static class WebApplicationExtensions
             var ps = ph.HashPassword(dict["password"]);
             user.Account.PasswordHash = ps.hashed;
             user.Account.Salt = ps.salt;
+            user.CreatedBy = UserId.Create(Guid.Empty);
+            user.LastModifiedBy = UserId.Create(Guid.Empty);
             users.Add(user);
         }
 

@@ -45,5 +45,6 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, C
         client.Comment = request.Comment;
         client.PhoneNumber = request.PhoneNumber;
         client.Source = request.Source;
+        client.State = request.State;
     }
 }

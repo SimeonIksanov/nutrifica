@@ -1,6 +1,7 @@
 #nullable disable
 using Microsoft.Extensions.Options;
 
+using Nutrifica.Application.Models.Clients;
 using Nutrifica.Application.Models.Users;
 
 using Sieve.Models;
@@ -37,6 +38,19 @@ public class CustomSieveProcessor : SieveProcessor
         mapper.Property<UserModel>(x => x.Role).CanFilter().CanSort();
         mapper.Property<UserModel>(x => x.SupervisorId).CanFilter(); //.CanSort();
         mapper.Property<UserModel>(x => x.Username).CanFilter().CanSort();
+
+        // mapper.Property<ClientModel>(x => x.FirstName).CanFilter().CanSort();
+        // mapper.Property<ClientModel>(x => x.Address.Street).CanSort();
+        // mapper.Property<ClientModel>(x => x.Address).HasName("address").CanSort();
+
+        // mapper.Property<ClientModel>(x => x.FirstName).CanFilter().CanSort();
+        // mapper.Property<ClientModel>(x => x.MiddleName).CanFilter().CanSort();
+        // mapper.Property<ClientModel>(x => x.LastName).CanFilter().CanSort();
+        mapper.Property<ClientModel>(x => x.PhoneNumber).CanFilter().CanSort();
+        mapper.Property<ClientModel>(x => x.Comment).CanFilter().CanSort();
+        mapper.Property<ClientModel>(x => x.State).CanFilter().CanSort();
+
+        mapper.Property<PhoneCallModel>(x => x.CreatedOn).CanSort().CanFilter();
 
         return mapper;
     }

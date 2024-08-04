@@ -14,4 +14,4 @@ public record UserModel(
     string DisableReason,
     Guid? SupervisorId,
     UserRole Role,
-    DateTime CreatedAt);
+    DateTime CreatedOn);

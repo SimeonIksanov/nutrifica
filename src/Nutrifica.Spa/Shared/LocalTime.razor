@@ -1,0 +1,7 @@
+<MudText Typo="Typo.caption" Inline="true">
+    @DateTime.ToString("yyyy-MM-dd HH:mm") UTC
+</MudText>
+
+@code {
+    [Parameter] public DateTime DateTime { get; set; }
+}

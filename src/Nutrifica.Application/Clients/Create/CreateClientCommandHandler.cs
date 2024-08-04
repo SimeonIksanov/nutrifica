@@ -1,5 +1,6 @@
 using Nutrifica.Api.Contracts.Clients;
 using Nutrifica.Application.Abstractions.Messaging;
+using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Mappings;
 using Nutrifica.Domain.Abstractions;
@@ -11,12 +12,14 @@ namespace Nutrifica.Application.Clients.Create;
 public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, ClientResponse>
 {
     private readonly IClientRepository _clientRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
-    public CreateClientCommandHandler(IUnitOfWork unitOfWork, IClientRepository clientRepository)
+    public CreateClientCommandHandler(IUnitOfWork unitOfWork, IClientRepository clientRepository, ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
         _clientRepository = clientRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result<ClientResponse>> Handle(CreateClientCommand request, CancellationToken cancellationToken)
@@ -28,7 +31,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
             request.PhoneNumber,
             request.Address,
             request.Comment,
-            request.CreatedBy,
+            _currentUserService.UserId,
             request.Source);
 
         _clientRepository.Add(client);

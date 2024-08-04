@@ -10,7 +10,7 @@ using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Domain.Aggregates.OrderAggregate;
 
-public sealed class Order : Entity<OrderId>, IAggregateRoot
+public sealed class Order : Entity<OrderId>, IAggregateRoot, IAuditableEntity
 {
     private readonly HashSet<UserId> _managerIds;
     private readonly List<OrderItem> _orderItems;
@@ -21,24 +21,24 @@ public sealed class Order : Entity<OrderId>, IAggregateRoot
         _managerIds = new HashSet<UserId> { createdBy };
         Status = OrderStatus.New;
         State = State.Active;
-        CreatedAt = DateTime.UtcNow;
     }
 
+    public DateTime CreatedOn { get; set; }
+    public UserId CreatedBy { get; set; }
+    public DateTime LastModifiedOn { get; set; }
+    public UserId LastModifiedBy { get; set; }
     public ClientId ClientId { get; private set; } = null!;
     public OrderStatus Status { get; private set; }
+
     public State State { get; set; }
-    public DateTime CreatedAt { get; init; }
+
     public Money TotalSum { get; }
     public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.ToList();
     public IReadOnlyCollection<UserId> ManagerIds => _managerIds.ToList();
 
     public static Order Create(ClientId clientId, UserId userId)
     {
-        var order = new Order(userId)
-        {
-            Id = OrderId.CreateUnique(),
-            ClientId = clientId
-        };
+        var order = new Order(userId) { Id = OrderId.CreateUnique(), ClientId = clientId };
         return order;
     }
 }
