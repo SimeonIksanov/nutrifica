@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 using Microsoft.EntityFrameworkCore;
 
 using Nutrifica.Application.Interfaces.Services.Persistence;
@@ -5,7 +7,6 @@ using Nutrifica.Application.Models.Clients;
 using Nutrifica.Application.Models.Users;
 using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.ClientAggregate;
-using Nutrifica.Domain.Aggregates.ClientAggregate.Entities;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Infrastructure.Services.SortAndFilter;
@@ -45,21 +46,12 @@ public class ClientRepository : IClientRepository
     {
         var query = _context.Set<Client>()
             .AsNoTracking()
-            .Select(client => new ClientModel(
-                client.Id.Value,
-                client.FirstName.Value,
-                client.MiddleName.Value,
-                client.LastName.Value,
-                client.Address,
-                client.Comment.Value,
-                client.PhoneNumber.Value,
-                client.Source,
-                client.State,
-                client.CreatedOn));
+            .Select(ClientToClientModel());
         var pagedList =
             await query.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
     }
+
 
     public async Task<bool> HasClientWithIdAsync(ClientId id, CancellationToken cancellationToken)
     {
@@ -86,7 +78,7 @@ public class ClientRepository : IClientRepository
                     x.phoneCall.Id,
                     x.phoneCall.CreatedOn,
                     Equals(user, null)
-                        ? null
+                        ? new UserFullName(x.phoneCall.CreatedBy.Value, "unknown", "unknown", "unknown")
                         : new UserFullName(user.Id.Value, user.FirstName.Value, user.MiddleName.Value,
                             user.LastName.Value),
                     x.phoneCall.Comment));
@@ -94,4 +86,25 @@ public class ClientRepository : IClientRepository
             await query.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
     }
+
+    private Expression<Func<Client,ClientModel>> ClientToClientModel() =>
+        client => new ClientModel(
+            client.Id.Value,
+            client.FirstName.Value,
+            client.MiddleName.Value,
+            client.LastName.Value,
+            new()
+            {
+                City = client.Address.City,
+                Comment = client.Address.Comment,
+                Country = client.Address.Country,
+                Region = client.Address.Region,
+                Street = client.Address.Street,
+                ZipCode = client.Address.ZipCode
+            },
+            client.Comment.Value,
+            client.PhoneNumber.Value,
+            client.Source,
+            client.State,
+            client.CreatedOn);
 }

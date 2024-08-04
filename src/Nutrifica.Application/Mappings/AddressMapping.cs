@@ -1,10 +1,24 @@
 using Nutrifica.Api.Contracts.Clients;
+using Nutrifica.Application.Models.Clients;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 namespace Nutrifica.Application.Mappings;
 
 public static class AddressMapping
 {
+    public static AddressDto ToAddressDto(this AddressModel address)
+    {
+        return new AddressDto
+        {
+            City = address.City,
+            Comment = address.Comment,
+            Country = address.Country,
+            Region = address.Region,
+            Street = address.Street,
+            ZipCode = address.ZipCode,
+        };
+    }
+
     public static AddressDto ToAddressDto(this Address address)
     {
         return new AddressDto

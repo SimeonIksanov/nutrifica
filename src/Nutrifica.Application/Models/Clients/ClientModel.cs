@@ -1,4 +1,3 @@
-using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Application.Models.Clients;
@@ -8,7 +7,7 @@ public record ClientModel(
     string FirstName,
     string MiddleName,
     string LastName,
-    Address Address,
+    AddressModel Address,
     string Comment,
     string PhoneNumber,
     string Source,
