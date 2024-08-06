@@ -11,7 +11,9 @@ public interface IClientService
     Task<IResult<PagedList<ClientResponse>>> GetAsync(QueryParams queryParams, CancellationToken cancellationToken);
     Task<IResult<ClientResponse>> GetByIdAsync(Guid clientId, CancellationToken cancellationToken);
 
-    Task<IResult<PagedList<PhoneCallResponse>>> GetPhoneCallsAsync(Guid clientId, CancellationToken cancellationToken);
+    Task<IResult<PagedList<PhoneCallResponse>>> GetPhoneCallsAsync(Guid clientId, QueryParams queryParams,
+        CancellationToken cancellationToken);
 
-    Task<IResult<PhoneCallResponse>> CreatePhoneCallAsync(Guid clientId, PhoneCallCreateRequest request, CancellationToken cancellationToken);
+    Task<IResult<PhoneCallResponse>> CreatePhoneCallAsync(Guid clientId, PhoneCallCreateRequest request,
+        CancellationToken cancellationToken);
 }

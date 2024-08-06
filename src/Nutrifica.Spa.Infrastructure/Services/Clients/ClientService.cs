@@ -44,12 +44,21 @@ public class ClientService : ServiceBase, IClientService
         }
     }
 
-    public async Task<IResult<PagedList<PhoneCallResponse>>> GetPhoneCallsAsync(Guid clientId,
+    public async Task<IResult<PagedList<PhoneCallResponse>>> GetPhoneCallsAsync(Guid clientId, QueryParams queryParams,
         CancellationToken cancellationToken)
     {
-        var response = await GetHttpClient()
-            .GetAsync(ClientsEndpoints.GetPhoneCalls(clientId), cancellationToken);
-        return await HandleResponse<PagedList<PhoneCallResponse>>(response, cancellationToken);
+        try
+        {
+            var requestUri = ClientsEndpoints.GetPhoneCalls(clientId) + queryParams;
+            var response = await GetHttpClient()
+                .GetAsync(requestUri, cancellationToken);
+            return await HandleResponse<PagedList<PhoneCallResponse>>(response, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Не удалось загрузить список пользователей: {ex.Message}");
+            return Result.Failure<PagedList<PhoneCallResponse>>(ClientServiceErrors.FailedToLoadPhoneCalls);
+        }
     }
 
     public async Task<IResult<ClientResponse>> CreateAsync(ClientCreateRequest request,

@@ -47,7 +47,9 @@
 
         <Columns>
             <HierarchyColumn T="ClientResponse"/>
-            <PropertyColumn Property="x => x.FullName" Title="ФИО"/>
+            <PropertyColumn Property="x => x.LastName" Title="Фамилия"/>
+            <PropertyColumn Property="x => x.FirstName" Title="Имя"/>
+            <PropertyColumn Property="x => x.MiddleName" Title="Отчество"/>
             <PropertyColumn Property="x => x.PhoneNumber" Title="Номер Телефона"/>
             @* <PropertyColumn Property="x => ShortComment(x)" Title="Комментарий"/> *@
             <PropertyColumn Property="x => x.Comment" Title="Комментарий"/>
@@ -63,9 +65,8 @@
                     </CardHeaderContent>
                 </MudCardHeader>
                 <MudCardContent>
-                    <MudText>This element is number @context.Item.CreatedAt</MudText>
-                    <MudText>This element has a molar mass of @context.Item.PhoneNumber</MudText>
-                    <MudText>Комментарии:<MudText Inline="false">@context.Item.Comment</MudText></MudText>
+                    <MudText>Создан @context.Item.CreatedAt</MudText>
+                    <MudText>Адрес: @context.Item.Address.Country @context.Item.Address.ZipCode @context.Item.Address.Region @context.Item.Address.City @context.Item.Address.Street @context.Item.Address.Comment</MudText>
                 </MudCardContent>
             </MudCard>
         </ChildRowContent>

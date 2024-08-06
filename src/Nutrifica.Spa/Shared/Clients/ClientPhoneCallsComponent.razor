@@ -1,8 +1,10 @@
 @using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Spa.Infrastructure.Models
 @using Nutrifica.Spa.Infrastructure.Services.Clients
 @implements IDisposable
 @inject IClientService ClientService
 @inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
 
 <MudStack>
     <MudStack Row="true">
@@ -12,7 +14,7 @@
                       Variant="Variant.Outlined"
                       @bind-Value="_newComment"
                       AutoGrow Clearable="true"/>
-        
+
         <MudButton StartIcon="@Icons.Material.Outlined.Add"
                    Variant="Variant.Filled"
                    OnClick="HandleAddComment"
@@ -27,17 +29,37 @@
     {
         <PhoneCallComment PhoneCall="phoneCall"/>
     }
+
+    <MudPaper Class="justify-center d-flex" Elevation="0">
+        <MudPagination Selected="_queryParams.Page"
+                       SelectedChanged="OnSelectedPageChanged"
+                       Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       Count="_totalPages" MiddleCount="5"/>
+    </MudPaper>
+
 </MudStack>
 
 
 @code {
     [Parameter] public Guid ClientId { get; set; }
-    private List<PhoneCallResponse> _phoneCalls = new List<PhoneCallResponse>();
+    [SupplyParameterFromQuery] private int? Page { get; set; }
+    [SupplyParameterFromQuery] private int? PageSize { get; set; }
+    [SupplyParameterFromQuery] private string? Sorts { get; set; }
+    private QueryParams _queryParams = null!;
+    private List<PhoneCallResponse> _phoneCalls = new();
     private CancellationTokenSource _cts = new();
     private string _newComment = string.Empty;
+    private int _totalPages = 1;
 
     protected override async Task OnInitializedAsync()
     {
+        _queryParams = new QueryParams()
+        {
+            PageSize = PageSize.HasValue && PageSize.Value > 0 ? PageSize.Value : 10,
+            Page = Page.HasValue && Page.Value > 0 ? Page.Value : 1,
+            Sorts = Sorts ?? "-CreatedOn"
+        };
         await FetchPhoneCallsAsync();
     }
 
@@ -45,9 +67,10 @@
     {
         if (ClientId.Equals(Guid.Empty))
             return;
-        var response = await ClientService.GetPhoneCallsAsync(ClientId, _cts.Token);
+        var response = await ClientService.GetPhoneCallsAsync(ClientId, _queryParams, _cts.Token);
         _phoneCalls.Clear();
         _phoneCalls.AddRange(response.Value.Items);
+        _totalPages = (response.Value.TotalCount + _queryParams.PageSize - 1) / _queryParams.PageSize;
     }
 
     public void Dispose()
@@ -65,9 +88,17 @@
             Snackbar.Add("Не удалось создать звонок", Severity.Error);
             return;
         }
+
         _phoneCalls.Add(result.Value);
         Snackbar.Add("Звонок создан", Severity.Success);
         _newComment = string.Empty;
+    }
+
+    private async Task OnSelectedPageChanged(int page)
+    {
+        _queryParams.Page = page;
+        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter(nameof(Page), page.ToString()));
+        await FetchPhoneCallsAsync();
     }
 
 }
