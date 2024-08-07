@@ -13,12 +13,15 @@
                       T="string"
                       Variant="Variant.Outlined"
                       @bind-Value="_newComment"
-                      AutoGrow Clearable="true"/>
+                      AutoGrow Clearable="true"
+                      DebounceInterval="100"
+                      OnKeyDown="@OnAddCommentKeyDown"
+                      KeyDownPreventDefault="@_shouldPrevent"/>
 
         <MudButton StartIcon="@Icons.Material.Outlined.Add"
                    Variant="Variant.Filled"
                    OnClick="HandleAddComment"
-                   Color="Color.Primary">
+                   Color="Color.Primary" Disabled="@HasInvalidNewPhoneCallComment()">
             Добавить
         </MudButton>
     </MudStack>
@@ -51,6 +54,7 @@
     private CancellationTokenSource _cts = new();
     private string _newComment = string.Empty;
     private int _totalPages = 1;
+    private bool _shouldPrevent = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,4 +105,18 @@
         await FetchPhoneCallsAsync();
     }
 
+    private async Task OnAddCommentKeyDown(KeyboardEventArgs e)
+    {
+        if (HasInvalidNewPhoneCallComment()) return;
+        if (e.ShiftKey && e.Key == "Enter")
+        {
+            _shouldPrevent = true;
+            await HandleAddComment(new MouseEventArgs());
+            return;
+        }
+
+        _shouldPrevent = false;
+    }
+
+    private bool HasInvalidNewPhoneCallComment() => string.IsNullOrWhiteSpace(_newComment);
 }
