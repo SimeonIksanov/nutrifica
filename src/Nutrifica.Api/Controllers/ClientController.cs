@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Nutrifica.Api.Contracts.Clients;
 using Nutrifica.Application.Clients.Create;
 using Nutrifica.Application.Clients.CreatePhoneCall;
+using Nutrifica.Application.Clients.DeletePhoneCall;
 using Nutrifica.Application.Clients.Get;
 using Nutrifica.Application.Clients.GetById;
 using Nutrifica.Application.Clients.GetClientPhoneCalls;
 using Nutrifica.Application.Clients.Update;
+using Nutrifica.Application.Clients.UpdatePhoneCall;
 using Nutrifica.Application.Mappings;
 using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
@@ -75,7 +77,7 @@ public class ClientController : ApiController
             },
             Comment.Create(request.Comment),
             PhoneNumber.Create(request.PhoneNumber),
-            request.Source//,
+            request.Source //,
             // UserId.Create(CurrentUserId)
         );
         Result<ClientResponse> result = await _mediator.Send(command, ct);
@@ -112,6 +114,11 @@ public class ClientController : ApiController
     }
 
 
+    /// <summary>
+    /// Get client phonecalls
+    /// </summary>
+    /// <param name="ct">Cancellation Token</param>
+    /// <returns>Returns phonecalls</returns>
     [HttpGet("{clientId:guid}/phonecalls")]
     public async Task<IActionResult> GetClientPhoneCalls([FromRoute] Guid clientId, [FromQuery] QueryParams queryParams,
         CancellationToken ct)
@@ -121,6 +128,11 @@ public class ClientController : ApiController
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
 
+    /// <summary>
+    /// Create client phonecall
+    /// </summary>
+    /// <param name="ct">Cancellation Token</param>
+    /// <returns>Created phonecall object</returns>
     [HttpPost("{clientId:guid}/phonecalls")]
     public async Task<IActionResult> CreateClientPhoneCall([FromRoute] Guid clientId,
         [FromBody] PhoneCallCreateRequest request,
@@ -128,6 +140,36 @@ public class ClientController : ApiController
     {
         var query = new CreatePhoneCallCommand(ClientId.Create(clientId), request.Comment);
         var result = await _mediator.Send(query, ct);
-        return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
+        return result.IsSuccess ? StatusCode(StatusCodes.Status201Created, result.Value) : HandleFailure(result);
+    }
+
+    /// <summary>
+    /// Updates client phonecall
+    /// </summary>
+    /// <param name="ct">Cancellation Token</param>
+    /// <returns>Created client object</returns>
+    [HttpPut("{clientId:guid}/phonecalls/{phoneCallId:int}")]
+    public async Task<IActionResult> UpdatePhoneCall([FromRoute] Guid clientId, [FromRoute] int phoneCallId,
+        [FromBody] PhoneCallUpdateRequest request,
+        CancellationToken ct)
+    {
+        if (phoneCallId != request.Id) return BadRequest();
+        var command = new UpdatePhoneCallCommand(ClientId.Create(clientId), PhoneCallId.Create(request.Id), request.Comment);
+        var result = await _mediator.Send(command, ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Deletes phonecall
+    /// </summary>
+    /// <param name="ct">Cancellation Token</param>
+    /// <returns>Created client object</returns>
+    [HttpDelete("{clientId:guid}/phonecalls/{phoneCallId:int}")]
+    public async Task<IActionResult> DeletePhoneCall([FromRoute] Guid clientId, [FromRoute] int phoneCallId,
+        CancellationToken ct)
+    {
+        var command = new DeletePhoneCallCommand(ClientId.Create(clientId), PhoneCallId.Create(phoneCallId));
+        var result = await _mediator.Send(command, ct);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 }

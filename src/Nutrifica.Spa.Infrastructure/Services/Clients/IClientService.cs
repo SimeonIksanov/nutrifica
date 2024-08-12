@@ -16,4 +16,9 @@ public interface IClientService
 
     Task<IResult<PhoneCallResponse>> CreatePhoneCallAsync(Guid clientId, PhoneCallCreateRequest request,
         CancellationToken cancellationToken);
+
+    Task<IResult<PhoneCallResponse>> UpdatePhoneCallAsync(Guid clientId, PhoneCallUpdateRequest request,
+        CancellationToken cancellationToken);
+
+    Task<IResult> DeletePhoneCallAsync(Guid clientId, int phoneCallId, CancellationToken cancellationToken);
 }

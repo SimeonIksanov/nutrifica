@@ -1,0 +1,85 @@
+@using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Spa.Infrastructure.Services.Clients
+@implements IDisposable
+@inject IClientService ClientService
+
+<EditForm EditContext="_editContext"
+          OnValidSubmit="OnSubmitAsync">
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator/>
+
+            <MudTextField Label="Комментарий"
+                          For="() => _model.Comment"
+                          @bind-Value="_model.Comment"
+                          AutoGrow
+                          Variant="Variant.Outlined"/>
+
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary">
+                Изменить
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Guid ClientId { get; set; }
+    [Parameter] public PhoneCallResponse PhoneCall { get; set; } = null!;
+    private readonly CancellationTokenSource _cts = new();
+    private EditContext _editContext = null!;
+    private ValidationMessageStore _messageStore = null!;
+    private PhoneCallUpdateRequest _model = new();
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(_model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new ValidationMessageStore(_editContext);
+        MapIncomingPhoneCallToFormModel();
+    }
+
+    private void MapIncomingPhoneCallToFormModel()
+    {
+        if (PhoneCall is null) return;
+
+        _model.Id = PhoneCall.Id;
+        _model.Comment = PhoneCall.Comment;
+    }
+
+    private void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore.Clear();
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+        _editContext.OnValidationRequested -= HandleValidationRequested;
+    }
+
+    private async Task OnSubmitAsync(EditContext obj)
+    {
+        var result = await ClientService.UpdatePhoneCallAsync(ClientId, _model, _cts.Token);
+        if (result.IsFailure)
+        {
+            _messageStore.Add(()=>_model, result.Error.Description);
+            _editContext.NotifyValidationStateChanged();
+            return;
+        }
+        MudDialog.Close(DialogResult.Ok(result.Value));
+    }
+
+}

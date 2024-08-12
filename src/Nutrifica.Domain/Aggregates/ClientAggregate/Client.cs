@@ -66,6 +66,8 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
         _phoneCalls.Add(phoneCall);
     }
 
+    public void DeletePhoneCall(PhoneCall phoneCall) => _phoneCalls.Remove(phoneCall);
+
     public class Builder
     {
         private Client _client;

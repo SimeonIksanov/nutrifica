@@ -108,4 +108,37 @@ public class ClientService : ServiceBase, IClientService
             return Result.Failure<PhoneCallResponse>(ClientServiceErrors.FailedToCreatePhoneCall);
         }
     }
+
+    public async Task<IResult<PhoneCallResponse>> UpdatePhoneCallAsync(Guid clientId, PhoneCallUpdateRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await GetHttpClient()
+                .PutAsJsonAsync(ClientsEndpoints.UpdatePhoneCall(clientId, request.Id), request, cancellationToken);
+            return await HandleResponse<PhoneCallResponse>(response, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine(ex);
+            return Result.Failure<PhoneCallResponse>(ClientServiceErrors.FailedToUpdatePhoneCalls);
+        }
+    }
+
+    public async Task<IResult> DeletePhoneCallAsync(Guid clientId, int phoneCallId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await GetHttpClient()
+                .DeleteAsync(ClientsEndpoints.DeletePhoneCall(clientId, phoneCallId), cancellationToken);
+            return response.IsSuccessStatusCode
+                ? Result.Success()
+                : Result.Failure(ClientServiceErrors.FailedToDeletePhoneCalls);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine(ex);
+            return Result.Failure(ClientServiceErrors.FailedToDeletePhoneCalls);
+        }
+    }
 }

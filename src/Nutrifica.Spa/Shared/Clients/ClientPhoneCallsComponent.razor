@@ -3,6 +3,7 @@
 @using Nutrifica.Spa.Infrastructure.Services.Clients
 @implements IDisposable
 @inject IClientService ClientService
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 
@@ -10,7 +11,7 @@
     <MudStack Row="true">
 
         <MudTextField Label="Добавить комментарий"
-                      T="string"
+                      T="string" Margin="Margin.Dense"
                       Variant="Variant.Outlined"
                       @bind-Value="_newComment"
                       AutoGrow Clearable="true"
@@ -19,7 +20,7 @@
                       KeyDownPreventDefault="@_shouldPrevent"/>
 
         <MudButton StartIcon="@Icons.Material.Outlined.Add"
-                   Variant="Variant.Filled"
+                   Variant="Variant.Filled" Size="Size.Small"
                    OnClick="HandleAddComment"
                    Color="Color.Primary" Disabled="@HasInvalidNewPhoneCallComment()">
             Добавить
@@ -30,7 +31,9 @@
 
     @foreach (var phoneCall in _phoneCalls)
     {
-        <PhoneCallComment PhoneCall="phoneCall"/>
+        <PhoneCallComponent PhoneCall="phoneCall"
+                            OnDelete="DeletePhoneCall" 
+                            OnUpdate="UpdatePhoneCall"/>
     }
 
     <MudPaper Class="justify-center d-flex" Elevation="0">
@@ -119,4 +122,37 @@
     }
 
     private bool HasInvalidNewPhoneCallComment() => string.IsNullOrWhiteSpace(_newComment);
+
+    private async Task UpdatePhoneCall(PhoneCallResponse? phoneCall)
+    {
+        var dialogOptions = new DialogOptions()
+        {
+            CloseOnEscapeKey = true,
+            BackdropClick = false,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true
+        };
+        var dialogParameters = new DialogParameters<UpdatePhoneCall_Dialog>()
+        {
+            {x=>x.PhoneCall, phoneCall},
+            {x=>x.ClientId, ClientId}
+        };
+        var dialog = await DialogService.ShowAsync<UpdatePhoneCall_Dialog>("Изменение звонка", dialogParameters, dialogOptions);
+        var dialogResult = await dialog.Result;
+        if (dialogResult is null || dialogResult.Canceled) return;
+        if (dialogResult.Data is PhoneCallResponse)
+        {
+            Snackbar.Add("Звонок изменен.", Severity.Success);
+            await FetchPhoneCallsAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeletePhoneCall(PhoneCallResponse? phoneCall)
+    {
+        if (phoneCall is null) return;
+        await ClientService.DeletePhoneCallAsync(ClientId, phoneCall.Id, _cts.Token);
+        await FetchPhoneCallsAsync();
+    }
+
 }
