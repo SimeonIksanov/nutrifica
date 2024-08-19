@@ -1,4 +1,4 @@
-namespace Nutrifica.Domain.Aggregates.OrderAggregate.Enums;
+namespace Nutrifica.Shared.Enums;
 
 public enum OrderStatus
 {

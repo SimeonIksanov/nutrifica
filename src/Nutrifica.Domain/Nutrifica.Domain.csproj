@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Folder Include="Aggregates/OrderAggregate/Events/" />
+    <Folder Include="Aggregates\OrderAggregate\Enums\" />
     <Folder Include="Shared/" />
   </ItemGroup>
 

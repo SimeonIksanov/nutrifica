@@ -29,10 +29,14 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             oib.ToTable("OrderItems");
             oib.WithOwner().HasForeignKey("OrderId");
             oib.HasKey(nameof(OrderItem.Id), "OrderId");
-            oib.Property(x => x.ProductId)
-                .HasConversion(
-                    x => x.Value,
-                    x => ProductId.Create(x));
+            // oib.Property(x => x.ProductId)
+            //     .HasConversion(
+            //         x => x.Value,
+            //         x => ProductId.Create(x));
+            oib.OwnsOne(x => x.Price, mb =>
+            {
+                mb.OwnsOne(x => x.Currency);
+            });
         });
         builder
             .Navigation(x => x.OrderItems)
@@ -73,5 +77,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasConversion(x => x.Value, x => UserId.Create(x));
         builder.Property(x => x.LastModifiedBy)
             .HasConversion(x => x.Value, x => UserId.Create(x));
+
+        builder.OwnsOne(x => x.TotalSum, mb =>
+        {
+            mb.OwnsOne(x => x.Currency);
+        });
     }
 }

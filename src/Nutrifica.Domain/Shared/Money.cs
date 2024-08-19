@@ -4,12 +4,15 @@ namespace Nutrifica.Domain.Shared;
 
 public class Money : ValueObject
 {
-    public Money(decimal ammount, Currency currency)
+    private Money() { }
+
+    public Money(decimal amount, Currency currency)
     {
-        Ammount = ammount;
+        Amount = amount;
         Currency = currency;
     }
-    public decimal Ammount { get; private set; }
+
+    public decimal Amount { get; private set; }
     public Currency Currency { get; init; }
 
     public static Money Zero() => new Money(0, Currency.None);
@@ -21,12 +24,12 @@ public class Money : ValueObject
         if (first.Currency != second.Currency)
             throw new InvalidOperationException("Валюта должна быть одинаковой");
 
-        return new Money(first.Ammount + second.Ammount, first.Currency);
+        return new Money(first.Amount + second.Amount, first.Currency);
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Currency;
-        yield return Ammount;
+        yield return Amount;
     }
 }

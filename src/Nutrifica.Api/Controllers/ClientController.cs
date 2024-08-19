@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using Nutrifica.Api.Contracts.Clients;
+using Nutrifica.Api.Contracts.Orders;
 using Nutrifica.Application.Clients.Create;
 using Nutrifica.Application.Clients.CreatePhoneCall;
 using Nutrifica.Application.Clients.DeletePhoneCall;
@@ -26,6 +27,8 @@ public class ClientController : ApiController
     public ClientController(IMediator mediator) : base(mediator)
     {
     }
+
+    #region Client
 
     /// <summary>
     ///     Get Clients
@@ -113,6 +116,9 @@ public class ClientController : ApiController
             : HandleFailure(result);
     }
 
+    #endregion
+
+    #region PhoneCalls
 
     /// <summary>
     /// Get client phonecalls
@@ -154,7 +160,8 @@ public class ClientController : ApiController
         CancellationToken ct)
     {
         if (phoneCallId != request.Id) return BadRequest();
-        var command = new UpdatePhoneCallCommand(ClientId.Create(clientId), PhoneCallId.Create(request.Id), request.Comment);
+        var command =
+            new UpdatePhoneCallCommand(ClientId.Create(clientId), PhoneCallId.Create(request.Id), request.Comment);
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
@@ -172,4 +179,36 @@ public class ClientController : ApiController
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
+
+    #endregion
+
+    #region Orders
+
+    [HttpGet("{clientId:guid}/orders/")]
+    public async Task<IActionResult> GetOrders([FromRoute] Guid clientId, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpPost("{clientId:guid}/orders/")]
+    public async Task<IActionResult> CreateClientOrder([FromRoute] Guid clientId, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpPut("{clientId:guid}/orders/{orderId:guid}")]
+    public async Task<IActionResult> UpdateClientOrder([FromRoute] Guid clientId, [FromRoute] Guid orderId,
+        CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpDelete("{clientId:guid}/orders/{orderId:guid}")]
+    public async Task<IActionResult> DeleteClientOrder([FromRoute] Guid clientId, [FromRoute] Guid orderId,
+        CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
 }

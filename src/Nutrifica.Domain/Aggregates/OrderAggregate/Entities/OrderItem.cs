@@ -1,19 +1,19 @@
 using Nutrifica.Domain.Aggregates.ProductAggregate.ValueObjects;
 using Nutrifica.Domain.Common.Models;
+using Nutrifica.Domain.Shared;
 
 namespace Nutrifica.Domain.Aggregates.OrderAggregate.Entities;
 
 public class OrderItem : Entity<int>
 {
-    public static OrderItem Create(ProductId productId, int count, decimal price)
+    public static OrderItem Create(string product, int count, Money price)
     {
-        ArgumentNullException.ThrowIfNull(productId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(product);
         ArgumentOutOfRangeException.ThrowIfNegative(count);
-        ArgumentOutOfRangeException.ThrowIfNegative(price);
 
         var orderItem = new OrderItem()
         {
-            ProductId = productId,
+            Product = product,
             Price = price,
             Count = count
         };
@@ -21,7 +21,7 @@ public class OrderItem : Entity<int>
     }
     internal OrderItem() { }
 
-    public ProductId ProductId { get; init; } = null!;
+    public string Product { get; init; } = string.Empty;
     public int Count { get; private set; }
-    public decimal Price { get; private set; }
+    public Money Price { get; private set; }
 }

@@ -1,7 +1,6 @@
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.OrderAggregate.Entities;
-using Nutrifica.Domain.Aggregates.OrderAggregate.Enums;
 using Nutrifica.Domain.Aggregates.OrderAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Domain.Common.Models;
@@ -32,7 +31,7 @@ public sealed class Order : Entity<OrderId>, IAggregateRoot, IAuditableEntity
 
     public State State { get; set; }
 
-    public Money TotalSum { get; }
+    public Money TotalSum { get; } = Money.Zero();
     public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.ToList();
     public IReadOnlyCollection<UserId> ManagerIds => _managerIds.ToList();
 
