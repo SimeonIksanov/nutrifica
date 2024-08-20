@@ -9,7 +9,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Users.Create;
 
-public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserResponse>
+public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserDto>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -20,10 +20,10 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserR
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<UserResponse>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         if (await UsernameIsUsed(request.Username, cancellationToken))
-            return Result.Failure<UserResponse>(UserErrors.UsernameIsAlreadyInUse);
+            return Result.Failure<UserDto>(UserErrors.UsernameIsAlreadyInUse);
 
         User? supervisor = null;
         if (request.SupervisorId is not null && Guid.Empty != request.SupervisorId.Value)
@@ -31,7 +31,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserR
             supervisor = await _userRepository.GetByIdAsync(request.SupervisorId, cancellationToken);
             if (supervisor is null)
             {
-                return Result.Failure<UserResponse>(UserErrors.SupervisorNotFound);
+                return Result.Failure<UserDto>(UserErrors.SupervisorNotFound);
             }
         }
 
@@ -41,7 +41,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, UserR
         _userRepository.Add(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return user.ToUserResponse(supervisor);
+        return user.ToUserDto(supervisor);
     }
 
     private async Task<bool> UsernameIsUsed(string username, CancellationToken cancellationToken)

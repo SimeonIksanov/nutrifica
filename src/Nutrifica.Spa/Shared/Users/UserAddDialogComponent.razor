@@ -87,7 +87,7 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
 
     private ValidationMessageStore? _messageStore;
-    private UserCreateRequest Model { get; } = new();
+    private UserCreateDto Model { get; } = new();
     private EditContext? _editContext;
     private readonly CancellationTokenSource _cts = new();
     private Error? Error;

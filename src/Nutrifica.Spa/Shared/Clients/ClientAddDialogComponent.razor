@@ -140,7 +140,7 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
 
     private ValidationMessageStore _messageStore = null!;
-    private ClientCreateRequest Model { get; } = new();
+    private ClientCreateDto Model { get; } = new();
     private EditContext _editContext = null!;
 
     protected override void OnInitialized()

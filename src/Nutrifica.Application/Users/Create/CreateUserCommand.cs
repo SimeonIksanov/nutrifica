@@ -14,4 +14,4 @@ public record CreateUserCommand(
     Email Email,
     PhoneNumber PhoneNumber,
     UserId? SupervisorId
-) : ICommand<UserResponse>;
+) : ICommand<UserDto>;

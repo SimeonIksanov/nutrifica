@@ -7,7 +7,7 @@ public record OrderDto
 {
     public Guid Id { get; set; }
     public DateTime CreatedOn { get; set; }
-    public UserFullNameResponse CreatedBy { get; set; } = null!;
+    public UserShortDto CreatedBy { get; set; } = null!;
     public Guid ClientId { get; set; }
     public OrderStatus Type { get; set; }
     public Status Status { get; set; }

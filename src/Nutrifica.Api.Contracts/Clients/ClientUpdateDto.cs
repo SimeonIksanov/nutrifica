@@ -4,7 +4,7 @@ using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Api.Contracts.Clients;
 
-public record ClientUpdateRequest
+public record ClientUpdateDto
 {
     public Guid Id { get; set; }
 

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Nutrifica.Api.Contracts.Clients;
 
-public record ClientCreateRequest
+public record ClientCreateDto
 {
     [MaxLength(50, ErrorMessage = "Максимальная длина имени 50 символов")]
     public string FirstName { get; set; } = string.Empty;

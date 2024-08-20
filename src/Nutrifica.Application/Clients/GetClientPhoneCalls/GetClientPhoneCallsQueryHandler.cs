@@ -9,7 +9,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.GetClientPhoneCalls;
 
-public class GetClientPhoneCallsQueryHandler : IQueryHandler<GetClientPhoneCallsQuery, PagedList<PhoneCallResponse>>
+public class GetClientPhoneCallsQueryHandler : IQueryHandler<GetClientPhoneCallsQuery, PagedList<PhoneCallDto>>
 {
     private readonly IClientRepository _clientRepository;
     private readonly ILogger<GetClientPhoneCallsQueryHandler> _logger;
@@ -22,7 +22,7 @@ public class GetClientPhoneCallsQueryHandler : IQueryHandler<GetClientPhoneCalls
     }
 
 
-    public async Task<Result<PagedList<PhoneCallResponse>>> Handle(GetClientPhoneCallsQuery request,
+    public async Task<Result<PagedList<PhoneCallDto>>> Handle(GetClientPhoneCallsQuery request,
         CancellationToken cancellationToken)
     {
         var clientExists = await _clientRepository
@@ -30,14 +30,14 @@ public class GetClientPhoneCallsQueryHandler : IQueryHandler<GetClientPhoneCalls
         if (!clientExists)
         {
             _logger.LogWarning("Client '{clientId}' not found", request.Id);
-            return Result.Failure<PagedList<PhoneCallResponse>>(ClientErrors.ClientNotFound);
+            return Result.Failure<PagedList<PhoneCallDto>>(ClientErrors.ClientNotFound);
         }
 
         var callsPagedList = await _clientRepository
             .GetPhoneCallsAsync(request.Id, request.QueryParams, cancellationToken);
 
-        return Result.Success(PagedList<PhoneCallResponse>.Create(
-            items: callsPagedList.Items.Select(x => x.ToPhoneCallResponse()).ToList(),
+        return Result.Success(PagedList<PhoneCallDto>.Create(
+            items: callsPagedList.Items.Select(x => x.ToPhoneCallDto()).ToList(),
             page: callsPagedList.Page,
             pageSize: callsPagedList.PageSize,
             totalCount: callsPagedList.TotalCount));

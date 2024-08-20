@@ -131,9 +131,9 @@
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
-    [Parameter] public ClientResponse Client { get; set; } = null!;
+    [Parameter] public ClientDto Client { get; set; } = null!;
     private ValidationMessageStore _messageStore = null!;
-    private ClientUpdateRequest _model = new ();
+    private ClientUpdateDto _model = new ();
     private EditContext _editContext = null!;
     private CancellationTokenSource _cts = new();
 

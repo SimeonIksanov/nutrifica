@@ -47,7 +47,7 @@
 @code {
     [Parameter] public Guid ClientId { get; set; }
 
-    private ClientResponse _client = null!;
+    private ClientDto _client = null!;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     protected override async Task OnInitializedAsync()

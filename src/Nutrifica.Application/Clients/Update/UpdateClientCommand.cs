@@ -15,4 +15,4 @@ public record UpdateClientCommand(
     Comment Comment,
     PhoneNumber PhoneNumber,
     string Source,
-    State State) : ICommand<ClientResponse>;
+    State State) : ICommand<ClientDto>;

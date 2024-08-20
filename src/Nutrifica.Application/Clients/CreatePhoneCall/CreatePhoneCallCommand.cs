@@ -7,4 +7,4 @@ namespace Nutrifica.Application.Clients.CreatePhoneCall;
 public record CreatePhoneCallCommand(
     ClientId clientId,
     string Comment
-) : ICommand<PhoneCallResponse>;
+) : ICommand<PhoneCallDto>;

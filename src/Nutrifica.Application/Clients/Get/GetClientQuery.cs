@@ -5,4 +5,4 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.Get;
 
-public record GetClientsQuery(QueryParams QueryParams) : IQuery<PagedList<ClientResponse>>;
+public record GetClientsQuery(QueryParams QueryParams) : IQuery<PagedList<ClientDto>>;

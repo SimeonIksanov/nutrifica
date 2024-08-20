@@ -9,7 +9,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Users.Update;
 
-public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserResponse>
+public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserDto>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -20,7 +20,7 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserR
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<UserResponse>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UserDto>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
         User? supervisor = null;
         if (request.SupervisorId is not null && Guid.Empty != request.SupervisorId.Value)
@@ -28,19 +28,19 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserR
             supervisor = await _userRepository.GetByIdAsync(request.SupervisorId, cancellationToken);
             if (supervisor is null)
             {
-                return Result.Failure<UserResponse>(UserErrors.SupervisorNotFound);
+                return Result.Failure<UserDto>(UserErrors.SupervisorNotFound);
             }
         }
 
         if (request.Enabled is false && string.IsNullOrWhiteSpace(request.DisableReason))
         {
-            return Result.Failure<UserResponse>(UserErrors.DisableReasonNotSpecified);
+            return Result.Failure<UserDto>(UserErrors.DisableReasonNotSpecified);
         }
 
         var user = await _userRepository.GetByIdIncludeAccountAsync(request.Id, cancellationToken);
         if (user is null)
         {
-            return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+            return Result.Failure<UserDto>(UserErrors.UserNotFound);
         }
 
         user.FirstName = request.FirstName;
@@ -63,6 +63,6 @@ public class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserR
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return user.ToUserResponse(supervisor);
+        return user.ToUserDto(supervisor);
     }
 }

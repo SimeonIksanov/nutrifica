@@ -14,61 +14,61 @@ public class UserService : ServiceBase, IUserService
     {
     }
 
-    public async Task<IResult<PagedList<UserResponse>>> Get(QueryParams queryParams,
+    public async Task<IResult<PagedList<UserDto>>> Get(QueryParams queryParams,
         CancellationToken cancellationToken)
     {
         var requestUri = UsersEndpoints.Get + queryParams;
         try
         {
             var response = await GetHttpClient().GetAsync(requestUri, cancellationToken);
-            return await HandleResponse<PagedList<UserResponse>>(response, cancellationToken);
+            return await HandleResponse<PagedList<UserDto>>(response, cancellationToken);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Не удалось загрузить список пользователей: {ex.Message}");
-            return Result.Failure<PagedList<UserResponse>>(UserServiceErrors.FailedToLoad);
+            return Result.Failure<PagedList<UserDto>>(UserServiceErrors.FailedToLoad);
         }
     }
 
-    public async Task<IResult<UserResponse>> CreateAsync(UserCreateRequest request, CancellationToken cancellationToken)
+    public async Task<IResult<UserDto>> CreateAsync(UserCreateDto dto, CancellationToken cancellationToken)
     {
         try
         {
             var response = await GetHttpClient()
-                .PostAsJsonAsync(UsersEndpoints.Create, request, cancellationToken);
-            return await HandleResponse<UserResponse>(response, cancellationToken);
+                .PostAsJsonAsync(UsersEndpoints.Create, dto, cancellationToken);
+            return await HandleResponse<UserDto>(response, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
             Console.WriteLine(ex);
-            return Result.Failure<UserResponse>(UserServiceErrors.FailedToCreate);
+            return Result.Failure<UserDto>(UserServiceErrors.FailedToCreate);
         }
     }
 
-    public async Task<IResult<UserResponse>> UpdateAsync(UserUpdateRequest request, CancellationToken cancellationToken)
+    public async Task<IResult<UserDto>> UpdateAsync(UserUpdateDto dto, CancellationToken cancellationToken)
     {
-        var uri = UsersEndpoints.Update(request.Id);
+        var uri = UsersEndpoints.Update(dto.Id);
         try
         {
             var response = await GetHttpClient()
-                .PutAsJsonAsync(uri, request, cancellationToken);
-            return await HandleResponse<UserResponse>(response, cancellationToken);
+                .PutAsJsonAsync(uri, dto, cancellationToken);
+            return await HandleResponse<UserDto>(response, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
             Console.WriteLine(ex);
-            return Result.Failure<UserResponse>(UserServiceErrors.FailedToUpdate);
+            return Result.Failure<UserDto>(UserServiceErrors.FailedToUpdate);
         }
     }
 
-    public async Task<IResult> ChangePasswordAsync(UserChangePasswordRequest request,
+    public async Task<IResult> ChangePasswordAsync(UserChangePasswordDto dto,
         CancellationToken cancellationToken)
     {
-        var uri = UsersEndpoints.ChangePassword(request.Id);
+        var uri = UsersEndpoints.ChangePassword(dto.Id);
         try
         {
             var response = await GetHttpClient()
-                .PostAsJsonAsync(uri, request, cancellationToken);
+                .PostAsJsonAsync(uri, dto, cancellationToken);
             return await HandleResponse(response, cancellationToken);
         }
         catch (HttpRequestException ex)
@@ -78,13 +78,13 @@ public class UserService : ServiceBase, IUserService
         }
     }
 
-    public async Task<IResult> ResetPasswordAsync(UserResetPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IResult> ResetPasswordAsync(UserResetPasswordDto dto, CancellationToken cancellationToken)
     {
-        var uri = UsersEndpoints.ResetPassword(request.Id);
+        var uri = UsersEndpoints.ResetPassword(dto.Id);
         try
         {
             var response = await GetHttpClient()
-                .PostAsJsonAsync(uri, request, cancellationToken);
+                .PostAsJsonAsync(uri, dto, cancellationToken);
             return await HandleResponse(response, cancellationToken);
         }
         catch (HttpRequestException ex)

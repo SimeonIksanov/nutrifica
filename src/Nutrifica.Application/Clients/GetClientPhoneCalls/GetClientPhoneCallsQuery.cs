@@ -6,4 +6,4 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.GetClientPhoneCalls;
 
-public record GetClientPhoneCallsQuery(ClientId Id, QueryParams QueryParams) : IQuery<PagedList<PhoneCallResponse>>;
+public record GetClientPhoneCallsQuery(ClientId Id, QueryParams QueryParams) : IQuery<PagedList<PhoneCallDto>>;

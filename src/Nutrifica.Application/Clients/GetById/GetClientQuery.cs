@@ -4,4 +4,4 @@ using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 namespace Nutrifica.Application.Clients.GetById;
 
-public record GetClientQuery(ClientId Id) : IQuery<ClientResponse>;
+public record GetClientQuery(ClientId Id) : IQuery<ClientDto>;

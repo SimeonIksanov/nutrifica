@@ -95,7 +95,7 @@
 </MudPaper>
 
 @code {
-    [Parameter] public ClientResponse Client { get; set; } = null!;
+    [Parameter] public ClientDto Client { get; set; } = null!;
 
     private async Task OnModifyClientClick(MouseEventArgs obj)
     {
@@ -116,14 +116,14 @@
 
         if (result is null || result.Canceled) return;
 
-        if (result.Data is ClientResponse clientResponse)
+        if (result.Data is ClientDto clientResponse)
         {
             Snackbar.Add("Данные клиента изменены", Severity.Success);
             MapRefreshedClientToExistingObject(clientResponse, Client);
         }
     }
 
-    private void MapRefreshedClientToExistingObject(ClientResponse src, ClientResponse dst)
+    private void MapRefreshedClientToExistingObject(ClientDto src, ClientDto dst)
     {
         if (src is null || dst is null) return;
         dst.FirstName = src.FirstName;

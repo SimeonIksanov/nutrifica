@@ -78,8 +78,8 @@ public class ClientRepository : IClientRepository
                     x.phoneCall.Id,
                     x.phoneCall.CreatedOn,
                     Equals(user, null)
-                        ? new UserFullName(x.phoneCall.CreatedBy.Value, "unknown", "unknown", "unknown")
-                        : new UserFullName(user.Id.Value, user.FirstName.Value, user.MiddleName.Value,
+                        ? new UserShortModel(x.phoneCall.CreatedBy.Value, "unknown", "unknown", "unknown")
+                        : new UserShortModel(user.Id.Value, user.FirstName.Value, user.MiddleName.Value,
                             user.LastName.Value),
                     x.phoneCall.Comment));
         var pagedList =
@@ -88,12 +88,12 @@ public class ClientRepository : IClientRepository
     }
 
     private Expression<Func<Client,ClientModel>> ClientToClientModel() =>
-        client => new ClientModel(
-            client.Id.Value,
-            client.FirstName.Value,
-            client.MiddleName.Value,
-            client.LastName.Value,
-            new()
+        client => new ClientModel{
+            Id = client.Id.Value,
+            FirstName = client.FirstName.Value,
+            MiddleName = client.MiddleName.Value,
+            LastName = client.LastName.Value,
+            Address = new()
             {
                 City = client.Address.City,
                 Comment = client.Address.Comment,
@@ -102,9 +102,10 @@ public class ClientRepository : IClientRepository
                 Street = client.Address.Street,
                 ZipCode = client.Address.ZipCode
             },
-            client.Comment.Value,
-            client.PhoneNumber.Value,
-            client.Source,
-            client.State,
-            client.CreatedOn);
+            Comment = client.Comment.Value,
+            PhoneNumber = client.PhoneNumber.Value,
+            Source = client.Source,
+            State = client.State,
+            CreatedOn = client.CreatedOn
+        };
 }

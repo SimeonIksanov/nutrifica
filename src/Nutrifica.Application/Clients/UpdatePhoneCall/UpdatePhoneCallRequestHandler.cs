@@ -8,7 +8,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.UpdatePhoneCall;
 
-public class UpdatePhoneCallRequestHandler : ICommandHandler<UpdatePhoneCallCommand, PhoneCallResponse>
+public class UpdatePhoneCallRequestHandler : ICommandHandler<UpdatePhoneCallCommand, PhoneCallDto>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClientRepository _clientRepository;
@@ -19,24 +19,24 @@ public class UpdatePhoneCallRequestHandler : ICommandHandler<UpdatePhoneCallComm
         _clientRepository = clientRepository;
     }
 
-    public async Task<Result<PhoneCallResponse>> Handle(UpdatePhoneCallCommand command,
+    public async Task<Result<PhoneCallDto>> Handle(UpdatePhoneCallCommand command,
         CancellationToken cancellationToken)
     {
         var client = await _clientRepository.GetByIdAsync(command.ClientId, cancellationToken);
         if (client is null)
-            return Result.Failure<PhoneCallResponse>(ClientErrors.ClientNotFound);
+            return Result.Failure<PhoneCallDto>(ClientErrors.ClientNotFound);
         var phoneCall = client.PhoneCalls.FirstOrDefault(x => x.Id == command.PhoneCallId.Value);
         if (phoneCall is null)
-            return Result.Failure<PhoneCallResponse>(ClientErrors.PhoneCallNotFound);
+            return Result.Failure<PhoneCallDto>(ClientErrors.PhoneCallNotFound);
 
         phoneCall.Comment = command.Comment;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success(new PhoneCallResponse()
+        return Result.Success(new PhoneCallDto()
         {
             Id = phoneCall.Id,
             Comment = phoneCall.Comment,
             CreatedOn = phoneCall.CreatedOn,
-            CreatedBy = new UserFullNameResponse(phoneCall.CreatedBy.Value, string.Empty, string.Empty,
+            CreatedBy = new UserShortDto(phoneCall.CreatedBy.Value, string.Empty, string.Empty,
                 string.Empty)
         });
     }

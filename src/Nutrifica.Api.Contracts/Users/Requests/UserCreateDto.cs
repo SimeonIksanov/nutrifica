@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Nutrifica.Api.Contracts.Users.Requests;
 
-public record UserCreateRequest
+public record UserCreateDto
 {
     [Required(AllowEmptyStrings = false, ErrorMessage = "Логин не может быть пустым")]
     [MaxLength(50, ErrorMessage = "Максимальная длина 50 символов")]

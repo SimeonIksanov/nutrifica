@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Nutrifica.Api.Contracts.Clients;
 
-public record PhoneCallUpdateRequest
+public record PhoneCallUpdateDto
 {
     [Required]
     public int Id { get; set; }

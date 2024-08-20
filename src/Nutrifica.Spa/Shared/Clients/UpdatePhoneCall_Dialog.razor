@@ -34,11 +34,11 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public Guid ClientId { get; set; }
-    [Parameter] public PhoneCallResponse PhoneCall { get; set; } = null!;
+    [Parameter] public PhoneCallDto PhoneCall { get; set; } = null!;
     private readonly CancellationTokenSource _cts = new();
     private EditContext _editContext = null!;
     private ValidationMessageStore _messageStore = null!;
-    private PhoneCallUpdateRequest _model = new();
+    private PhoneCallUpdateDto _model = new();
 
     protected override void OnInitialized()
     {

@@ -30,7 +30,6 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
     public FirstName FirstName { get; set; }
     public MiddleName MiddleName { get; set; }
     public LastName LastName { get; set; }
-    // public string FullName => string.Join(" ", LastName, FirstName, MiddleName).Trim();
 
     public Address Address { get; set; } = null!;
     public Comment Comment { get; set; }

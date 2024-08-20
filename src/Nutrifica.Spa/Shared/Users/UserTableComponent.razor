@@ -13,7 +13,7 @@
     MaxWidth="MaxWidth.False">
 
     <MudDataGrid
-        T="UserResponse"
+        T="UserDto"
         @ref="_dataGrid"
         Dense="true"
         Striped="true"
@@ -95,17 +95,17 @@
         </LoadingContent>
 
         <PagerContent>
-            <MudDataGridPager T="UserResponse"/>
+            <MudDataGridPager T="UserDto"/>
         </PagerContent>
     </MudDataGrid>
 
 </MudContainer>
 
 @code {
-    private ICollection<UserResponse> _users = Array.Empty<UserResponse>();
-    private IDictionary<Guid, UserResponse> _managers = new Dictionary<Guid, UserResponse>();
+    private ICollection<UserDto> _users = Array.Empty<UserDto>();
+    private IDictionary<Guid, UserDto> _managers = new Dictionary<Guid, UserDto>();
     private CancellationTokenSource _cancellationTokenSource = new();
-    private MudDataGrid<UserResponse> _dataGrid = null!;
+    private MudDataGrid<UserDto> _dataGrid = null!;
 
     public void Dispose()
     {
@@ -119,18 +119,18 @@
         if (firstRender)
         {
             _dataGrid.FilterDefinitions.Clear();
-            _dataGrid.FilterDefinitions.Add(new FilterDefinition<UserResponse>
+            _dataGrid.FilterDefinitions.Add(new FilterDefinition<UserDto>
             {
                 Id = Guid.NewGuid(),
                 Title = "Active",
-                Column = _dataGrid.RenderedColumns.Find(x => x.PropertyName == nameof(UserResponse.Enabled)),
+                Column = _dataGrid.RenderedColumns.Find(x => x.PropertyName == nameof(UserDto.Enabled)),
                 Operator = FilterOperator.Boolean.Is,
                 Value = true
             });
         }
     }
 
-    private async Task<GridData<UserResponse>> FetchUsersAsync(GridState<UserResponse> state)
+    private async Task<GridData<UserDto>> FetchUsersAsync(GridState<UserDto> state)
     {
         var managersTask = LoadManagersAsync();
         var usersTask = LoadUsersAsync(state);
@@ -138,7 +138,7 @@
         return usersTask.Result;
     }
 
-    private async Task<GridData<UserResponse>> LoadUsersAsync(GridState<UserResponse> state)
+    private async Task<GridData<UserDto>> LoadUsersAsync(GridState<UserDto> state)
     {
         var queryParams = new QueryParams
         {
@@ -152,13 +152,13 @@
         if (result.IsFailure)
         {
             Snackbar.Add(result.Error.Description, Severity.Error);
-            _users = Array.Empty<UserResponse>();
-            return new GridData<UserResponse>();
+            _users = Array.Empty<UserDto>();
+            return new GridData<UserDto>();
         }
 
         _users = result.Value.Items;
 
-        return new GridData<UserResponse>
+        return new GridData<UserDto>
         {
             Items = result.Value.Items,
             TotalItems = result.Value.TotalCount
@@ -172,7 +172,7 @@
             _managers = managerResult.Value.Items.ToDictionary(x => x.Id, x => x);
     }
 
-    private static void ApplySorts(GridState<UserResponse> state, QueryParams queryParams)
+    private static void ApplySorts(GridState<UserDto> state, QueryParams queryParams)
     {
         if (state.SortDefinitions.Count > 0)
             queryParams.Sorts = state.SortDefinitions
@@ -180,7 +180,7 @@
                 .Aggregate("", (a, b) => string.Join(",", a, b));
     }
 
-    private void ApplyFilters(GridState<UserResponse> state, QueryParams queryParams)
+    private void ApplyFilters(GridState<UserDto> state, QueryParams queryParams)
     {
         if (state.FilterDefinitions.Count > 0)
         {
@@ -255,14 +255,14 @@
 
         if (result is null || result.Canceled) return;
 
-        if (result.Data is UserResponse)
+        if (result.Data is UserDto)
         {
             Snackbar.Add("Пользователь создан", Severity.Success);
             _ = _dataGrid.ReloadServerData();
         }
     }
 
-    private async Task OnResetPasswordClick(UserResponse user)
+    private async Task OnResetPasswordClick(UserDto user)
     {
         var options = new DialogOptions
         {
@@ -282,14 +282,14 @@
         Snackbar.Add("Пароль установлен.", Severity.Success);
     }
 
-    private Expression<Func<UserResponse, string>> ExtractField()
+    private Expression<Func<UserDto, string>> ExtractField()
     {
         return x => x.SupervisorId.HasValue && _managers.ContainsKey(x.SupervisorId.Value)
             ? _managers[x.SupervisorId.Value].FullName
             : string.Empty;
     }
 
-    private async Task OnEditClick(UserResponse user)
+    private async Task OnEditClick(UserDto user)
     {
         var options = new DialogOptions
         {
@@ -308,14 +308,14 @@
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
 
-        if (result.Data is UserResponse)
+        if (result.Data is UserDto)
         {
             Snackbar.Add("Данные обновлены", Severity.Success);
             _ = _dataGrid.ReloadServerData();
         }
     }
 
-    private Func<UserResponse, int, string> RowStyleFunc =>
+    private Func<UserDto, int, string> RowStyleFunc =>
         (user, _) => user.Enabled ? string.Empty : "font-style:italic;text-decoration: line-through";
 
     private async Task OnRefreshClick()

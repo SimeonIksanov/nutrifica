@@ -9,7 +9,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.Create;
 
-public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, ClientResponse>
+public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, ClientDto>
 {
     private readonly IClientRepository _clientRepository;
     private readonly ICurrentUserService _currentUserService;
@@ -22,7 +22,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
         _currentUserService = currentUserService;
     }
 
-    public async Task<Result<ClientResponse>> Handle(CreateClientCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ClientDto>> Handle(CreateClientCommand request, CancellationToken cancellationToken)
     {
         var client = Client.Create(
             request.FirstName,
@@ -37,7 +37,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
         _clientRepository.Add(client);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var dto = client.ToClientResponse();
+        var dto = client.ToClientDto();
         return Result.Success(dto);
     }
 }

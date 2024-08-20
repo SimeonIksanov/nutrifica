@@ -38,7 +38,7 @@ public class ClientController : ApiController
     public async Task<IActionResult> Get([FromQuery] QueryParams queryParams, CancellationToken ct)
     {
         var command = new GetClientsQuery(queryParams);
-        Result<PagedList<ClientResponse>> result = await _mediator.Send(command, ct);
+        Result<PagedList<ClientDto>> result = await _mediator.Send(command, ct);
 
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
@@ -59,31 +59,31 @@ public class ClientController : ApiController
     /// <summary>
     ///     Create client
     /// </summary>
-    /// <param name="request"></param>
+    /// <param name="dto"></param>
     /// <param name="ct">Cancellation Token</param>
     /// <returns>Created client object</returns>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] ClientCreateRequest request, CancellationToken ct)
+    public async Task<IActionResult> Create([FromBody] ClientCreateDto dto, CancellationToken ct)
     {
         var command = new CreateClientCommand(
-            FirstName.Create(request.FirstName),
-            MiddleName.Create(request.MiddleName),
-            LastName.Create(request.LastName),
+            FirstName.Create(dto.FirstName),
+            MiddleName.Create(dto.MiddleName),
+            LastName.Create(dto.LastName),
             new Address
             {
-                City = request.Address.City,
-                Country = request.Address.Country,
-                Region = request.Address.Region,
-                ZipCode = request.Address.ZipCode,
-                Comment = request.Address.Comment,
-                Street = request.Address.Street
+                City = dto.Address.City,
+                Country = dto.Address.Country,
+                Region = dto.Address.Region,
+                ZipCode = dto.Address.ZipCode,
+                Comment = dto.Address.Comment,
+                Street = dto.Address.Street
             },
-            Comment.Create(request.Comment),
-            PhoneNumber.Create(request.PhoneNumber),
-            request.Source //,
+            Comment.Create(dto.Comment),
+            PhoneNumber.Create(dto.PhoneNumber),
+            dto.Source //,
             // UserId.Create(CurrentUserId)
         );
-        Result<ClientResponse> result = await _mediator.Send(command, ct);
+        Result<ClientDto> result = await _mediator.Send(command, ct);
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetClient), new { clientId = result.Value.Id }, result.Value)
             : HandleFailure(result);
@@ -96,21 +96,21 @@ public class ClientController : ApiController
     /// <param name="ct"></param>
     /// <returns></returns>
     [HttpPut("{clientId:guid}")]
-    public async Task<IActionResult> Update([FromRoute] Guid clientId, [FromBody] ClientUpdateRequest request,
+    public async Task<IActionResult> Update([FromRoute] Guid clientId, [FromBody] ClientUpdateDto dto,
         CancellationToken ct)
     {
-        if (clientId != request.Id) return BadRequest();
+        if (clientId != dto.Id) return BadRequest();
         var command = new UpdateClientCommand(
-            ClientId.Create(request.Id),
-            FirstName.Create(request.FirstName),
-            MiddleName.Create(request.MiddleName),
-            LastName.Create(request.LastName),
-            request.Address.ToAddress(),
-            Comment.Create(request.Comment),
-            PhoneNumber.Create(request.PhoneNumber),
-            request.Source,
-            request.State);
-        Result<ClientResponse> result = await _mediator.Send(command, ct);
+            ClientId.Create(dto.Id),
+            FirstName.Create(dto.FirstName),
+            MiddleName.Create(dto.MiddleName),
+            LastName.Create(dto.LastName),
+            dto.Address.ToAddress(),
+            Comment.Create(dto.Comment),
+            PhoneNumber.Create(dto.PhoneNumber),
+            dto.Source,
+            dto.State);
+        Result<ClientDto> result = await _mediator.Send(command, ct);
         return result.IsSuccess
             ? Ok(result.Value)
             : HandleFailure(result);
@@ -141,10 +141,10 @@ public class ClientController : ApiController
     /// <returns>Created phonecall object</returns>
     [HttpPost("{clientId:guid}/phonecalls")]
     public async Task<IActionResult> CreateClientPhoneCall([FromRoute] Guid clientId,
-        [FromBody] PhoneCallCreateRequest request,
+        [FromBody] PhoneCallCreateDto dto,
         CancellationToken ct)
     {
-        var query = new CreatePhoneCallCommand(ClientId.Create(clientId), request.Comment);
+        var query = new CreatePhoneCallCommand(ClientId.Create(clientId), dto.Comment);
         var result = await _mediator.Send(query, ct);
         return result.IsSuccess ? StatusCode(StatusCodes.Status201Created, result.Value) : HandleFailure(result);
     }
@@ -156,12 +156,12 @@ public class ClientController : ApiController
     /// <returns>Created client object</returns>
     [HttpPut("{clientId:guid}/phonecalls/{phoneCallId:int}")]
     public async Task<IActionResult> UpdatePhoneCall([FromRoute] Guid clientId, [FromRoute] int phoneCallId,
-        [FromBody] PhoneCallUpdateRequest request,
+        [FromBody] PhoneCallUpdateDto dto,
         CancellationToken ct)
     {
-        if (phoneCallId != request.Id) return BadRequest();
+        if (phoneCallId != dto.Id) return BadRequest();
         var command =
-            new UpdatePhoneCallCommand(ClientId.Create(clientId), PhoneCallId.Create(request.Id), request.Comment);
+            new UpdatePhoneCallCommand(ClientId.Create(clientId), PhoneCallId.Create(dto.Id), dto.Comment);
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }

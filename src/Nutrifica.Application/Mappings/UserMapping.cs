@@ -12,9 +12,9 @@ public static class UserMapping
             user.LastName.Value, user.Email.Value, user.PhoneNumber.Value, user.Enabled, user.DisableReason,
             user.SupervisorId?.Value ?? null, user.Role, user.CreatedOn);
 
-    public static UserResponse ToUserResponse(this User user, User? supervisor)
+    public static UserDto ToUserDto(this User user, User? supervisor)
     {
-        return new UserResponse(
+        return new UserDto(
             user.Id.Value,
             user.Account.Username,
             user.FirstName.Value,
@@ -29,9 +29,9 @@ public static class UserMapping
             user.CreatedOn);
     }
 
-    public static UserResponse ToUserResponse(this UserModel user)
+    public static UserDto ToUserDto(this UserModel user)
     {
-        return new UserResponse(
+        return new UserDto(
             user.Id,
             user.Username,
             user.FirstName,
@@ -46,6 +46,6 @@ public static class UserMapping
             user.CreatedOn);
     }
 
-    public static UserFullNameResponse ToUserFullNameResponse(this UserFullName fullName) =>
-        new UserFullNameResponse(fullName.Id, fullName.FirstName, fullName.MiddleName, fullName.LastName);
+    public static UserShortDto ToUserShortDto(this UserShortModel shortModel) =>
+        new UserShortDto(shortModel.Id, shortModel.FirstName, shortModel.MiddleName, shortModel.LastName);
 }

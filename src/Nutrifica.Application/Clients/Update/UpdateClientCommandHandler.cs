@@ -8,7 +8,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.Update;
 
-public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, ClientResponse>
+public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, ClientDto>
 {
     private readonly IClientRepository _clientRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -20,19 +20,19 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, C
     }
 
 
-    public async Task<Result<ClientResponse>> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ClientDto>> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
     {
         var client = await _clientRepository.GetByIdAsync(request.Id, cancellationToken);
         if (client is null)
         {
-            return Result.Failure<ClientResponse>(ClientErrors.ClientNotFound);
+            return Result.Failure<ClientDto>(ClientErrors.ClientNotFound);
         }
 
         MapToClient(request, client);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var dto = client.ToClientResponse();
+        var dto = client.ToClientDto();
         return Result.Success(dto);
     }
 

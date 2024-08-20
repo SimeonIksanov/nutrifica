@@ -13,38 +13,38 @@ public class ClientService : ServiceBase, IClientService
     {
     }
 
-    public async Task<IResult<PagedList<ClientResponse>>> GetAsync(QueryParams queryParams,
+    public async Task<IResult<PagedList<ClientDto>>> GetAsync(QueryParams queryParams,
         CancellationToken cancellationToken)
     {
         var requestUri = ClientsEndpoints.Get + queryParams;
         try
         {
             var response = await GetHttpClient().GetAsync(requestUri, cancellationToken);
-            return await HandleResponse<PagedList<ClientResponse>>(response, cancellationToken);
+            return await HandleResponse<PagedList<ClientDto>>(response, cancellationToken);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Не удалось загрузить список клиентов: {ex.Message}");
-            return Result.Failure<PagedList<ClientResponse>>(ClientServiceErrors.FailedToLoad);
+            return Result.Failure<PagedList<ClientDto>>(ClientServiceErrors.FailedToLoad);
         }
     }
 
-    public async Task<IResult<ClientResponse>> GetByIdAsync(Guid clientId, CancellationToken cancellationToken)
+    public async Task<IResult<ClientDto>> GetByIdAsync(Guid clientId, CancellationToken cancellationToken)
     {
         try
         {
             var response = await GetHttpClient()
                 .GetAsync(ClientsEndpoints.GetById(clientId), cancellationToken);
-            return await HandleResponse<ClientResponse>(response, cancellationToken);
+            return await HandleResponse<ClientDto>(response, cancellationToken);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return Result.Failure<ClientResponse>(ClientServiceErrors.FailedToLoad);
+            return Result.Failure<ClientDto>(ClientServiceErrors.FailedToLoad);
         }
     }
 
-    public async Task<IResult<PagedList<PhoneCallResponse>>> GetPhoneCallsAsync(Guid clientId, QueryParams queryParams,
+    public async Task<IResult<PagedList<PhoneCallDto>>> GetPhoneCallsAsync(Guid clientId, QueryParams queryParams,
         CancellationToken cancellationToken)
     {
         try
@@ -52,76 +52,76 @@ public class ClientService : ServiceBase, IClientService
             var requestUri = ClientsEndpoints.GetPhoneCalls(clientId) + queryParams;
             var response = await GetHttpClient()
                 .GetAsync(requestUri, cancellationToken);
-            return await HandleResponse<PagedList<PhoneCallResponse>>(response, cancellationToken);
+            return await HandleResponse<PagedList<PhoneCallDto>>(response, cancellationToken);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Не удалось загрузить список пользователей: {ex.Message}");
-            return Result.Failure<PagedList<PhoneCallResponse>>(ClientServiceErrors.FailedToLoadPhoneCalls);
+            return Result.Failure<PagedList<PhoneCallDto>>(ClientServiceErrors.FailedToLoadPhoneCalls);
         }
     }
 
-    public async Task<IResult<ClientResponse>> CreateAsync(ClientCreateRequest request,
+    public async Task<IResult<ClientDto>> CreateAsync(ClientCreateDto dto,
         CancellationToken cancellationToken)
     {
         try
         {
             var response = await GetHttpClient()
-                .PostAsJsonAsync(ClientsEndpoints.Create, request, cancellationToken);
-            return await HandleResponse<ClientResponse>(response, cancellationToken);
+                .PostAsJsonAsync(ClientsEndpoints.Create, dto, cancellationToken);
+            return await HandleResponse<ClientDto>(response, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
             Console.WriteLine(ex);
-            return Result.Failure<ClientResponse>(ClientServiceErrors.FailedToCreate);
+            return Result.Failure<ClientDto>(ClientServiceErrors.FailedToCreate);
         }
     }
 
-    public async Task<IResult<ClientResponse>> UpdateAsync(ClientUpdateRequest request,
+    public async Task<IResult<ClientDto>> UpdateAsync(ClientUpdateDto dto,
         CancellationToken cancellationToken)
     {
         try
         {
             var response = await GetHttpClient()
-                .PutAsJsonAsync(ClientsEndpoints.Update(request.Id), request, cancellationToken);
-            return await HandleResponse<ClientResponse>(response, cancellationToken);
+                .PutAsJsonAsync(ClientsEndpoints.Update(dto.Id), dto, cancellationToken);
+            return await HandleResponse<ClientDto>(response, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
             Console.WriteLine(ex);
-            return Result.Failure<ClientResponse>(ClientServiceErrors.FailedToUpdate);
+            return Result.Failure<ClientDto>(ClientServiceErrors.FailedToUpdate);
         }
     }
 
-    public async Task<IResult<PhoneCallResponse>> CreatePhoneCallAsync(Guid clientId, PhoneCallCreateRequest request,
+    public async Task<IResult<PhoneCallDto>> CreatePhoneCallAsync(Guid clientId, PhoneCallCreateDto dto,
         CancellationToken cancellationToken)
     {
         try
         {
             var response = await GetHttpClient()
-                .PostAsJsonAsync(ClientsEndpoints.CreatePhoneCall(clientId), request, cancellationToken);
-            return await HandleResponse<PhoneCallResponse>(response, cancellationToken);
+                .PostAsJsonAsync(ClientsEndpoints.CreatePhoneCall(clientId), dto, cancellationToken);
+            return await HandleResponse<PhoneCallDto>(response, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
             Console.WriteLine(ex);
-            return Result.Failure<PhoneCallResponse>(ClientServiceErrors.FailedToCreatePhoneCall);
+            return Result.Failure<PhoneCallDto>(ClientServiceErrors.FailedToCreatePhoneCall);
         }
     }
 
-    public async Task<IResult<PhoneCallResponse>> UpdatePhoneCallAsync(Guid clientId, PhoneCallUpdateRequest request,
+    public async Task<IResult<PhoneCallDto>> UpdatePhoneCallAsync(Guid clientId, PhoneCallUpdateDto dto,
         CancellationToken cancellationToken)
     {
         try
         {
             var response = await GetHttpClient()
-                .PutAsJsonAsync(ClientsEndpoints.UpdatePhoneCall(clientId, request.Id), request, cancellationToken);
-            return await HandleResponse<PhoneCallResponse>(response, cancellationToken);
+                .PutAsJsonAsync(ClientsEndpoints.UpdatePhoneCall(clientId, dto.Id), dto, cancellationToken);
+            return await HandleResponse<PhoneCallDto>(response, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
             Console.WriteLine(ex);
-            return Result.Failure<PhoneCallResponse>(ClientServiceErrors.FailedToUpdatePhoneCalls);
+            return Result.Failure<PhoneCallDto>(ClientServiceErrors.FailedToUpdatePhoneCalls);
         }
     }
 

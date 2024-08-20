@@ -6,7 +6,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.Get;
 
-public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, PagedList<ClientResponse>>
+public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, PagedList<ClientDto>>
 {
     private readonly IClientRepository _clientRepository;
 
@@ -15,14 +15,14 @@ public class GetClientsQueryHandler : IQueryHandler<GetClientsQuery, PagedList<C
         _clientRepository = clientRepository;
     }
 
-    public async Task<Result<PagedList<ClientResponse>>> Handle(GetClientsQuery request,
+    public async Task<Result<PagedList<ClientDto>>> Handle(GetClientsQuery request,
         CancellationToken cancellationToken)
     {
         var clientPagedList = await _clientRepository
             .GetByFilterAsync(request.QueryParams, cancellationToken);
 
-        var responseList = PagedList<ClientResponse>.Create(
-            clientPagedList.Items.Select(x => x.ToClientResponse()).ToList(),
+        var responseList = PagedList<ClientDto>.Create(
+            clientPagedList.Items.Select(x => x.ToClientDto()).ToList(),
             clientPagedList.Page,
             clientPagedList.PageSize,
             clientPagedList.TotalCount);

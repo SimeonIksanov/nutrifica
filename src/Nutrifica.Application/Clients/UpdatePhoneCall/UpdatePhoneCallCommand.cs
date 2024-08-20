@@ -4,4 +4,4 @@ using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 namespace Nutrifica.Application.Clients.UpdatePhoneCall;
 
-public record UpdatePhoneCallCommand(ClientId ClientId, PhoneCallId PhoneCallId, string Comment) : ICommand<PhoneCallResponse>;
+public record UpdatePhoneCallCommand(ClientId ClientId, PhoneCallId PhoneCallId, string Comment) : ICommand<PhoneCallDto>;

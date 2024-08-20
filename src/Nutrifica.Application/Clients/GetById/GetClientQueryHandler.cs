@@ -7,7 +7,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Clients.GetById;
 
-public class GetClientQueryHandler : IQueryHandler<GetClientQuery, ClientResponse>
+public class GetClientQueryHandler : IQueryHandler<GetClientQuery, ClientDto>
 {
     private readonly IClientRepository _clientRepository;
 
@@ -16,14 +16,14 @@ public class GetClientQueryHandler : IQueryHandler<GetClientQuery, ClientRespons
         _clientRepository = clientRepository;
     }
 
-    public async Task<Result<ClientResponse>> Handle(GetClientQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ClientDto>> Handle(GetClientQuery request, CancellationToken cancellationToken)
     {
         var clientModel = await _clientRepository.GetByIdAsync(request.Id, cancellationToken);
         if (clientModel is null)
         {
-            return Result.Failure<ClientResponse>(ClientErrors.ClientNotFound);
+            return Result.Failure<ClientDto>(ClientErrors.ClientNotFound);
         }
 
-        return Result.Success(clientModel.ToClientResponse());
+        return Result.Success(clientModel.ToClientDto());
     }
 }

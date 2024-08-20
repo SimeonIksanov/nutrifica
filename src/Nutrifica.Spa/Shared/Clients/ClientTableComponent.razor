@@ -15,7 +15,7 @@
     MaxWidth="MaxWidth.False">
 
     <MudDataGrid RowClick="@RowClicked"
-                 T="ClientResponse"
+                 T="ClientDto"
                  @ref="_dataGrid"
                  Dense="true"
                  Striped="true"
@@ -46,7 +46,7 @@
         </ToolBarContent>
 
         <Columns>
-            <HierarchyColumn T="ClientResponse"/>
+            <HierarchyColumn T="ClientDto"/>
             <PropertyColumn Property="x => x.LastName" Title="Фамилия"/>
             <PropertyColumn Property="x => x.FirstName" Title="Имя"/>
             <PropertyColumn Property="x => x.MiddleName" Title="Отчество"/>
@@ -72,7 +72,7 @@
         </ChildRowContent>
         
         <PagerContent>
-            <MudDataGridPager T="ClientResponse"/>
+            <MudDataGridPager T="ClientDto"/>
         </PagerContent>
 
     </MudDataGrid>
@@ -80,10 +80,10 @@
 </MudContainer>
 
 @code {
-    private MudDataGrid<ClientResponse> _dataGrid = null!;
+    private MudDataGrid<ClientDto> _dataGrid = null!;
     private CancellationTokenSource _cancellationTokenSource = new();
 
-    private async Task<GridData<ClientResponse>> FetchClientsAsync(GridState<ClientResponse> state)
+    private async Task<GridData<ClientDto>> FetchClientsAsync(GridState<ClientDto> state)
     {
         var queryParams = new QueryParams
         {
@@ -97,17 +97,17 @@
         if (result.IsFailure)
         {
             Snackbar.Add(result.Error.Description, Severity.Error);
-            return new GridData<ClientResponse>();
+            return new GridData<ClientDto>();
         }
 
-        return new GridData<ClientResponse>
+        return new GridData<ClientDto>
         {
             Items = result.Value.Items,
             TotalItems = result.Value.TotalCount
         };
     }
 
-    private void RowClicked(DataGridRowClickEventArgs<ClientResponse> eventArgs)
+    private void RowClicked(DataGridRowClickEventArgs<ClientDto> eventArgs)
     {
         NavigationManager.NavigateTo(PageUrls.ClientDetails(eventArgs.Item.Id));
     }
@@ -133,14 +133,14 @@
 
         if (result is null || result.Canceled) return;
 
-        if (result.Data is ClientResponse)
+        if (result.Data is ClientDto)
         {
             Snackbar.Add("Пользователь создан", Severity.Success);
             _ = _dataGrid.ReloadServerData();
         }
     }
 
-    private string ShortComment(ClientResponse client) =>
+    private string ShortComment(ClientDto client) =>
         client.Comment.Substring(0, Math.Min(50, client.Comment.Length));
 
     private async Task OnUpdateClick()
@@ -148,7 +148,7 @@
         await _dataGrid.ReloadServerData();
     }
 
-    private static void ApplySorts(GridState<ClientResponse> state, QueryParams queryParams)
+    private static void ApplySorts(GridState<ClientDto> state, QueryParams queryParams)
     {
         if (state.SortDefinitions.Count > 0)
             queryParams.Sorts = state.SortDefinitions

@@ -1,6 +1,6 @@
 namespace Nutrifica.Application.Models.Users;
 
-public record UserFullName(
+public record UserShortModel(
     Guid Id,
     string FirstName,
     string MiddleName,

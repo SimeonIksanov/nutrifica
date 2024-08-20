@@ -32,9 +32,9 @@
 </MudPaper>
 
 @code {
-    [Parameter] public PhoneCallResponse PhoneCall { get; set; }
-    [Parameter] public EventCallback<PhoneCallResponse> OnUpdate { get; set; }
-    [Parameter] public EventCallback<PhoneCallResponse> OnDelete { get; set; }
+    [Parameter] public PhoneCallDto PhoneCall { get; set; }
+    [Parameter] public EventCallback<PhoneCallDto> OnUpdate { get; set; }
+    [Parameter] public EventCallback<PhoneCallDto> OnDelete { get; set; }
 
     private void OnClickEditPhoneCall() => OnUpdate.InvokeAsync(PhoneCall);
     private void OnClickDeletePhoneCall() => OnDelete.InvokeAsync(PhoneCall);

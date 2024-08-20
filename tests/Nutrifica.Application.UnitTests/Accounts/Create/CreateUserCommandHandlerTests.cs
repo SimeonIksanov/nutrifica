@@ -36,7 +36,7 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserResponse>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.NotNull(actual.Value.SupervisorId);
     }
@@ -47,7 +47,7 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserResponse>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.Null(actual.Value.SupervisorId);
     }
@@ -58,7 +58,7 @@ public class CreateUserCommandHandlerTests
         var actual = await _sut.Handle(_command, default);
 
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserResponse>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.Null(actual.Value.SupervisorId);
     }
@@ -68,7 +68,7 @@ public class CreateUserCommandHandlerTests
     {
         var actual = await _sut.Handle(_command, default);
         Assert.True(actual.IsSuccess);
-        Assert.IsType<UserResponse>(actual.Value);
+        Assert.IsType<UserDto>(actual.Value);
         Assert.Equal(_command.Username, actual.Value.Username);
         Assert.NotEqual(DateTime.MinValue, actual.Value.CreatedAt); // (actual.Value.CreatedAt);
     }

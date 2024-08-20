@@ -6,9 +6,9 @@ namespace Nutrifica.Application.Mappings;
 
 public static class ClientMapping
 {
-    public static ClientResponse ToClientResponse(this Client client)
+    public static ClientDto ToClientDto(this Client client)
     {
-        return new ClientResponse
+        return new ClientDto
         {
             Id = client.Id.Value,
             FirstName = client.FirstName.Value,
@@ -23,9 +23,9 @@ public static class ClientMapping
         };
     }
 
-    public static ClientResponse ToClientResponse(this ClientModel client)
+    public static ClientDto ToClientDto(this ClientModel client)
     {
-        return new ClientResponse
+        return new ClientDto
         {
             Id = client.Id,
             FirstName = client.FirstName,
@@ -34,19 +34,19 @@ public static class ClientMapping
             Address = client.Address.ToAddressDto(),
             PhoneNumber = client.PhoneNumber,
             Comment = client.Comment,
-            CreatedAt = client.CreatedAt,
+            CreatedAt = client.CreatedOn,
             Source = client.Source,
             State = client.State,
         };
     }
 
-    public static PhoneCallResponse ToPhoneCallResponse(this PhoneCallModel phoneCall)
+    public static PhoneCallDto ToPhoneCallDto(this PhoneCallModel phoneCall)
     {
-        return new PhoneCallResponse
+        return new PhoneCallDto
         {
             Comment = phoneCall.Comment,
             CreatedOn = phoneCall.CreatedOn,
-            CreatedBy = phoneCall.CreatedBy.ToUserFullNameResponse(),
+            CreatedBy = phoneCall.CreatedBy.ToUserShortDto(),
             Id = phoneCall.Id,
         };
     }

@@ -8,7 +8,7 @@ using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Users.GetById;
 
-public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserResponse>
+public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserDto>
 {
     private readonly IUserRepository _userRepository;
 
@@ -17,14 +17,14 @@ public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserResponse>
         _userRepository = userRepository;
     }
 
-    public async Task<Result<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
         var userModel = await _userRepository.GetDetailedByIdAsync(request.Id ,cancellationToken);
         if (userModel is null)
         {
-            return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+            return Result.Failure<UserDto>(UserErrors.UserNotFound);
         }
-        var response = userModel.ToUserResponse();
+        var response = userModel.ToUserDto();
         return Result.Success(response);
     }
 }

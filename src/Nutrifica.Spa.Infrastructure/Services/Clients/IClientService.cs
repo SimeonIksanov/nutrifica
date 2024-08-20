@@ -6,18 +6,18 @@ namespace Nutrifica.Spa.Infrastructure.Services.Clients;
 
 public interface IClientService
 {
-    Task<IResult<ClientResponse>> CreateAsync(ClientCreateRequest request, CancellationToken cancellationToken);
-    Task<IResult<ClientResponse>> UpdateAsync(ClientUpdateRequest request, CancellationToken cancellationToken);
-    Task<IResult<PagedList<ClientResponse>>> GetAsync(QueryParams queryParams, CancellationToken cancellationToken);
-    Task<IResult<ClientResponse>> GetByIdAsync(Guid clientId, CancellationToken cancellationToken);
+    Task<IResult<ClientDto>> CreateAsync(ClientCreateDto dto, CancellationToken cancellationToken);
+    Task<IResult<ClientDto>> UpdateAsync(ClientUpdateDto dto, CancellationToken cancellationToken);
+    Task<IResult<PagedList<ClientDto>>> GetAsync(QueryParams queryParams, CancellationToken cancellationToken);
+    Task<IResult<ClientDto>> GetByIdAsync(Guid clientId, CancellationToken cancellationToken);
 
-    Task<IResult<PagedList<PhoneCallResponse>>> GetPhoneCallsAsync(Guid clientId, QueryParams queryParams,
+    Task<IResult<PagedList<PhoneCallDto>>> GetPhoneCallsAsync(Guid clientId, QueryParams queryParams,
         CancellationToken cancellationToken);
 
-    Task<IResult<PhoneCallResponse>> CreatePhoneCallAsync(Guid clientId, PhoneCallCreateRequest request,
+    Task<IResult<PhoneCallDto>> CreatePhoneCallAsync(Guid clientId, PhoneCallCreateDto dto,
         CancellationToken cancellationToken);
 
-    Task<IResult<PhoneCallResponse>> UpdatePhoneCallAsync(Guid clientId, PhoneCallUpdateRequest request,
+    Task<IResult<PhoneCallDto>> UpdatePhoneCallAsync(Guid clientId, PhoneCallUpdateDto dto,
         CancellationToken cancellationToken);
 
     Task<IResult> DeletePhoneCallAsync(Guid clientId, int phoneCallId, CancellationToken cancellationToken);

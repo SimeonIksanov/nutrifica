@@ -53,7 +53,7 @@
     [SupplyParameterFromQuery] private int? PageSize { get; set; }
     [SupplyParameterFromQuery] private string? Sorts { get; set; }
     private QueryParams _queryParams = null!;
-    private List<PhoneCallResponse> _phoneCalls = new();
+    private List<PhoneCallDto> _phoneCalls = new();
     private CancellationTokenSource _cts = new();
     private string _newComment = string.Empty;
     private int _totalPages = 1;
@@ -88,7 +88,7 @@
 
     private async Task HandleAddComment(MouseEventArgs obj)
     {
-        var request = new PhoneCallCreateRequest() { Comment = _newComment };
+        var request = new PhoneCallCreateDto() { Comment = _newComment };
         var result = await ClientService.CreatePhoneCallAsync(ClientId, request, _cts.Token);
         if (result.IsFailure)
         {
@@ -123,7 +123,7 @@
 
     private bool HasInvalidNewPhoneCallComment() => string.IsNullOrWhiteSpace(_newComment);
 
-    private async Task UpdatePhoneCall(PhoneCallResponse? phoneCall)
+    private async Task UpdatePhoneCall(PhoneCallDto? phoneCall)
     {
         var dialogOptions = new DialogOptions()
         {
@@ -140,7 +140,7 @@
         var dialog = await DialogService.ShowAsync<UpdatePhoneCall_Dialog>("Изменение звонка", dialogParameters, dialogOptions);
         var dialogResult = await dialog.Result;
         if (dialogResult is null || dialogResult.Canceled) return;
-        if (dialogResult.Data is PhoneCallResponse)
+        if (dialogResult.Data is PhoneCallDto)
         {
             Snackbar.Add("Звонок изменен.", Severity.Success);
             await FetchPhoneCallsAsync();
@@ -148,7 +148,7 @@
         }
     }
 
-    private async Task DeletePhoneCall(PhoneCallResponse? phoneCall)
+    private async Task DeletePhoneCall(PhoneCallDto? phoneCall)
     {
         if (phoneCall is null) return;
         await ClientService.DeletePhoneCallAsync(ClientId, phoneCall.Id, _cts.Token);

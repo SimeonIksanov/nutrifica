@@ -4,7 +4,7 @@ using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Api.Contracts.Users.Responses;
 
-public record UserResponse(
+public record UserDto(
     Guid Id,
     string Username,
     string FirstName,

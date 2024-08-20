@@ -122,11 +122,11 @@
 
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
-    [Parameter] public UserResponse User { get; set; } = null!;
-    [Parameter] public IDictionary<Guid, UserResponse> Managers { get; set; } = null!;
+    [Parameter] public UserDto User { get; set; } = null!;
+    [Parameter] public IDictionary<Guid, UserDto> Managers { get; set; } = null!;
 
     private ValidationMessageStore _messageStore = null!;
-    private UserUpdateRequest Model { get; } = new();
+    private UserUpdateDto Model { get; } = new();
     private EditContext _editContext = null!;
     private CancellationTokenSource _cts = new();
     private Error? _error;
