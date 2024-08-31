@@ -21,10 +21,6 @@ public class ApiController : ControllerBase
         _mediator = mediator;
     }
 
-    // protected Guid CurrentUserId => User.Identity!.IsAuthenticated
-    //     ? Guid.Parse(User.Claims.First(x => x.Type.Equals(ClaimTypes.Sid)).Value)
-    //     : throw new InvalidOperationException("Unauthenticated user.");
-
     protected IActionResult HandleFailure(Result result) =>
         result switch
         {

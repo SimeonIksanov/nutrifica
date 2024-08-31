@@ -7,6 +7,8 @@ using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Interfaces.Services;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate;
+using Nutrifica.Domain.Aggregates.OrderAggregate;
+using Nutrifica.Domain.Aggregates.ProductAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 
 namespace Nutrifica.Infrastructure.Persistence;
@@ -26,8 +28,8 @@ public class AppDbContext : DbContext, IUnitOfWork
     public DbSet<User> Users { get; set; }
 
     public DbSet<Client> Clients { get; set; }
-    // public DbSet<Order> Orders { get; set; }
-    // public DbSet<Product> Products { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<Product> Products { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

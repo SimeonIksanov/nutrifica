@@ -6,22 +6,28 @@ namespace Nutrifica.Domain.Aggregates.OrderAggregate.Entities;
 
 public class OrderItem : Entity<int>
 {
-    public static OrderItem Create(string product, int count, Money price)
+    public static OrderItem Create(ProductId productId, int quantity, Money unitPrice)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(product);
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentNullException.ThrowIfNull(productId);
+        ArgumentOutOfRangeException.ThrowIfNegative(quantity);
 
         var orderItem = new OrderItem()
         {
-            Product = product,
-            Price = price,
-            Count = count
+            ProductId = productId,
+            Quantity = quantity,
+            UnitPrice = unitPrice
         };
         return orderItem;
     }
     internal OrderItem() { }
 
-    public string Product { get; init; } = string.Empty;
-    public int Count { get; private set; }
-    public Money Price { get; private set; }
+    public ProductId ProductId { get; init; }
+    public int Quantity { get; private set; }
+    public Money UnitPrice { get; private set; }
+
+    public void UpdateQuantity(int newQuantity)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(newQuantity);
+        Quantity = newQuantity;
+    }
 }

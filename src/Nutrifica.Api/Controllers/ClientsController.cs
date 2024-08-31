@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using Nutrifica.Api.Contracts.Clients;
-using Nutrifica.Api.Contracts.Orders;
 using Nutrifica.Application.Clients.Create;
 using Nutrifica.Application.Clients.CreatePhoneCall;
 using Nutrifica.Application.Clients.DeletePhoneCall;
@@ -22,9 +21,9 @@ namespace Nutrifica.Api.Controllers;
 
 [Route("api/clients")]
 [ApiController]
-public class ClientController : ApiController
+public class ClientsController : ApiController
 {
-    public ClientController(IMediator mediator) : base(mediator)
+    public ClientsController(IMediator mediator) : base(mediator)
     {
     }
 
@@ -178,36 +177,6 @@ public class ClientController : ApiController
         var command = new DeletePhoneCallCommand(ClientId.Create(clientId), PhoneCallId.Create(phoneCallId));
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);
-    }
-
-    #endregion
-
-    #region Orders
-
-    [HttpGet("{clientId:guid}/orders/")]
-    public async Task<IActionResult> GetOrders([FromRoute] Guid clientId, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    [HttpPost("{clientId:guid}/orders/")]
-    public async Task<IActionResult> CreateClientOrder([FromRoute] Guid clientId, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    [HttpPut("{clientId:guid}/orders/{orderId:guid}")]
-    public async Task<IActionResult> UpdateClientOrder([FromRoute] Guid clientId, [FromRoute] Guid orderId,
-        CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    [HttpDelete("{clientId:guid}/orders/{orderId:guid}")]
-    public async Task<IActionResult> DeleteClientOrder([FromRoute] Guid clientId, [FromRoute] Guid orderId,
-        CancellationToken ct)
-    {
-        throw new NotImplementedException();
     }
 
     #endregion

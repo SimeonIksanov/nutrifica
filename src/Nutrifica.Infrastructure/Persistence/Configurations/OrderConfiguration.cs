@@ -29,11 +29,11 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             oib.ToTable("OrderItems");
             oib.WithOwner().HasForeignKey("OrderId");
             oib.HasKey(nameof(OrderItem.Id), "OrderId");
-            // oib.Property(x => x.ProductId)
-            //     .HasConversion(
-            //         x => x.Value,
-            //         x => ProductId.Create(x));
-            oib.OwnsOne(x => x.Price, mb =>
+            oib.Property(x => x.ProductId)
+                .HasConversion(
+                    x => x.Value,
+                    x => ProductId.Create(x));
+            oib.OwnsOne(x => x.UnitPrice, mb =>
             {
                 mb.OwnsOne(x => x.Currency);
             });

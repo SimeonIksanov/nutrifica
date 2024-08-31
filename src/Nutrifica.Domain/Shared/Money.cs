@@ -8,6 +8,7 @@ public class Money : ValueObject
 
     public Money(decimal amount, Currency currency)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(amount);
         Amount = amount;
         Currency = currency;
     }
@@ -21,11 +22,28 @@ public class Money : ValueObject
 
     public static Money operator +(Money first, Money second)
     {
+        if (!first.IsZero && !second.IsZero && first.Currency != second.Currency)
+            throw new InvalidOperationException("Валюта должна быть одинаковой");
+
+        var sum = first.IsZero
+            ? second
+            : second.IsZero
+                ? first
+                : new Money(first.Amount + second.Amount, Currency.FromCode(first.Currency.Code));
+        return sum.IsZero ? Money.Zero() : sum;
+    }
+
+    public static Money operator -(Money first, Money second)
+    {
         if (first.Currency != second.Currency)
             throw new InvalidOperationException("Валюта должна быть одинаковой");
 
-        return new Money(first.Amount + second.Amount, first.Currency);
+        var dif = new Money(first.Amount - second.Amount, Currency.FromCode(first.Currency.Code));
+        return dif.IsZero ? Money.Zero() : dif;
     }
+
+    public static Money operator *(Money money, int multiplier) =>
+        new Money(money.Amount * multiplier, Currency.FromCode(money.Currency.Code));
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
