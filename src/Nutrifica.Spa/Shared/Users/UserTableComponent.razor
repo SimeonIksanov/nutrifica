@@ -102,7 +102,7 @@
 </MudContainer>
 
 @code {
-    private ICollection<UserDto> _users = Array.Empty<UserDto>();
+    // private ICollection<UserDto> _users = Array.Empty<UserDto>();
     private IDictionary<Guid, UserDto> _managers = new Dictionary<Guid, UserDto>();
     private CancellationTokenSource _cancellationTokenSource = new();
     private MudDataGrid<UserDto> _dataGrid = null!;
@@ -148,15 +148,15 @@
         ApplyFilters(state, queryParams);
         ApplySorts(state, queryParams);
 
-        var result = await UserService.Get(queryParams, _cancellationTokenSource.Token);
+        var result = await UserService.GetAsync(queryParams, _cancellationTokenSource.Token);
         if (result.IsFailure)
         {
             Snackbar.Add(result.Error.Description, Severity.Error);
-            _users = Array.Empty<UserDto>();
+            // _users = Array.Empty<UserDto>();
             return new GridData<UserDto>();
         }
 
-        _users = result.Value.Items;
+        // _users = result.Value.Items;
 
         return new GridData<UserDto>
         {
@@ -167,7 +167,7 @@
 
     private async Task LoadManagersAsync()
     {
-        var managerResult = await UserService.Get(new QueryParams() { Filters = "role>0", PageSize = 100 }, _cancellationTokenSource.Token);
+        var managerResult = await UserService.GetAsync(new QueryParams() { Filters = "role>0", PageSize = 100 }, _cancellationTokenSource.Token);
         if (managerResult.IsSuccess)
             _managers = managerResult.Value.Items.ToDictionary(x => x.Id, x => x);
     }

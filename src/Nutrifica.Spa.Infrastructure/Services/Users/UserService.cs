@@ -14,7 +14,7 @@ public class UserService : ServiceBase, IUserService
     {
     }
 
-    public async Task<IResult<PagedList<UserDto>>> Get(QueryParams queryParams,
+    public async Task<IResult<PagedList<UserDto>>> GetAsync(QueryParams queryParams,
         CancellationToken cancellationToken)
     {
         var requestUri = UsersEndpoints.Get + queryParams;

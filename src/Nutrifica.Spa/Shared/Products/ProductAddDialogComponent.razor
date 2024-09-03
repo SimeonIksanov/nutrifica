@@ -1,0 +1,91 @@
+@using Nutrifica.Api.Contracts.Products
+@using Nutrifica.Spa.Converters
+@using Nutrifica.Spa.Infrastructure.Services.Products
+@inject IProductService ProductService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<EditForm EditContext="_editContext"
+          OnValidSubmit="SubmitAsync">
+    
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator />
+            
+            <MudTextField Label="Название"
+                          For="() => Model.Name"
+                          @bind-Value="Model.Name"
+                          Variant="Variant.Outlined"/>
+            
+            <MudTextField Label="Описание"
+                          For="() => Model.Details"
+                          @bind-Value="Model.Details"
+                          Variant="Variant.Outlined"/>
+            
+            <MudTextField Label="Цена"
+                          For="() => Model.Price"
+                          @bind-Value="Model.Price"
+                          Converter="@_converter"
+                          Variant="Variant.Outlined"/>
+        </DialogContent>
+        
+        <DialogActions>
+            <MudButton OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary">
+                Создать
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    private ValidationMessageStore _messageStore = null!;
+    private ProductCreateDto Model { get; } = new();
+    private EditContext _editContext = null!;
+    private readonly CancellationTokenSource _cts = new();
+    private MoneyDtoRurConverter _converter = new();
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(Model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new(_editContext);
+    }
+
+    async Task SubmitAsync()
+    {
+        var createdResult = await ProductService
+            .CreateAsync(Model, _cts.Token);
+        if (createdResult.IsFailure)
+        {
+            _messageStore.Add(() => Model, createdResult.Error.Description);
+            _editContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(createdResult));
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore.Clear();
+    }
+
+    public void Dispose()
+    {
+        if (_editContext != null)
+            _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
+}

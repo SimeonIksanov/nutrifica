@@ -1,0 +1,133 @@
+@using System.Globalization
+@using Nutrifica.Api.Contracts.Products
+@using Nutrifica.Spa.Infrastructure.Models
+@using Nutrifica.Spa.Infrastructure.Services.Products
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IProductService ProductService
+@implements IDisposable
+
+<MudContainer
+    Gutters="true"
+    MaxWidth="MaxWidth.False">
+
+    <MudDataGrid
+        T="ProductDto"
+        @ref="_dataGrid"
+        Dense="true"
+        Striped="true"
+        Bordered="true"
+        Outlined="false"
+        Elevation="0"
+        ColumnResizeMode="ResizeMode.Column"
+        Filterable="true"
+        FilterMode="DataGridFilterMode.Simple"
+        ServerData="FetchProductsAsync">
+
+        <ToolBarContent>
+            <MudToolBar Class="gap-2">
+                <MudButton Variant="Variant.Outlined"
+                           Size="Size.Small"
+                           @onclick="OnAddClick">
+                    Создать
+                </MudButton>
+                
+                <MudButton @onclick="OnRefreshClick"
+                           Variant="Variant.Outlined"
+                           Size="Size.Small">
+                    Обновить
+                </MudButton>
+            </MudToolBar>
+        </ToolBarContent>
+
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Название"/>
+            <PropertyColumn Property="x => x.Details" Title="Описание"/>
+            <PropertyColumn Property="x => x.Price.Amount" Title="Цена">
+                <CellTemplate>
+                    @context.Item.Price.Amount.ToString(CultureInfo.InvariantCulture) рублей
+                </CellTemplate>
+            </PropertyColumn>
+
+        </Columns>
+
+        <NoRecordsContent>
+            <MudText>Продукты не найдены</MudText>
+        </NoRecordsContent>
+
+        <LoadingContent>
+            <MudText>Загрузка...</MudText>
+        </LoadingContent>
+
+        <PagerContent>
+            <MudDataGridPager T="ProductDto"/>
+        </PagerContent>
+    </MudDataGrid>
+
+</MudContainer>
+
+@code {
+    private MudDataGrid<ProductDto> _dataGrid = null!;
+    private CancellationTokenSource _cancellationTokenSource = new();
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.CancelAsync();
+        _cancellationTokenSource.Dispose();
+    }
+
+    private async Task<GridData<ProductDto>> FetchProductsAsync(GridState<ProductDto> state)
+    {
+        var usersTask = await LoadProductsAsync(state);
+        return usersTask;
+    }
+
+    private async Task<GridData<ProductDto>> LoadProductsAsync(GridState<ProductDto> state)
+    {
+        var queryParams = new QueryParams
+        {
+            Page = state.Page + 1,
+            PageSize = state.PageSize
+        };
+
+        var result = await ProductService.GetAsync(queryParams, _cancellationTokenSource.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+            return new GridData<ProductDto>();
+        }
+
+        return new GridData<ProductDto>
+        {
+            Items = result.Value.Items,
+            TotalItems = result.Value.TotalCount
+        };
+    }
+
+    private async Task OnAddClick()
+    {
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.TopCenter,
+            CloseOnEscapeKey = true
+        };
+        var dialog = await DialogService.ShowAsync<ProductAddDialogComponent>("Создание продукта", options);
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled) return;
+
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Продукт создан", Severity.Success);
+            _ = _dataGrid.ReloadServerData();
+        }
+    }
+    
+    private async Task OnRefreshClick()
+    {
+        await _dataGrid.ReloadServerData();
+    }
+}

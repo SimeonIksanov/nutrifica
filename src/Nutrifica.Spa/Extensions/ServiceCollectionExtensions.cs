@@ -9,6 +9,7 @@ using MudBlazor.Services;
 using Nutrifica.Spa.Infrastructure.Services;
 using Nutrifica.Spa.Infrastructure.Services.Authentication;
 using Nutrifica.Spa.Infrastructure.Services.Clients;
+using Nutrifica.Spa.Infrastructure.Services.Products;
 using Nutrifica.Spa.Infrastructure.Services.Users;
 using Nutrifica.Spa.MiddleWares;
 
@@ -34,6 +35,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IAuthenticationService, AuthenticationService>()
             .AddScoped<IUserService, UserService>()
             .AddScoped<IClientService, ClientService>()
+            .AddScoped<IProductService, ProductService>()
             .AddScoped<NutrificaAuthenticationStateProvider>()
             .AddScoped<AuthenticationStateProvider>(sp =>
                 sp.GetRequiredService<NutrificaAuthenticationStateProvider>())

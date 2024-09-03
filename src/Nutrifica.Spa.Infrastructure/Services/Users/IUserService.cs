@@ -7,7 +7,7 @@ namespace Nutrifica.Spa.Infrastructure.Services.Users;
 
 public interface IUserService
 {
-    Task<IResult<PagedList<UserDto>>> Get(QueryParams queryParams, CancellationToken cancellationToken);
+    Task<IResult<PagedList<UserDto>>> GetAsync(QueryParams queryParams, CancellationToken cancellationToken);
     Task<IResult<UserDto>> CreateAsync(UserCreateDto dto, CancellationToken cancellationToken);
     Task<IResult<UserDto>> UpdateAsync(UserUpdateDto dto, CancellationToken cancellationToken);
     Task<IResult> ChangePasswordAsync(UserChangePasswordDto dto, CancellationToken cancellationToken);
