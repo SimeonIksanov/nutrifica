@@ -31,7 +31,7 @@
                            @onclick="OnAddClick">
                     Создать
                 </MudButton>
-                
+
                 <MudButton @onclick="OnRefreshClick"
                            Variant="Variant.Outlined"
                            Size="Size.Small">
@@ -48,6 +48,14 @@
                     @context.Item.Price.Amount.ToString(CultureInfo.InvariantCulture) рублей
                 </CellTemplate>
             </PropertyColumn>
+            <TemplateColumn CellClass="d-flex justify-end">
+                <CellTemplate>
+                    <MudIconButton
+                        Size="@Size.Small"
+                        Icon="@Icons.Material.Outlined.Edit"
+                        OnClick="() => OnEditClick(context.Item)"/>
+                </CellTemplate>
+            </TemplateColumn>
 
         </Columns>
 
@@ -60,7 +68,9 @@
         </LoadingContent>
 
         <PagerContent>
-            <MudDataGridPager T="ProductDto"/>
+            <MudDataGridPager T="ProductDto"
+                              RowsPerPageString="Строк на странице"
+                              InfoFormat="{first_item}-{last_item} из {all_items}"/>
         </PagerContent>
     </MudDataGrid>
 
@@ -125,9 +135,35 @@
             _ = _dataGrid.ReloadServerData();
         }
     }
-    
+
+    private async Task OnEditClick(ProductDto product)
+    {
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.TopCenter,
+            CloseOnEscapeKey = true
+        };
+        var dialogParameters = new DialogParameters<ProductModifyDialogComponent>
+        {
+            { x => x.Product, product },
+        };
+        var dialog = await DialogService.ShowAsync<ProductModifyDialogComponent>("Изменение продукта", dialogParameters, options);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Данные обновлены", Severity.Success);
+            _ = _dataGrid.ReloadServerData();
+        }
+    }
+
     private async Task OnRefreshClick()
     {
         await _dataGrid.ReloadServerData();
     }
+
 }

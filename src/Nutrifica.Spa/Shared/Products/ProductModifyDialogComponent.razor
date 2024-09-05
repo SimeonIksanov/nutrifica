@@ -1,0 +1,114 @@
+@using Nutrifica.Api.Contracts.Products
+@using Nutrifica.Spa.Infrastructure.Services.Products
+@inject IProductService ProductService
+@implements IDisposable
+
+<EditForm
+    EditContext="_editContext"
+    OnValidSubmit="Submit">
+
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+
+            <MudTextField Label="Название"
+                          @bind-Value="Model.Name"
+                          For="() => Model.Name"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          RequiredError="Это поле обязательно к заполнению"/>
+
+            <MudTextField Label="Описание"
+                          @bind-Value="Model.Details"
+                          For="() => Model.Details"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          RequiredError="Это поле обязательно к заполнению"/>
+
+            <MudNumericField Label="Цена"
+                             T="Decimal"
+                             Step="Step"
+                             Min="0"
+                             @bind-Value="_price"
+                             Variant="Variant.Outlined"/>
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Обновить
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public ProductDto? Product { get; set; }
+
+    private ValidationMessageStore _messageStore = null!;
+    private ProductUpdateDto Model { get; } = new();
+    private EditContext _editContext = null!;
+    private readonly CancellationTokenSource _cts = new();
+    private decimal _price;
+    private const decimal Step = 100;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(Model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new(_editContext);
+        MapIncomingModelToFormModel();
+    }
+
+    async Task Submit()
+    {
+        Model.Price.Amount = _price;
+        var updatedResult = await ProductService
+            .UpdateAsync(Model, _cts.Token);
+        if (updatedResult.IsFailure)
+        {
+            _messageStore.Add(() => Model, updatedResult.Error.Description);
+            _editContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(updatedResult));
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore.Clear();
+    }
+
+    private void MapIncomingModelToFormModel()
+    {
+        if (Product is null) return;
+
+        Model.Id = Product.Id;
+        Model.Name = Product.Name;
+        Model.Details = Product.Details;
+        Model.Price = Product.Price;
+        _price = Product.Price.Amount;
+    }
+
+    public void Dispose()
+    {
+        _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
+}

@@ -39,9 +39,19 @@ public class ProductService : ServiceBase, IProductService
         }
     }
 
-    public Task<IResult> UpdateAsync(ProductUpdateDto dto, CancellationToken cancellationToken)
+    public async Task<IResult> UpdateAsync(ProductUpdateDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await GetHttpClient()
+                .PutAsJsonAsync(ProductsEndpoints.Update(dto.Id), dto, cancellationToken);
+            return await HandleResponse(response, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine(ex);
+            return Result.Failure(ProductServiceErrors.FailedToUpdate);
+        }
     }
 
     public ProductService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
