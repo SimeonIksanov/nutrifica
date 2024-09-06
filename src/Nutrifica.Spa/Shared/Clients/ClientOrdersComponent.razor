@@ -1,0 +1,150 @@
+@using System.Globalization
+@using Nutrifica.Api.Contracts.Orders
+@using Nutrifica.Spa.Infrastructure.Models
+@using Nutrifica.Spa.Infrastructure.Services.Orders
+@inject IOrderService OrderService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<MudContainer
+    Gutters="true"
+    MaxWidth="MaxWidth.False">
+
+    <MudDataGrid
+        T="OrderDto"
+        @ref="_dataGrid"
+        Dense="true"
+        Striped="true"
+        Bordered="true"
+        Outlined="false"
+        Elevation="0"
+        ColumnResizeMode="ResizeMode.Column"
+        Filterable="true"
+        FilterMode="DataGridFilterMode.ColumnFilterMenu"
+        ServerData="FetchOrdersAsync">
+
+        <ToolBarContent>
+            <MudToolBar Class="gap-2">
+                <MudButton
+                    @onclick="OnAddClick"
+                    Variant="Variant.Outlined"
+                    Size="Size.Small">
+                    Создать
+                </MudButton>
+
+                <MudButton @onclick="OnRefreshClick"
+                           Variant="Variant.Outlined"
+                           Size="Size.Small">
+                    Обновить
+                </MudButton>
+            </MudToolBar>
+        </ToolBarContent>
+
+        <Columns>
+            <HierarchyColumn/>
+            <PropertyColumn Title="Создан"
+                            Property="x => x.CreatedOn">
+                <CellTemplate>
+                    @context.Item.CreatedOn
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Title="Статус"
+                            Property="x => x.Status"/>
+            <PropertyColumn Title="Сумма" 
+                            Property="x => x.TotalSum.Amount">
+                <CellTemplate >
+                    @context.Item.TotalSum.Amount рублей
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Title="Кем Создан" 
+                            Property="x => x.CreatedBy">
+                <CellTemplate>
+                    @context.Item.CreatedBy.FirstName @context.Item.CreatedBy.LastName
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn CellClass="d-flex justify-end">
+                <CellTemplate>
+                    <MudIconButton
+                        Size="@Size.Small"
+                        Icon="@Icons.Material.Outlined.Edit"
+                        OnClick="() => OnEditClick(context.Item)"/>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+
+        <ChildRowContent>
+            @foreach (var item in @context.Item.OrderItems)
+            {
+                <span>@item.ProductName</span>
+            }
+        </ChildRowContent>
+
+        <NoRecordsContent>
+            <MudText>Заказы не найдены</MudText>
+        </NoRecordsContent>
+
+        <LoadingContent>
+            <MudText>Загрузка...</MudText>
+        </LoadingContent>
+
+        <PagerContent>
+            <MudDataGridPager T="OrderDto"/>
+        </PagerContent>
+    </MudDataGrid>
+
+</MudContainer>
+
+@code {
+    [Parameter] public Guid ClientId { get; set; }
+    private MudDataGrid<OrderDto> _dataGrid = null!;
+    private CancellationTokenSource _cancellationTokenSource = new();
+
+    private async Task OnAddClick()
+    {
+        var createDto = new OrderCreateDto() { ClientId = ClientId };
+        var result = await OrderService.CreateAsync(createDto, _cancellationTokenSource.Token);
+        if (result.IsSuccess)
+        {
+            await OnRefreshClick();
+        }
+    }
+
+    private async Task OnRefreshClick()
+    {
+        await _dataGrid.ReloadServerData();
+    }
+
+    private Task OnEditClick(OrderDto contextItem)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.CancelAsync();
+        _cancellationTokenSource.Dispose();
+    }
+
+    private async Task<GridData<OrderDto>> FetchOrdersAsync(GridState<OrderDto> state)
+    {
+        var queryParams = new QueryParams
+        {
+            Page = state.Page + 1,
+            PageSize = state.PageSize
+        };
+
+        var result = await OrderService.GetAsync(queryParams, _cancellationTokenSource.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+            return new GridData<OrderDto>();
+        }
+
+        return new GridData<OrderDto>
+        {
+            Items = result.Value.Items,
+            TotalItems = result.Value.TotalCount
+        };
+    }
+
+}
