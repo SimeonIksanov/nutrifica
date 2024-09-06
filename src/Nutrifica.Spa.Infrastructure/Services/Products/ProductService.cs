@@ -9,7 +9,10 @@ namespace Nutrifica.Spa.Infrastructure.Services.Products;
 
 public class ProductService : ServiceBase, IProductService
 {
-    public async Task<IResult<PagedList<ProductDto>>> GetAsync(QueryParams queryParams, CancellationToken cancellationToken)
+    public ProductService(IHttpClientFactory httpClientFactory) : base(httpClientFactory) { }
+
+    public async Task<IResult<PagedList<ProductDto>>> GetAsync(QueryParams queryParams,
+        CancellationToken cancellationToken)
     {
         var requestUri = ProductsEndpoints.Get + queryParams;
         try
@@ -52,9 +55,5 @@ public class ProductService : ServiceBase, IProductService
             Console.WriteLine(ex);
             return Result.Failure(ProductServiceErrors.FailedToUpdate);
         }
-    }
-
-    public ProductService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
-    {
     }
 }
