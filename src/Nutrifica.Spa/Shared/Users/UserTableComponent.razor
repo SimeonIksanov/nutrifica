@@ -87,15 +87,17 @@
         </ChildRowContent>
 
         <NoRecordsContent>
-            <MudText>No matching records found</MudText>
+            <MudText>Пользователи не найдены</MudText>
         </NoRecordsContent>
 
         <LoadingContent>
-            <MudText>Loading...</MudText>
+            <MudText>Загрузка...</MudText>
         </LoadingContent>
 
         <PagerContent>
-            <MudDataGridPager T="UserDto"/>
+            <MudDataGridPager T="UserDto"
+                              RowsPerPageString="Строк на странице"
+                              InfoFormat="{first_item}-{last_item} из {all_items}"/>
         </PagerContent>
     </MudDataGrid>
 
