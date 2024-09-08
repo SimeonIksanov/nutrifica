@@ -9,8 +9,8 @@
 @inject ISnackbar Snackbar
 @implements IDisposable
 
-<h3>ClientDetails</h3>
-<MudGrid>
+
+<MudGrid Spacing="2" mx="1">
     <MudItem md="3" xs="12">
         @if (_client is not null)
         {
@@ -19,7 +19,7 @@
     </MudItem>
 
     <MudItem md="9" xs="12">
-        <MudTabs Elevation="2"
+        <MudTabs Elevation="1" class="mx-1"
                  Rounded="true"
                  ApplyEffectsToContainer="true"
                  PanelClass="pa-3">
