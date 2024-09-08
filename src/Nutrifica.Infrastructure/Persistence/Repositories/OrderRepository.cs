@@ -60,7 +60,7 @@ public class OrderRepository : IOrderRepository
                         Id = orderItem.Id,
                         Quantity = orderItem.Quantity,
                         ProductId = orderItem.ProductId.Value,
-                        // Price = orderItem.Price,
+                        UnitPrice = orderItem.UnitPrice,
                         ProductName = product.Name
                     }).ToList()
             });
