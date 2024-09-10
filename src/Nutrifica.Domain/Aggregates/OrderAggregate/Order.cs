@@ -61,6 +61,7 @@ public sealed class Order : Entity<OrderId>, IAggregateRoot, IAuditableEntity
         var currentOrderItem = _orderItems.FirstOrDefault(x => x.ProductId == item.ProductId);
         if (currentOrderItem is null) return;
         currentOrderItem.UpdateQuantity(item.Quantity);
+        currentOrderItem.UnitPrice = item.UnitPrice;
 
         TotalSum = _orderItems
             .Select(x => x.UnitPrice * x.Quantity)

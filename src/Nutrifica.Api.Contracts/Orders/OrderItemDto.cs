@@ -22,6 +22,7 @@ public record OrderItemUpdateDto
     public Guid OrderId { get; set; }
     public int ProductId { get; set; }
     public int Quantity { get; set; }
+    public MoneyDto UnitPrice { get; set; } = null!;
 }
 
 public record OrderItemRemoveDto

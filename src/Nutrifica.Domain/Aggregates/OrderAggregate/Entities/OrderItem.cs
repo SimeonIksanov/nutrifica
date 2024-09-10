@@ -23,7 +23,7 @@ public class OrderItem : Entity<int>
 
     public ProductId ProductId { get; init; }
     public int Quantity { get; private set; }
-    public Money UnitPrice { get; private set; }
+    public Money UnitPrice { get; internal set; }
 
     public void UpdateQuantity(int newQuantity)
     {

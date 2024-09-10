@@ -83,7 +83,7 @@ else
             
             <PropertyColumn Title="Цена"
                             Property="x => x.UnitPrice.Amount" 
-                            Editable="false"/>
+                            Editable="true"/>
             <TemplateColumn>
                 <CellTemplate>
                     <MudIconButton Icon="@Icons.Material.Outlined.Edit"
@@ -173,7 +173,8 @@ else
         {
             OrderId = OrderId,
             ProductId = orderItem.ProductId,
-            Quantity = orderItem.Quantity
+            Quantity = orderItem.Quantity,
+            UnitPrice = orderItem.UnitPrice
         };
         var result = await OrderService.UpdateOrderItemAsync(dto, _cancellationTokenSource.Token);
         if (result.IsFailure)

@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using Nutrifica.Api.Contracts.Orders;
+using Nutrifica.Application.Mappings;
 using Nutrifica.Application.Orders.Create;
 using Nutrifica.Application.Orders.Get;
 using Nutrifica.Application.Orders.GetById;
@@ -119,7 +120,8 @@ public class OrdersController : ApiController
         {
             OrderId = OrderId.Create(orderId),
             ProductId = ProductId.Create(orderItem.ProductId),
-            Quantity = orderItem.Quantity
+            Quantity = orderItem.Quantity,
+            UnitPrice = orderItem.UnitPrice.ToMoney()
         };
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? Ok() : HandleFailure(result);

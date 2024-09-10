@@ -13,5 +13,8 @@ public class UpdateOrderItemCommandValidator : AbstractValidator<UpdateOrderItem
             .NotNull()
             .DependentRules(() => RuleFor(x => x.ProductId.Value).NotEmpty());
         RuleFor(x => x.Quantity > 0);
+        RuleFor(x => x.UnitPrice)
+            .NotNull()
+            .DependentRules(() => RuleFor(x => x.UnitPrice.Amount).GreaterThan(0));
     }
 }

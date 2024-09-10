@@ -3,6 +3,7 @@ using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate;
 using Nutrifica.Domain.Aggregates.OrderAggregate.Entities;
+using Nutrifica.Domain.Shared;
 using Nutrifica.Shared.Wrappers;
 
 namespace Nutrifica.Application.Orders.OrderItems.Update;
@@ -36,8 +37,8 @@ public class UpdateOrderItemCommandHandler : ICommandHandler<UpdateOrderItemComm
 
     private async Task<OrderItem> CreateOrderItem(UpdateOrderItemCommand command, CancellationToken cancellationToken)
     {
-        var unitPrice = await _productRepository.GetByIdAsync(command.ProductId, cancellationToken);
-        var orderItem = OrderItem.Create(command.ProductId, command.Quantity, unitPrice.Price);
+        // var unitPrice = await _productRepository.GetByIdAsync(command.ProductId, cancellationToken);
+        var orderItem = OrderItem.Create(command.ProductId, command.Quantity, command.UnitPrice);
         return orderItem;
     }
 }
