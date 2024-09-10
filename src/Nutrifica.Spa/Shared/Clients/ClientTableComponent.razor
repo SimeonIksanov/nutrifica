@@ -36,7 +36,7 @@
                 </MudButton>
 
                 <MudButton
-                    @onclick="OnUpdateClick"
+                    @onclick="OnRefreshClick"
                     Variant="Variant.Outlined"
                     Size="Size.Small">
                     Обновить
@@ -69,9 +69,19 @@
                 </MudCardContent>
             </MudCard>
         </ChildRowContent>
+
+        <NoRecordsContent>
+            <MudText>Клиенты не найдены</MudText>
+        </NoRecordsContent>
+
+        <LoadingContent>
+            <MudText>Загрузка...</MudText>
+        </LoadingContent>
         
         <PagerContent>
-            <MudDataGridPager T="ClientDto"/>
+            <MudDataGridPager T="ClientDto" 
+                              RowsPerPageString="Строк на странице"
+                              InfoFormat="{first_item}-{last_item} из {all_items}"/>
         </PagerContent>
 
     </MudDataGrid>
@@ -142,7 +152,7 @@
     private string ShortComment(ClientDto client) =>
         client.Comment.Substring(0, Math.Min(50, client.Comment.Length));
 
-    private async Task OnUpdateClick()
+    private async Task OnRefreshClick()
     {
         await _dataGrid.ReloadServerData();
     }

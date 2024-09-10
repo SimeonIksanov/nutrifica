@@ -1,0 +1,114 @@
+@using System.Globalization
+@using Nutrifica.Api.Contracts.Orders
+@using Nutrifica.Spa.Infrastructure.Models
+@using Nutrifica.Spa.Infrastructure.Routes
+@using Nutrifica.Spa.Infrastructure.Services.Orders
+@inject NavigationManager NavigationManager
+@inject IOrderService OrderService
+@inject ISnackbar Snackbar
+@implements IDisposable
+
+<MudContainer
+    Gutters="true"
+    MaxWidth="MaxWidth.False">
+
+    <MudDataGrid RowClick="@RowClicked"
+                 T="OrderDto"
+                 @ref="_dataGrid"
+                 Dense="true"
+                 Striped="true"
+                 Bordered="true"
+                 Outlined="false"
+                 Elevation="0"
+                 ColumnResizeMode="ResizeMode.Column"
+                 ServerData="FetchOrdersAsync"
+                 Filterable="true"
+                 FilterMode="DataGridFilterMode.Simple">
+
+        <ToolBarContent>
+            <MudToolBar Class="gap-2">
+                <MudButton
+                    @onclick="OnRefreshClick"
+                    Variant="Variant.Outlined"
+                    Size="Size.Small">
+                    Обновить
+                </MudButton>
+            </MudToolBar>
+        </ToolBarContent>
+
+        <NoRecordsContent>
+            <MudText>Заказы не найдены</MudText>
+        </NoRecordsContent>
+
+        <LoadingContent>
+            <MudText>Загрузка...</MudText>
+        </LoadingContent>
+
+        <Columns>
+            <PropertyColumn Title="Статус"
+                            Property="x=>x.Status"/>
+            <PropertyColumn Title="Фамилия клиента"
+                            Property="x=>x.Client.LastName"/>
+            <PropertyColumn Title="Имя клиента"
+                            Property="x=>x.Client.FirstName"/>
+            <PropertyColumn Title="Сумма заказа"
+                            Property="x=>x.TotalSum.Amount"/>
+            <PropertyColumn Title="Дата создания"
+                            Property="x => x.CreatedOn">
+                <CellTemplate>
+                    @context.Item.CreatedOn.ToString("dd MMMM yyyy", CultureInfo.CreateSpecificCulture("ru-RU"))
+                </CellTemplate>
+            </PropertyColumn>
+        </Columns>
+        
+        <PagerContent>
+            <MudDataGridPager T="OrderDto"
+                              RowsPerPageString="Строк на странице"
+                              InfoFormat="{first_item}-{last_item} из {all_items}"/>
+        </PagerContent>
+    </MudDataGrid>
+</MudContainer>
+
+@code {
+    private MudDataGrid<OrderDto> _dataGrid = null!;
+    private CancellationTokenSource _cancellationTokenSource = new();
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.CancelAsync();
+        _cancellationTokenSource.Dispose();
+    }
+
+    private async Task OnRefreshClick()
+    {
+        await _dataGrid.ReloadServerData();
+    }
+
+    private void RowClicked(DataGridRowClickEventArgs<OrderDto> eventArgs)
+    {
+        NavigationManager.NavigateTo(PageUrls.OrdersDetails(eventArgs.Item.Id));
+    }
+
+    private async Task<GridData<OrderDto>> FetchOrdersAsync(GridState<OrderDto> state)
+    {
+        var queryParams = new QueryParams
+        {
+            Page = state.Page + 1,
+            PageSize = state.PageSize
+        };
+
+        var result = await OrderService.GetAsync(queryParams, _cancellationTokenSource.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+            return new GridData<OrderDto>();
+        }
+
+        return new GridData<OrderDto>
+        {
+            Items = result.Value.Items,
+            TotalItems = result.Value.TotalCount
+        };
+    }
+
+}
