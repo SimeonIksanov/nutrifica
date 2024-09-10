@@ -61,7 +61,8 @@ public class OrderRepository : IOrderRepository
                         Quantity = orderItem.Quantity,
                         ProductId = orderItem.ProductId.Value,
                         UnitPrice = orderItem.UnitPrice,
-                        ProductName = product.Name
+                        ProductName = product.Name,
+                        ProductDetails = product.Details
                     }).ToList()
             });
         var orderModel = await query.FirstOrDefaultAsync(ct);
@@ -100,7 +101,8 @@ public class OrderRepository : IOrderRepository
                         Quantity = orderItem.Quantity,
                         ProductId = orderItem.ProductId.Value,
                         UnitPrice = orderItem.UnitPrice,
-                        ProductName = product.Name
+                        ProductName = product.Name,
+                        ProductDetails = product.Details
                     }
                 ).ToList()
             });

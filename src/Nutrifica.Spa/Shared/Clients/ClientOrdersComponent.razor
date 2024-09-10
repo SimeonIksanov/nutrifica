@@ -1,10 +1,12 @@
-@using System.Globalization
 @using Nutrifica.Api.Contracts.Orders
 @using Nutrifica.Spa.Infrastructure.Models
+@using Nutrifica.Spa.Infrastructure.Routes
 @using Nutrifica.Spa.Infrastructure.Services.Orders
 @inject IOrderService OrderService
 @inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
 @implements IDisposable
+
 
 <MudContainer
     Gutters="true"
@@ -21,7 +23,8 @@
         ColumnResizeMode="ResizeMode.Column"
         Filterable="true"
         FilterMode="DataGridFilterMode.ColumnFilterMenu"
-        ServerData="FetchOrdersAsync">
+        ServerData="FetchOrdersAsync"
+        RowClick="RowClicked">
 
         <ToolBarContent>
             <MudToolBar Class="gap-2">
@@ -145,6 +148,11 @@
             Items = result.Value.Items,
             TotalItems = result.Value.TotalCount
         };
+    }
+
+    private void RowClicked(DataGridRowClickEventArgs<OrderDto> eventArgs)
+    {
+        NavigationManager.NavigateTo(PageUrls.OrdersDetails(eventArgs.Item.Id));
     }
 
 }

@@ -129,15 +129,15 @@ public class OrdersController : ApiController
     /// 
     /// </summary>
     /// <param name="ct"></param>
-    [HttpDelete("{orderId:guid}/items")]
-    public async Task<IActionResult> RemoveOrderItem([FromRoute] Guid orderId, [FromBody] OrderItemRemoveDto orderItem,
+    [HttpDelete("{orderId:guid}/items/{productId:int}")]
+    public async Task<IActionResult> RemoveOrderItem([FromRoute] Guid orderId, [FromRoute] int productId,
         CancellationToken ct)
     {
-        if (orderId != orderItem.OrderId) return BadRequest();
+        // if (orderId != orderItem.OrderId) return BadRequest();
         var command = new RemoveOrderItemCommand()
         {
             OrderId = OrderId.Create(orderId),
-            ProductId = ProductId.Create(orderItem.ProductId)
+            ProductId = ProductId.Create(productId)
         };
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? Ok() : HandleFailure(result);

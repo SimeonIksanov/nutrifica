@@ -1,0 +1,188 @@
+@page "/Orders/{orderId:guid}"
+@using System.Globalization
+@using Nutrifica.Api.Contracts.Orders
+@using Nutrifica.Spa.Infrastructure.Routes
+@using Nutrifica.Spa.Infrastructure.Services.Orders
+@using Nutrifica.Spa.Shared.Orders
+@inject IOrderService OrderService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@implements IDisposable
+
+
+<h3>Заказ</h3>
+@if (_order is null)
+{
+    <MudAlert Severity="Severity.Warning">Заказ не найден</MudAlert>
+}
+else
+{
+    <div>
+        Клиент:
+        <MudLink Href=@(PageUrls.Clients + $"/{_order.Client.Id.ToString()}")>
+            @_order.Client.LastName, @_order.Client.FirstName @_order.Client.MiddleName
+        </MudLink>
+    </div>
+    <div>CreatedBy</div>
+    <div>CreatedOn : @_order.CreatedOn.ToString("M", CultureInfo.CreateSpecificCulture("ru-RU"))</div>
+    <div>
+        Managers:
+        <MudList T="string" Dense="true">
+            @foreach (var manager in _order.Managers)
+            {
+                <MudListItem Text=@($"{manager.LastName}, {manager.FirstName} {manager.MiddleName}")/>
+            }
+        </MudList>
+    </div>
+
+    <MudDataGrid Items="@_order.OrderItems" T="OrderItemDto"
+                 Elevation="1"
+                 Class="mx-1"
+                 Dense="true"
+                 Filterable="false"
+                 SortMode="SortMode.None"
+                 EditMode="DataGridEditMode.Form"
+                 ReadOnly="false"
+                 EditTrigger="DataGridEditTrigger.OnRowClick"
+                 @ref="_dataGrid"
+                 CommittedItemChanges="UpdateItemHandler">
+
+        <ToolBarContent>
+            <MudIconButton Icon="@Icons.Material.Filled.Add"
+                           Color="Color.Inherit"
+                           Class="mr-5" OnClick="OnAddItemHandlerAsync"/>
+            
+            <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                           Color="Color.Inherit"
+                           Class="mr-5" OnClick="FetchOrderAsync"/>
+        </ToolBarContent>
+
+        <Columns>
+            <PropertyColumn Title="ID"
+                            Property="x => x.Id" 
+                            Editable="false"/>
+            
+            <PropertyColumn Title="Название"
+                            Property="x => x.ProductName"
+                            Editable="false"/>
+            
+            <PropertyColumn Title="Описание"
+                            Property="x=>x.ProductDetails"
+                            Editable="false"/>
+            
+            <PropertyColumn Title="Количество"
+                            Property="x => x.Quantity">
+                <EditTemplate >
+                    <MudNumericField Label="Количество"
+                                     @bind-Value="context.Item.Quantity" 
+                                     Min="0" 
+                                     Variant="Variant.Outlined" 
+                                     Margin="Margin.Dense"/>
+                </EditTemplate>
+            </PropertyColumn>
+            
+            <PropertyColumn Title="Цена"
+                            Property="x => x.UnitPrice.Amount" 
+                            Editable="false"/>
+            <TemplateColumn>
+                <CellTemplate>
+                    <MudIconButton Icon="@Icons.Material.Outlined.Edit"
+                                   Size="@Size.Small"
+                                   OnClick="@context.Actions.StartEditingItemAsync"/>
+
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Size="@Size.Small"
+                                   OnClick="() => OnDeleteItemHandlerAsync(context.Item!.ProductId)"/>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}
+
+
+@code {
+    [Parameter] public Guid OrderId { get; set; }
+    private MudDataGrid<OrderItemDto> _dataGrid = null!;
+    private OrderDto? _order;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchOrderAsync();
+    }
+
+    private async Task FetchOrderAsync()
+    {
+        var result = await OrderService.GetByIdAsync(OrderId, _cancellationTokenSource.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+        }
+
+        _order = result.Value;
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
+
+    private async Task OnAddItemHandlerAsync(MouseEventArgs obj)
+    {
+        var dialogOptions = new DialogOptions()
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.TopCenter,
+            CloseOnEscapeKey = true
+        };
+        var dialogParameters = new DialogParameters<OrderAddItemDialogComponent>
+        {
+            { x => x.OrderId, OrderId }
+        };
+        var dialog = await DialogService
+            .ShowAsync<OrderAddItemDialogComponent>("Добавить в заказ", dialogParameters, dialogOptions);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Продукт добавлен в заказ", Severity.Success);
+            await FetchOrderAsync();
+        }
+    }
+
+    private async Task OnDeleteItemHandlerAsync(int itemProductId)
+    {
+        var dto = new OrderItemRemoveDto { OrderId = OrderId, ProductId = itemProductId };
+        var result = await OrderService
+            .DeleteOrderItemAsync(dto, _cancellationTokenSource.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+            return;
+        }
+
+        await FetchOrderAsync();
+    }
+
+    private async Task UpdateItemHandler(OrderItemDto orderItem)
+    {
+        var dto = new OrderItemUpdateDto()
+        {
+            OrderId = OrderId,
+            ProductId = orderItem.ProductId,
+            Quantity = orderItem.Quantity
+        };
+        var result = await OrderService.UpdateOrderItemAsync(dto, _cancellationTokenSource.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+            return;
+        }
+
+        await FetchOrderAsync();
+    }
+
+}

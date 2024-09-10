@@ -1,0 +1,141 @@
+@using Nutrifica.Api.Contracts.Orders
+@using Nutrifica.Api.Contracts.Products
+@using Nutrifica.Spa.Infrastructure.Models
+@using Nutrifica.Spa.Infrastructure.Services.Orders
+@using Nutrifica.Spa.Infrastructure.Services.Products
+@implements IDisposable
+@inject ISnackbar Snackbar
+@inject IProductService ProductService
+@inject IOrderService OrderService
+
+<EditForm
+    EditContext="_editContext"
+    OnValidSubmit="SubmitAsync">
+
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <MudSelect Label="Продукт"
+                       @bind-Value="Model.ProductId"
+                       For="() => Model.ProductId"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Required="true"
+                       Dense="true"
+                       Disabled="_productSelectorDisabled" Class="my-1">
+
+                <MudSelectItem Value="0" Disabled="true">&nbsp;</MudSelectItem>
+                @foreach (var productDto in _productList)
+                {
+                    <MudSelectItem Value="productDto.Id">@productDto.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudNumericField Label="Количество"
+                             @bind-Value="Model.Quantity"
+                             For="() => Model.Quantity"
+                             Min="1"
+                             Margin="Margin.Dense"
+                             Variant="Variant.Outlined"/>
+
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Создать
+            </MudButton>
+        </DialogActions>
+
+    </MudDialog>
+
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Guid OrderId { get; set; }
+    private ValidationMessageStore _messageStore = null!;
+    private OrderItemCreateDto Model { get; set; } = null!;
+    private EditContext _editContext = null!;
+    private readonly CancellationTokenSource _cts = new();
+
+    private ICollection<ProductDto> _productList = Array.Empty<ProductDto>();
+    private bool _productSelectorDisabled = true;
+
+    protected override void OnInitialized()
+    {
+        Model = new()
+        {
+            OrderId = OrderId,
+            Quantity = 1
+        };
+        _editContext = new EditContext(Model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new ValidationMessageStore(_editContext);
+        _ = FetchProducts();
+    }
+
+    private async Task FetchProducts()
+    {
+        var result = await ProductService.GetAsync(new QueryParams { PageSize = int.MaxValue }, _cts.Token);
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Description, Severity.Error);
+            _productSelectorDisabled = true;
+        }
+        else
+        {
+            _productSelectorDisabled = false;
+            _productList = result.Value.Items;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SubmitAsync(EditContext obj)
+    {
+        var result = await OrderService.AddOrderItemAsync(Model, _cts.Token);
+        if (result.IsFailure)
+        {
+            _messageStore.Add(() => Model, result.Error.Description);
+            _editContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore.Clear();
+        if (HasErrorInProductSelector())
+        {
+            _messageStore.Add(() => Model.ProductId, "Продукт не выбран.");
+            Console.WriteLine("yes");
+            _editContext.NotifyValidationStateChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
+    private bool HasErrorInProductSelector()
+    {
+        bool hasError = _productList.All(x => x.Id != Model.ProductId);
+        return hasError;
+    }
+
+}

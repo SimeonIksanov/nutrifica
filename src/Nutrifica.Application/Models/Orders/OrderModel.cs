@@ -21,6 +21,7 @@ public class OrderItemModel
     public int Id { get; set; }
     public int ProductId { get; set; }
     public string ProductName { get; set; } = String.Empty;
+    public string ProductDetails { get; set; } = String.Empty;
     public Money UnitPrice { get; set; } = null!;
     public int Quantity { get; set; }
 }

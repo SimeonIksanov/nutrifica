@@ -26,7 +26,8 @@ public static class OrderMapping
             Quantity = model.Quantity,
             UnitPrice = model.UnitPrice.ToMoneyDto(),
             ProductId = model.ProductId,
-            ProductName = model.ProductName
+            ProductName = model.ProductName,
+            ProductDetails = model.ProductDetails
         };
 
     public static MoneyDto ToMoneyDto(this Money model) => new()
