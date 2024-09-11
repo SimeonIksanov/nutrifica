@@ -5,10 +5,9 @@ using Nutrifica.Spa.Infrastructure.Services;
 
 namespace Nutrifica.Spa.MiddleWares;
 
-public class JwtInjectorDelegateHandler(ITokenService tokenService) : DelegatingHandler
+public class JwtInjectorDelegateHandler(ITokenService tokenService, IConfiguration configuration) : DelegatingHandler
 {
-    // TODO : Параметризовать базовые адреса бекенда
-    private readonly string[] baseApiUrls = ["localhost:5203", "localhost"];
+    private readonly string _baseApiUrl = configuration.GetSection("backend").GetValue<string>("authority") ?? string.Empty;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
         CancellationToken cancellationToken)
@@ -16,7 +15,7 @@ public class JwtInjectorDelegateHandler(ITokenService tokenService) : Delegating
         string requestPath = request.RequestUri?.AbsolutePath.TrimEnd('/') ?? string.Empty;
         bool isAuthRequest = requestPath.EndsWith(AuthenticationEndpoints.Login)
                              || requestPath.EndsWith(AuthenticationEndpoints.RefreshToken);
-        bool isTrustedUrl = baseApiUrls.Contains(request.RequestUri?.Authority);
+        bool isTrustedUrl = _baseApiUrl.Equals(request.RequestUri?.Authority, StringComparison.OrdinalIgnoreCase);
         if (!isAuthRequest && isTrustedUrl)
         {
             string jwt = await tokenService.GetAccessTokenAsync(cancellationToken);

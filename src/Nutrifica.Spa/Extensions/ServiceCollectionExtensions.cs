@@ -48,17 +48,12 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddHttpClients(this IServiceCollection services, WebAssemblyHostBuilder builder)
     {
-        services.AddHttpClient("apiBackend", client =>
-            {
-                client.BaseAddress = new Uri(builder.Configuration.GetSection("backend")["uri"] ??
-                                             throw new KeyNotFoundException("No backend URI specified"));
-            })
+        services.AddHttpClient("apiBackend", client => client.BaseAddress = new Uri(GetBackendUriString(builder)))
             .AddHttpMessageHandler<TokenRefreshDelegateHandler>()
             .AddHttpMessageHandler<JwtInjectorDelegateHandler>();
 
         services.AddHttpClient("apiBackendWoHandlers", config =>
-            config.BaseAddress = new Uri(builder.Configuration.GetSection("backend")["uri"] ??
-                                         throw new KeyNotFoundException("No backend URI specified")));
+            config.BaseAddress = new Uri(GetBackendUriString(builder)));
 
         services.AddHttpClient("blazorBackend", client =>
             client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
@@ -91,5 +86,22 @@ public static class ServiceCollectionExtensions
             config.SnackbarConfiguration.ClearAfterNavigation = true;
         });
         return services;
+    }
+
+    private static string GetBackendUriString(WebAssemblyHostBuilder builder)
+    {
+        var backendSection = builder
+            .Configuration
+            .GetSection("backend");
+
+        var authority = backendSection
+            .GetValue<string>("authority");
+        if (string.IsNullOrWhiteSpace(authority))
+            throw new KeyNotFoundException("No backend__authority specified in configuration");
+
+        var scheme = backendSection
+            .GetValue<string>("scheme") ?? "https";
+
+        return $"{scheme}://{authority}";
     }
 }
