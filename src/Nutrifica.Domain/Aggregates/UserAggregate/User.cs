@@ -46,24 +46,24 @@ public sealed class User : Entity<UserId>, IAggregateRoot, IAuditableEntity
     {
     }
 
-    public UserAccount Account { get; private set; }
+    public UserAccount Account { get; private set; } = null!;
 
     public bool Enabled { get; private set; }
     public string DisableReason { get; private set; } = string.Empty;
 
     public DateTime CreatedOn { get; set; }
-    public UserId CreatedBy { get; set; }
+    public UserId CreatedBy { get; set; } = null!;
     public DateTime LastModifiedOn { get; set; }
-    public UserId LastModifiedBy { get; set; }
+    public UserId LastModifiedBy { get; set; } = null!;
 
-    public FirstName FirstName { get; set; }
-    public MiddleName MiddleName { get; set; }
-    public LastName LastName { get; set; }
+    public FirstName FirstName { get; set; } = null!;
+    public MiddleName MiddleName { get; set; } = null!;
+    public LastName LastName { get; set; } = null!;
 
-    public Email Email { get; set; }
+    public Email Email { get; set; } = null!;
     public PhoneNumber PhoneNumber { get; set; } = null!;
 
-    public UserId? SupervisorId { get; set; } = null!;
+    public UserId? SupervisorId { get; set; }
     public UserRole Role { get; set; }
 
     public string FullName => string.Join(" ", LastName, FirstName, MiddleName).Trim();

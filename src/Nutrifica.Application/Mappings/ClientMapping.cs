@@ -19,7 +19,7 @@ public static class ClientMapping
             PhoneNumber = client.PhoneNumber.Value,
             State = client.State,
             Source = client.Source,
-            CreatedAt = client.CreatedOn,
+            CreatedAt = client.CreatedOn
         };
     }
 
@@ -37,6 +37,7 @@ public static class ClientMapping
             CreatedAt = client.CreatedOn,
             Source = client.Source,
             State = client.State,
+            Managers = client.Managers.Select(x=>x.ToUserShortDto()).ToArray()
         };
     }
 

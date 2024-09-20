@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-
 using Microsoft.EntityFrameworkCore;
 
 using Nutrifica.Application.Interfaces.Services.Persistence;
@@ -44,9 +42,38 @@ public class ClientRepository : IClientRepository
     public async Task<PagedList<ClientModel>> GetByFilterAsync(QueryParams queryParams,
         CancellationToken cancellationToken)
     {
-        var query = _context.Set<Client>()
-            .AsNoTracking()
-            .Select(ClientToClientModel());
+        var query = from client in _context.Clients.AsNoTracking()
+            select new ClientModel
+            {
+                Id = client.Id.Value,
+                FirstName = client.FirstName.Value,
+                MiddleName = client.MiddleName.Value,
+                LastName = client.LastName.Value,
+                Address = new()
+                {
+                    City = client.Address.City,
+                    Comment = client.Address.Comment,
+                    Country = client.Address.Country,
+                    Region = client.Address.Region,
+                    Street = client.Address.Street,
+                    ZipCode = client.Address.ZipCode
+                },
+                Comment = client.Comment.Value,
+                PhoneNumber = client.PhoneNumber.Value,
+                Source = client.Source,
+                State = client.State,
+                CreatedOn = client.CreatedOn,
+                Managers = (
+                    from managerId in client.ManagerIds
+                    join manager in _context.Users on managerId.Value equals manager.Id.Value
+                    select new UserShortModel(
+                        manager.Id.Value,
+                        manager.FirstName.Value,
+                        manager.MiddleName.Value,
+                        manager.LastName.Value)
+                ).ToList()
+            };
+
         var pagedList =
             await query.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
@@ -87,25 +114,4 @@ public class ClientRepository : IClientRepository
         return pagedList;
     }
 
-    private Expression<Func<Client,ClientModel>> ClientToClientModel() =>
-        client => new ClientModel{
-            Id = client.Id.Value,
-            FirstName = client.FirstName.Value,
-            MiddleName = client.MiddleName.Value,
-            LastName = client.LastName.Value,
-            Address = new()
-            {
-                City = client.Address.City,
-                Comment = client.Address.Comment,
-                Country = client.Address.Country,
-                Region = client.Address.Region,
-                Street = client.Address.Street,
-                ZipCode = client.Address.ZipCode
-            },
-            Comment = client.Comment.Value,
-            PhoneNumber = client.PhoneNumber.Value,
-            Source = client.Source,
-            State = client.State,
-            CreatedOn = client.CreatedOn
-        };
 }

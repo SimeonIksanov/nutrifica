@@ -14,28 +14,28 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
     private readonly HashSet<UserId> _managerIds = null!; // Пользователи которые могут манипулировать клиентом
     private readonly List<OrderId> _orderIds = null!;
     private readonly List<PhoneCall> _phoneCalls = null!;
+
+    // ReSharper disable once UnusedMember.Local
     private Client() { }
 
     private Client(UserId createdBy)
     {
         _managerIds = new HashSet<UserId> { createdBy };
         State = State.Active;
-        Status = Status.New;
     }
 
     public DateTime CreatedOn { get; set; }
-    public UserId CreatedBy { get; set; }
+    public UserId CreatedBy { get; set; } = null!;
     public DateTime LastModifiedOn { get; set; }
-    public UserId LastModifiedBy { get; set; }
-    public FirstName FirstName { get; set; }
-    public MiddleName MiddleName { get; set; }
-    public LastName LastName { get; set; }
+    public UserId LastModifiedBy { get; set; } = null!;
+    public FirstName FirstName { get; set; } = null!;
+    public MiddleName MiddleName { get; set; } = null!;
+    public LastName LastName { get; set; } = null!;
 
     public Address Address { get; set; } = null!;
-    public Comment Comment { get; set; }
+    public Comment Comment { get; set; } = null!;
     public PhoneNumber PhoneNumber { get; set; } = null!;
     public string Source { get; set; } = string.Empty;
-    public Status Status { get; set; }
     public State State { get; set; }
     public IReadOnlyCollection<UserId> ManagerIds => _managerIds.ToList();
     public IReadOnlyCollection<OrderId> OrderIds => _orderIds.ToList();

@@ -1,3 +1,4 @@
+using Nutrifica.Application.Models.Users;
 using Nutrifica.Shared.Enums;
 
 namespace Nutrifica.Application.Models.Clients;
@@ -14,4 +15,5 @@ public record ClientModel
     public string Source { get; set; } = string.Empty;
     public State State { get; set; }
     public DateTime CreatedOn { get; set; }
+    public ICollection<UserShortModel> Managers { get; set; } = null!;
 }

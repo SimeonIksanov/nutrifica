@@ -11,21 +11,24 @@ namespace Nutrifica.Domain.Aggregates.OrderAggregate;
 
 public sealed class Order : Entity<OrderId>, IAggregateRoot, IAuditableEntity
 {
-    private readonly HashSet<UserId> _managerIds;
-    private readonly List<OrderItem> _orderItems;
+    private readonly HashSet<UserId> _managerIds = null!;
+    private readonly List<OrderItem> _orderItems = null!;
+
+    // ReSharper disable once UnusedMember.Local
     private Order() { }
 
     private Order(UserId createdBy)
     {
         _managerIds = new HashSet<UserId> { createdBy };
+        _orderItems = new List<OrderItem>();
         Status = OrderStatus.New;
         State = State.Active;
     }
 
     public DateTime CreatedOn { get; set; }
-    public UserId CreatedBy { get; set; }
+    public UserId CreatedBy { get; set; } = null!;
     public DateTime LastModifiedOn { get; set; }
-    public UserId LastModifiedBy { get; set; }
+    public UserId LastModifiedBy { get; set; } = null!;
     public ClientId ClientId { get; private set; } = null!;
     public OrderStatus Status { get; set; }
 

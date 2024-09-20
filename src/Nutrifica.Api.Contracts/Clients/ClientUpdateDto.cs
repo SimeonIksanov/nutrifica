@@ -24,4 +24,5 @@ public record ClientUpdateDto
     public string Comment { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
     public State State { get; set; }
+    public ICollection<Guid> ManagerIds { get; set; } = null!;
 }
