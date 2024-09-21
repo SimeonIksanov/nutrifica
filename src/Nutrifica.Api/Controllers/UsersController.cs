@@ -9,6 +9,7 @@ using Nutrifica.Application.Users.ChangePassword;
 using Nutrifica.Application.Users.Create;
 using Nutrifica.Application.Users.Get;
 using Nutrifica.Application.Users.GetById;
+using Nutrifica.Application.Users.GetManagers;
 using Nutrifica.Application.Users.ResetPassword;
 using Nutrifica.Application.Users.Update;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
@@ -36,6 +37,14 @@ public class UsersController : ApiController
         var command = new GetUsersQuery(queryParams);
         Result<PagedList<UserDto>> result = await _mediator.Send(command, ct);
 
+        return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
+    }
+
+    [HttpGet("managers")]
+    public async Task<IActionResult> GetManagers(CancellationToken ct)
+    {
+        var query = new GetManagersQuery();
+        var result = await _mediator.Send(query, ct);
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
 

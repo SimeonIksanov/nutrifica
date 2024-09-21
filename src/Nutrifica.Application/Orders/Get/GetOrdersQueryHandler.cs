@@ -21,7 +21,7 @@ public class GetOrdersQueryHandler : IQueryHandler<GetOrdersQuery, PagedList<Ord
     public async Task<Result<PagedList<OrderDto>>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
     {
         var orderPagedList = await _orderRepository
-            .GetByFilterAsync(request.QueryParams, cancellationToken);
+            .GetByFilterAsync(request.QueryParams, _currentUserService.UserId, cancellationToken);
         var responseList = PagedList<OrderDto>.Create(
             orderPagedList.Items.Select(x => x.ToOrderDto()).ToList(),
             orderPagedList.Page,

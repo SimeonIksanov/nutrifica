@@ -32,11 +32,50 @@ public class ClientRepository : IClientRepository
             .Add(client);
     }
 
-    public Task<Client?> GetByIdAsync(ClientId clientId, CancellationToken ct = default)
+    public Task<Client?> GetEntityByIdAsync(ClientId clientId, CancellationToken ct = default)
     {
         return _context
             .Set<Client>()
             .FirstOrDefaultAsync(x => x.Id == clientId);
+    }
+
+    public async Task<ClientModel?> GetByIdAsync(ClientId clientId, CancellationToken ct = default)
+    {
+        // TODO урать дублированый код
+        var query = from client in _context.Clients.AsNoTracking()
+            where client.Id.Equals(clientId)
+            select new ClientModel
+            {
+                Id = client.Id.Value,
+                FirstName = client.FirstName.Value,
+                MiddleName = client.MiddleName.Value,
+                LastName = client.LastName.Value,
+                Address = new()
+                {
+                    City = client.Address.City,
+                    Comment = client.Address.Comment,
+                    Country = client.Address.Country,
+                    Region = client.Address.Region,
+                    Street = client.Address.Street,
+                    ZipCode = client.Address.ZipCode
+                },
+                Comment = client.Comment.Value,
+                PhoneNumber = client.PhoneNumber.Value,
+                Source = client.Source,
+                State = client.State,
+                CreatedOn = client.CreatedOn,
+                Managers = (
+                    from managerId in client.ManagerIds
+                    join manager in _context.Users on managerId.Value equals manager.Id.Value
+                    select new UserShortModel(
+                        manager.Id.Value,
+                        manager.FirstName.Value,
+                        manager.MiddleName.Value,
+                        manager.LastName.Value)
+                ).ToList()
+            };
+
+        return await query.FirstOrDefaultAsync(ct);
     }
 
     public async Task<PagedList<ClientModel>> GetByFilterAsync(QueryParams queryParams,
@@ -79,7 +118,6 @@ public class ClientRepository : IClientRepository
         return pagedList;
     }
 
-
     public async Task<bool> HasClientWithIdAsync(ClientId id, CancellationToken cancellationToken)
     {
         return await _context
@@ -113,5 +151,4 @@ public class ClientRepository : IClientRepository
             await query.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
     }
-
 }

@@ -93,4 +93,19 @@ public class UserService : ServiceBase, IUserService
             return Result.Failure(UserServiceErrors.FailedToResetPassword);
         }
     }
+
+    public async Task<IResult<ICollection<UserShortDto>>> GetManagersAsync(CancellationToken cancellationToken)
+    {
+        var requestUri = UsersEndpoints.GetManagers;
+        try
+        {
+            var response = await GetHttpClient().GetAsync(requestUri, cancellationToken);
+            return await HandleResponse<ICollection<UserShortDto>>(response, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Не удалось загрузить список пользователей: {ex.Message}");
+            return Result.Failure<ICollection<UserShortDto>>(UserServiceErrors.FailedToLoad);
+        }
+    }
 }

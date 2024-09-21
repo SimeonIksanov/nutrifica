@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 
+using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Models.Users;
 using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Infrastructure.Services.SortAndFilter;
+using Nutrifica.Shared.Enums;
 using Nutrifica.Shared.Wrappers;
 
 using Sieve.Services;
@@ -75,6 +77,19 @@ public class UserRepository : IUserRepository
         var pagedList =
             await query.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
+    }
+
+    public async Task<ICollection<UserShortModel>> GetManagers(UserId supervisorId, CancellationToken cancellationToken)
+    {
+        // TODO Выборка пользователей, которые подчиняются supervisorId
+        var query = from user in _context.Users.AsNoTracking()
+            where user.Role != UserRole.Operator
+            select new UserShortModel(
+                user.Id.Value,
+                user.FirstName.Value,
+                user.MiddleName.Value,
+                user.LastName.Value);
+        return await query.ToListAsync(cancellationToken);
     }
 
     public Task<UserModel?> GetDetailedByIdAsync(UserId id, CancellationToken cancellationToken)

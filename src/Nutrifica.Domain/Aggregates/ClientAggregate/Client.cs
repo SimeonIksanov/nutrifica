@@ -20,7 +20,9 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
 
     private Client(UserId createdBy)
     {
-        _managerIds = new HashSet<UserId> { createdBy };
+        _managerIds = new() { createdBy };
+        _orderIds = new();
+        _phoneCalls = new();
         State = State.Active;
     }
 
@@ -66,6 +68,12 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
     }
 
     public void DeletePhoneCall(PhoneCall phoneCall) => _phoneCalls.Remove(phoneCall);
+
+    public void SetManagerIds(ICollection<UserId> managerIds)
+    {
+        _managerIds.Clear();
+        _managerIds.UnionWith(managerIds);
+    }
 
     public class Builder
     {

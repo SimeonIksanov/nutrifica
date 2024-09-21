@@ -15,4 +15,5 @@ public interface IUserRepository
     Task<int> GetCountByUsernameAsync(string username, CancellationToken ct = default);
     Task<PagedList<UserModel>> GetByFilterAsync(QueryParams queryParams, CancellationToken cancellationToken);
     Task<UserModel?> GetDetailedByIdAsync(UserId id, CancellationToken cancellationToken);
+    Task<ICollection<UserShortModel>> GetManagers(UserId supervisorId, CancellationToken cancellationToken);
 }

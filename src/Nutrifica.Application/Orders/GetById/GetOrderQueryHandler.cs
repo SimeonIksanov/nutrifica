@@ -21,7 +21,7 @@ public class GetOrderQueryHandler : IQueryHandler<GetOrderQuery, OrderDto>
 
     public async Task<Result<OrderDto>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
-        var orderModel = await _orderRepository.GetOrderModelByIdAsync(request.OrderId, cancellationToken);
+        var orderModel = await _orderRepository.GetOrderModelByIdAsync(request.OrderId, _currentUserService.UserId, cancellationToken);
         if (orderModel is null)
             return Result.Failure<OrderDto>(OrderError.OrderNotFound);
         return Result.Success(orderModel.ToOrderDto());

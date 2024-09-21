@@ -22,10 +22,12 @@ public class DeletePhoneCallCommandHandler : ICommandHandler<DeletePhoneCallComm
 
     public async Task<Result> Handle(DeletePhoneCallCommand request, CancellationToken cancellationToken)
     {
-        var client = await _clientRepository.GetByIdAsync(request.ClientId, cancellationToken);
+        var client = await _clientRepository.GetEntityByIdAsync(request.ClientId, cancellationToken);
         if (client is null)
             return Result.Failure(ClientErrors.ClientNotFound);
         var phoneCall = client.PhoneCalls.FirstOrDefault(x => x.Id == request.PhoneCallId.Value);
+        if (phoneCall is null)
+            return Result.Failure(ClientErrors.PhoneCallNotFound);
         client.DeletePhoneCall(phoneCall);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();

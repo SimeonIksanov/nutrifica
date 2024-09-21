@@ -23,7 +23,7 @@ public class CreatePhoneCallCommandHandler : ICommandHandler<CreatePhoneCallComm
     public async Task<Result<PhoneCallDto>> Handle(CreatePhoneCallCommand request,
         CancellationToken cancellationToken)
     {
-        var client = await _clientRepository.GetByIdAsync(request.clientId, cancellationToken);
+        var client = await _clientRepository.GetEntityByIdAsync(request.clientId, cancellationToken);
         if (client is null)
             return Result.Failure<PhoneCallDto>(ClientErrors.ClientNotFound);
         var newPhoneCall = PhoneCall.Create(request.Comment);

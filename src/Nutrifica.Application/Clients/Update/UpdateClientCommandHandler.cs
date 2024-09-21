@@ -22,13 +22,14 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, C
 
     public async Task<Result<ClientDto>> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
     {
-        var client = await _clientRepository.GetByIdAsync(request.Id, cancellationToken);
+        var client = await _clientRepository.GetEntityByIdAsync(request.Id, cancellationToken);
         if (client is null)
         {
             return Result.Failure<ClientDto>(ClientErrors.ClientNotFound);
         }
 
         MapToClient(request, client);
+        client.SetManagerIds(request.ManagerIds);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

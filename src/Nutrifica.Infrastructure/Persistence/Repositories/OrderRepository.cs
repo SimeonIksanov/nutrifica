@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Models.Orders;
@@ -6,6 +7,7 @@ using Nutrifica.Application.Models.Users;
 using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.OrderAggregate;
 using Nutrifica.Domain.Aggregates.OrderAggregate.ValueObjects;
+using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Infrastructure.Services.SortAndFilter;
 using Nutrifica.Shared.Wrappers;
 
@@ -24,14 +26,20 @@ public class OrderRepository : IOrderRepository
         _sieveProcessor = sieveProcessor;
     }
 
-    public async Task<Order?> GetByIdAsync(OrderId orderId, CancellationToken ct = default)
+    public async Task<Order?> GetByIdAsync(OrderId orderId, UserId managerId, CancellationToken ct = default)
     {
-        return await _context
-            .Set<Order>()
-            .FirstOrDefaultAsync(x => x.Id == orderId, ct);
+        return await (
+            from order in _context.Orders
+            where order.Id.Equals(orderId)
+            select order
+        ).FirstOrDefaultAsync(ct);
+        // return await _context
+        //     .Set<Order>()
+        //     .FirstOrDefaultAsync(x => x.Id == orderId, ct);
     }
 
-    public async Task<OrderModel?> GetOrderModelByIdAsync(OrderId orderId, CancellationToken ct = default)
+    public async Task<OrderModel?> GetOrderModelByIdAsync(OrderId orderId, UserId managerId,
+        CancellationToken ct = default)
     {
         var query = (from order in _context.Orders.AsNoTracking()
             join creator in _context.Users on order.CreatedBy.Value equals creator.Id.Value
@@ -69,7 +77,7 @@ public class OrderRepository : IOrderRepository
         return orderModel;
     }
 
-    public async Task<PagedList<OrderModel>> GetByFilterAsync(QueryParams queryParams,
+    public async Task<PagedList<OrderModel>> GetByFilterAsync(QueryParams queryParams, UserId managerId,
         CancellationToken cancellationToken)
     {
         var query = (from order in _context.Orders.AsNoTracking()

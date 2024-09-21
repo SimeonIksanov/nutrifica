@@ -1,16 +1,19 @@
 @using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Api.Contracts.Users.Responses
 @using Nutrifica.Shared.Enums
 @using Nutrifica.Spa.Infrastructure.Services.Clients
+@using Nutrifica.Spa.Infrastructure.Services.Users
 @implements IDisposable
 @inject IClientService ClientService
+@inject IUserService UserService
 
 <EditForm EditContext="_editContext"
           OnValidSubmit="OnSubmitAsync">
     <MudDialog>
         <DialogContent>
-                <DataAnnotationsValidator/>
-                <ValidationSummary/>
-            
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+
             <MudTextField Label="Фамилия"
                           @bind-Value="_model.LastName"
                           For="() => _model.LastName"
@@ -67,48 +70,58 @@
 
 
             <MudDivider/>
+            <MudExpansionPanels Class="my-1">
+                <MudExpansionPanel Text="Адрес" Expanded="false">
+                    <MudTextField Label="Страна"
+                                  @bind-Value="_model.Address.Country"
+                                  For="() => _model.Address.Country"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="my-2"/>
 
-            <MudTextField Label="Страна"
-                          @bind-Value="_model.Address.Country"
-                          For="() => _model.Address.Country"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="my-2"/>
+                    <MudTextField Label="Регион"
+                                  @bind-Value="_model.Address.Region"
+                                  For="() => _model.Address.Region"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="my-2"/>
 
-            <MudTextField Label="Регион"
-                          @bind-Value="_model.Address.Region"
-                          For="() => _model.Address.Region"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="my-2"/>
+                    <MudTextField Label="Город"
+                                  @bind-Value="_model.Address.City"
+                                  For="() => _model.Address.City"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="my-2"/>
 
-            <MudTextField Label="Город"
-                          @bind-Value="_model.Address.City"
-                          For="() => _model.Address.City"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="my-2"/>
+                    <MudTextField Label="Улица"
+                                  @bind-Value="_model.Address.Street"
+                                  For="() => _model.Address.Street"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="my-2"/>
 
-            <MudTextField Label="Улица"
-                          @bind-Value="_model.Address.Street"
-                          For="() => _model.Address.Street"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="my-2"/>
+                    <MudTextField Label="Индекс"
+                                  @bind-Value="_model.Address.ZipCode"
+                                  For="() => _model.Address.ZipCode"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="my-2"/>
 
-            <MudTextField Label="Индекс"
-                          @bind-Value="_model.Address.ZipCode"
-                          For="() => _model.Address.ZipCode"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="my-2"/>
+                    <MudTextField Label="Комментарий"
+                                  @bind-Value="_model.Address.Comment"
+                                  For="() => _model.Address.Comment"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Class="my-2"/>
+                </MudExpansionPanel>
 
-            <MudTextField Label="Комментарий"
-                          @bind-Value="_model.Address.Comment"
-                          For="() => _model.Address.Comment"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="my-2"/>
+                <MudExpansionPanel Text="Менеджеры" MaxHeight="150" Expanded="false">
+                    @foreach (var item in _selectableManagers)
+                    {
+                        <MudCheckBox Label=@item.Name @bind-Value="@item.Selected"/>
+                    }
+                </MudExpansionPanel>
+            </MudExpansionPanels>
 
         </DialogContent>
 
@@ -133,17 +146,20 @@
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public ClientDto Client { get; set; } = null!;
     private ValidationMessageStore _messageStore = null!;
-    private ClientUpdateDto _model = new ();
+    private readonly ClientUpdateDto _model = new();
     private EditContext _editContext = null!;
-    private CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _cts = new();
+    private ICollection<SelectableManager> _selectableManagers = [];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _editContext = new EditContext(_model);
         _editContext.OnValidationRequested += HandleValidationRequested;
         _messageStore = new ValidationMessageStore(_editContext);
         MapIncomingClientToFormModel();
+        _selectableManagers = await GetSelectableManagersAsync(Client.Managers, _cts.Token);
     }
+
 
     void CloseWindowAsCancel() => MudDialog.Cancel();
 
@@ -156,7 +172,7 @@
 
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
     {
-        _messageStore?.Clear();
+        _messageStore.Clear();
     }
 
     private void MapIncomingClientToFormModel()
@@ -170,11 +186,15 @@
         _model.Comment = Client.Comment;
         _model.Source = Client.Source;
         _model.State = Client.State;
-        _model.Address = Client.Address with {};
+        _model.Address = Client.Address with { };
     }
 
     private async Task OnSubmitAsync()
     {
+        _model.ManagerIds = _selectableManagers
+            .Where(x => x.Selected)
+            .Select(x => x.User.Id)
+            .ToList();
         var result = await ClientService.UpdateAsync(_model, _cts.Token);
         if (result.IsFailure)
         {
@@ -185,4 +205,36 @@
 
         MudDialog.Close(DialogResult.Ok(result.Value));
     }
+
+    private async Task<ICollection<SelectableManager>> GetSelectableManagersAsync(ICollection<UserShortDto> currentManagers, CancellationToken ct)
+    {
+        var managers = await LoadManagersAsync(ct);
+        var selectable = new List<SelectableManager>(managers.Count);
+        var currentIds = currentManagers.Select(x => x.Id).ToArray();
+        foreach (var manager in managers)
+        {
+            SelectableManager val = currentIds.Contains(manager.Id)
+                ? new(manager, true)
+                : new(manager, false);
+            selectable.Add(val);
+        }
+
+        return selectable;
+    }
+
+    private async Task<ICollection<UserShortDto>> LoadManagersAsync(CancellationToken ct)
+    {
+        var managerResult = await UserService.GetManagersAsync(ct);
+        return managerResult.IsSuccess
+            ? managerResult.Value
+            : [];
+    }
+
+    record SelectableManager(UserShortDto User, bool Selected)
+    {
+        //public UserShortDto User { get; init; } = User;
+        public bool Selected { get; set; } = Selected;
+        public string Name => $"{User.LastName} {User.FirstName} {User.MiddleName}";
+    }
+
 }

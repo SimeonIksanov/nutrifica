@@ -14,6 +14,7 @@ using Nutrifica.Application.Clients.UpdatePhoneCall;
 using Nutrifica.Application.Mappings;
 using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
+using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Domain.Shared;
 using Nutrifica.Shared.Wrappers;
 
@@ -99,16 +100,19 @@ public class ClientsController : ApiController
         CancellationToken ct)
     {
         if (clientId != dto.Id) return BadRequest();
-        var command = new UpdateClientCommand(
-            ClientId.Create(dto.Id),
-            FirstName.Create(dto.FirstName),
-            MiddleName.Create(dto.MiddleName),
-            LastName.Create(dto.LastName),
-            dto.Address.ToAddress(),
-            Comment.Create(dto.Comment),
-            PhoneNumber.Create(dto.PhoneNumber),
-            dto.Source,
-            dto.State);
+        var command = new UpdateClientCommand
+        {
+            Id = ClientId.Create(dto.Id),
+            FirstName = FirstName.Create(dto.FirstName),
+            MiddleName = MiddleName.Create(dto.MiddleName),
+            LastName = LastName.Create(dto.LastName),
+            Address = dto.Address.ToAddress(),
+            Comment = Comment.Create(dto.Comment),
+            PhoneNumber = PhoneNumber.Create(dto.PhoneNumber),
+            Source = dto.Source,
+            State = dto.State,
+            ManagerIds = dto.ManagerIds.Select(UserId.Create).ToArray()
+        };
         Result<ClientDto> result = await _mediator.Send(command, ct);
         return result.IsSuccess
             ? Ok(result.Value)

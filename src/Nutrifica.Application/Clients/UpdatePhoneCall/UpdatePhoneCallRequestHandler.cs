@@ -22,7 +22,7 @@ public class UpdatePhoneCallRequestHandler : ICommandHandler<UpdatePhoneCallComm
     public async Task<Result<PhoneCallDto>> Handle(UpdatePhoneCallCommand command,
         CancellationToken cancellationToken)
     {
-        var client = await _clientRepository.GetByIdAsync(command.ClientId, cancellationToken);
+        var client = await _clientRepository.GetEntityByIdAsync(command.ClientId, cancellationToken);
         if (client is null)
             return Result.Failure<PhoneCallDto>(ClientErrors.ClientNotFound);
         var phoneCall = client.PhoneCalls.FirstOrDefault(x => x.Id == command.PhoneCallId.Value);

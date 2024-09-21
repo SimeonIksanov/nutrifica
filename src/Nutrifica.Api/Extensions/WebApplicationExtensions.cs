@@ -35,11 +35,11 @@ public static class WebApplicationExtensions
     private static User CreateMainUser(IPasswordHasherService ph)
     {
         var user = User.Create(username: "admin",
-            firstName: FirstName.Create("f"),
-            middleName: MiddleName.Create("m"),
-            lastname: LastName.Create("l"),
+            firstName: FirstName.Create("Главный"),
+            middleName: MiddleName.Create("Человек"),
+            lastname: LastName.Create("Самый"),
             phoneNumber: PhoneNumber.Create("123"),
-            email: Email.Create("email"),
+            email: Email.Create("vip@mail.ru"),
             supervisorId: null);
         user.CreatedBy = UserId.Create(Guid.Empty);
         user.LastModifiedBy = UserId.Create(Guid.Empty);

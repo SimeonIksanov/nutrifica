@@ -10,7 +10,8 @@ public interface IClientRepository
 {
     void Add(Client client);
     Task<bool> HasClientWithIdAsync(ClientId id, CancellationToken cancellationToken);
-    Task<Client?> GetByIdAsync(ClientId clientId, CancellationToken ct = default);
+    Task<Client?> GetEntityByIdAsync(ClientId clientId, CancellationToken ct = default);
+    Task<ClientModel?> GetByIdAsync(ClientId clientId, CancellationToken ct = default);
     Task<PagedList<ClientModel>> GetByFilterAsync(QueryParams queryParams, CancellationToken cancellationToken);
 
     Task<PagedList<PhoneCallModel>> GetPhoneCallsAsync(ClientId id, QueryParams queryParams, CancellationToken cancellationToken);
