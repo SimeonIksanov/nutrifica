@@ -68,9 +68,19 @@ public class OrderService : ServiceBase, IOrderService
         }
     }
 
-    public Task<IResult> UpdateAsync(OrderUpdateDto dto, CancellationToken cancellationToken)
+    public async Task<IResult> UpdateAsync(OrderUpdateDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await GetHttpClient()
+                .PutAsJsonAsync(OrdersEndpoints.Update(dto.Id), dto, cancellationToken);
+            return await HandleResponse<OrderDto>(response, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine(ex);
+            return Result.Failure(OrderServiceErrors.FailedToUpdate);
+        }
     }
 
     public async Task<IResult> AddOrderItemAsync(OrderItemCreateDto dto, CancellationToken cancellationToken)

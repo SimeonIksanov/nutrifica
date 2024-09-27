@@ -1,0 +1,140 @@
+@using Nutrifica.Api.Contracts.Orders
+@using Nutrifica.Api.Contracts.Users.Responses
+@using Nutrifica.Shared.Enums
+@using Nutrifica.Spa.Infrastructure.Services.Orders
+@using Nutrifica.Spa.Infrastructure.Services.Users
+@implements IDisposable
+@inject IOrderService OrderService
+@inject IUserService UserService
+
+<EditForm EditContext="_editContext"
+          OnValidSubmit="OnSubmitAsync">
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            
+            <MudSelect @bind-Value="_model.Status" Label="Статус" T="OrderStatus">
+                <MudSelectItem Value="OrderStatus.New">Новый</MudSelectItem>
+                <MudSelectItem Value="OrderStatus.InProcess">В работе</MudSelectItem>
+                <MudSelectItem Value="OrderStatus.Waiting">Ожидание</MudSelectItem>
+                <MudSelectItem Value="OrderStatus.Done">Закончен</MudSelectItem>
+                <MudSelectItem Value="OrderStatus.Rejected">Отменен</MudSelectItem>
+            </MudSelect>
+
+            <MudExpansionPanels Class="my-1">
+                <MudExpansionPanel Text="Менеджеры" MaxHeight="150" Expanded="false">
+                    @foreach (var item in _selectableManagers)
+                    {
+                        <MudCheckBox Label=@item.Name @bind-Value="@item.Selected"/>
+                    }
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+            
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Изменить
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public OrderDto Order { get; set; } = null!;
+
+    private ValidationMessageStore _messageStore = null!;
+    private EditContext _editContext = null!;
+    private readonly CancellationTokenSource _cts = new();
+    private readonly OrderUpdateDto _model = new();
+    private ICollection<SelectableManager> _selectableManagers = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _editContext = new EditContext(_model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new ValidationMessageStore(_editContext);
+        MapIncomingOrderToFormModel();
+        _selectableManagers = await GetSelectableManagersAsync(Order.Managers, _cts.Token);
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private async Task OnSubmitAsync()
+    {
+        _model.ManagerIds = _selectableManagers
+            .Where(x => x.Selected)
+            .Select(x => x.User.Id)
+            .ToList();
+        var result = await OrderService.UpdateAsync(_model, _cts.Token);
+        if (result.IsFailure)
+        {
+            _messageStore.Add(() => _model, result.Error.Description);
+            _editContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void MapIncomingOrderToFormModel()
+    {
+        if (Order is null) return;
+        _model.Id = Order.Id;
+        _model.Status = Order.Status;
+    }
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore.Clear();
+    }
+
+    public void Dispose()
+    {
+        _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
+    private async Task<ICollection<UserShortDto>> LoadManagersAsync(CancellationToken ct)
+    {
+        var managerResult = await UserService.GetManagersAsync(ct);
+        return managerResult.IsSuccess
+            ? managerResult.Value
+            : [];
+    }
+
+    private async Task<ICollection<SelectableManager>> GetSelectableManagersAsync(ICollection<UserShortDto> currentManagers, CancellationToken ct)
+    {
+        var managers = await LoadManagersAsync(ct);
+        var selectable = new List<SelectableManager>(managers.Count);
+        var currentIds = currentManagers.Select(x => x.Id).ToArray();
+        foreach (var manager in managers)
+        {
+            SelectableManager val = currentIds.Contains(manager.Id)
+                ? new(manager, true)
+                : new(manager, false);
+            selectable.Add(val);
+        }
+
+        return selectable;
+    }
+
+    record SelectableManager(UserShortDto User, bool Selected)
+    {
+        //public UserShortDto User { get; init; } = User;
+        public bool Selected { get; set; } = Selected;
+        public string Name => $"{User.LastName} {User.FirstName} {User.MiddleName}";
+    }
+
+}

@@ -34,6 +34,7 @@ else
             }
         </MudList>
     </div>
+    <MudButton OnClick="OnModifyOrderClick">Редактировать заказ</MudButton>
 
     <MudDataGrid Items="@_order.OrderItems" T="OrderItemDto"
                  Elevation="1"
@@ -51,7 +52,7 @@ else
             <MudIconButton Icon="@Icons.Material.Filled.Add"
                            Color="Color.Inherit"
                            Class="mr-5" OnClick="OnAddItemHandlerAsync"/>
-            
+
             <MudIconButton Icon="@Icons.Material.Filled.Refresh"
                            Color="Color.Inherit"
                            Class="mr-5" OnClick="FetchOrderAsync"/>
@@ -59,30 +60,30 @@ else
 
         <Columns>
             <PropertyColumn Title="ID"
-                            Property="x => x.Id" 
+                            Property="x => x.Id"
                             Editable="false"/>
-            
+
             <PropertyColumn Title="Название"
                             Property="x => x.ProductName"
                             Editable="false"/>
-            
+
             <PropertyColumn Title="Описание"
-                            Property="x=>x.ProductDetails"
+                            Property="x => x.ProductDetails"
                             Editable="false"/>
-            
+
             <PropertyColumn Title="Количество"
                             Property="x => x.Quantity">
                 <EditTemplate >
                     <MudNumericField Label="Количество"
-                                     @bind-Value="context.Item.Quantity" 
-                                     Min="0" 
-                                     Variant="Variant.Outlined" 
+                                     @bind-Value="context.Item.Quantity"
+                                     Min="0"
+                                     Variant="Variant.Outlined"
                                      Margin="Margin.Dense"/>
                 </EditTemplate>
             </PropertyColumn>
-            
+
             <PropertyColumn Title="Цена"
-                            Property="x => x.UnitPrice.Amount" 
+                            Property="x => x.UnitPrice.Amount"
                             Editable="true"/>
             <TemplateColumn>
                 <CellTemplate>
@@ -183,6 +184,28 @@ else
             return;
         }
 
+        await FetchOrderAsync();
+    }
+
+    private async Task OnModifyOrderClick()
+    {
+        var parameters = new DialogParameters<ModifyOrderComponent>
+        {
+            { x => x.Order, _order }
+        };
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.TopCenter,
+            CloseOnEscapeKey = true
+        };
+        var dialog = await DialogService.ShowAsync<ModifyOrderComponent>("Изменить заказ", parameters, options);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        Snackbar.Add("Данные заказа изменены", Severity.Success);
         await FetchOrderAsync();
     }
 
