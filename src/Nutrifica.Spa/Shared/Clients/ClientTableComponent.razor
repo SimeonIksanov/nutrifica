@@ -50,8 +50,9 @@
             <PropertyColumn Property="x => x.FirstName" Title="Имя"/>
             <PropertyColumn Property="x => x.MiddleName" Title="Отчество"/>
             <PropertyColumn Property="x => x.PhoneNumber" Title="Номер Телефона"/>
-            @* <PropertyColumn Property="x => ShortComment(x)" Title="Комментарий"/> *@
-            <PropertyColumn Property="x => x.Comment" Title="Комментарий"/>
+            <PropertyColumn Property="x => x.Comment" Title="Комментарий">
+                <CellTemplate>@ShortComment(context.Item)</CellTemplate>
+            </PropertyColumn>
             <PropertyColumn Property="x => x.Source" Title="Источник" Hideable="true"/>
             <PropertyColumn Property="x => x.State" Title="Состояние"/>
         </Columns>
@@ -66,6 +67,7 @@
                 <MudCardContent>
                     <MudText>Создан @context.Item.CreatedAt</MudText>
                     <MudText>Адрес: @context.Item.Address.Country @context.Item.Address.ZipCode @context.Item.Address.Region @context.Item.Address.City @context.Item.Address.Street @context.Item.Address.Comment</MudText>
+                    <MudText>Комментарий: @context.Item.Comment</MudText>
                 </MudCardContent>
             </MudCard>
         </ChildRowContent>
@@ -77,9 +79,9 @@
         <LoadingContent>
             <MudText>Загрузка...</MudText>
         </LoadingContent>
-        
+
         <PagerContent>
-            <MudDataGridPager T="ClientDto" 
+            <MudDataGridPager T="ClientDto"
                               RowsPerPageString="Строк на странице"
                               InfoFormat="{first_item}-{last_item} из {all_items}"/>
         </PagerContent>
@@ -149,8 +151,15 @@
         }
     }
 
-    private string ShortComment(ClientDto client) =>
-        client.Comment.Substring(0, Math.Min(50, client.Comment.Length));
+    private string ShortComment(ClientDto client)
+    {
+        int maxLength = 50;
+        if (client.Comment.Length < 50)
+            return client.Comment;
+
+        string x = $"{client.Comment.Substring(0, maxLength)}...";
+        return x;
+    }
 
     private async Task OnRefreshClick()
     {
@@ -165,4 +174,5 @@
                 // .Aggregate("", (a, b) => string.Join(",", a, b));
                 .Aggregate((a, b) => string.Join(",", a, b));
     }
+
 }

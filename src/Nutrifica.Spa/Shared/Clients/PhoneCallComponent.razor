@@ -12,7 +12,11 @@
 
     <MudStack Row Class="justify-space-between">
         <MudText Class="pa-3" Typo="Typo.body2">
-            @PhoneCall.Comment
+            @* @(string.Join("<br>", PhoneCall.Comment.Split('\n'))) *@
+            @foreach (var line in PhoneCall.Comment.Split('\n', StringSplitOptions.None))
+            {
+                @line<br>
+            }
         </MudText>
         
         <MudStack Row Class="column-gap-0">

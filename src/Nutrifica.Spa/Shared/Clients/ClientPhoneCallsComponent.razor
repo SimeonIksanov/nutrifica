@@ -88,7 +88,7 @@
 
     private async Task HandleAddComment(MouseEventArgs obj)
     {
-        var request = new PhoneCallCreateDto() { Comment = _newComment };
+        var request = new PhoneCallCreateDto { Comment = _newComment };
         var result = await ClientService.CreatePhoneCallAsync(ClientId, request, _cts.Token);
         if (result.IsFailure)
         {
