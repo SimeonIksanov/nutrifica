@@ -1,0 +1,32 @@
+version: '3'
+services:
+    
+    backend:
+        image: nutrifica-api
+        build:
+            context: .
+            dockerfile: backend.Dockerfile
+        environment:
+            ASPNETCORE_ENVIRONMENT: Development
+        # ports:
+        #     - "8080:8080"
+        #     - "8443:443"
+        networks:
+            - nutrifica-net
+    
+    frontend:
+        image: nutrifica-spa
+        build:
+            context: .
+            dockerfile: frontend.Dockerfile
+        environment:
+            BACKEND_SCHEME: http
+            BACKEND_AUTHORITY: 192.168.88.23:8080
+        ports:
+            - "8080:80"
+            - "8443:443"
+        networks:
+            - nutrifica-net
+
+networks:
+  nutrifica-net: {}
