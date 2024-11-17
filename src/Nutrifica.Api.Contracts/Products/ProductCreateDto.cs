@@ -7,5 +7,5 @@ public record ProductCreateDto
 {
     public string Name { get; set; } = string.Empty;
     public string Details { get; set; } = string.Empty;
-    public MoneyDto Price { get; set; } = null!;
+    public MoneyDto Price { get; set; } = new MoneyDto();
 }
