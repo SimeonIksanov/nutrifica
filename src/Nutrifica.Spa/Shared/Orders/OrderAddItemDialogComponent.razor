@@ -120,7 +120,6 @@
         if (HasErrorInProductSelector())
         {
             _messageStore.Add(() => Model.ProductId, "Продукт не выбран.");
-            Console.WriteLine("yes");
             _editContext.NotifyValidationStateChanged();
         }
     }

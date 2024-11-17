@@ -11,22 +11,27 @@
     <MudDialog>
         <DialogContent>
             <DataAnnotationsValidator />
-            
+            <ValidationSummary/>
             <MudTextField Label="Название"
                           For="() => Model.Name"
                           @bind-Value="Model.Name"
-                          Variant="Variant.Outlined"/>
+                          Variant="Variant.Outlined"
+                          Required="true"/>
+            <ValidationMessage For="() => Model.Name"/>
             
             <MudTextField Label="Описание"
                           For="() => Model.Details"
                           @bind-Value="Model.Details"
                           Variant="Variant.Outlined"/>
+            <ValidationMessage For="() => Model.Details"/>
             
             <MudTextField Label="Цена"
                           For="() => Model.Price"
                           @bind-Value="Model.Price"
                           Converter="@_converter"
-                          Variant="Variant.Outlined"/>
+                          Variant="Variant.Outlined"
+                          Required="true"/>
+            <ValidationMessage For="() => Model.Price"/>
         </DialogContent>
         
         <DialogActions>
@@ -56,7 +61,13 @@
     {
         _editContext = new EditContext(Model);
         _editContext.OnValidationRequested += HandleValidationRequested;
+        _editContext.OnFieldChanged += HandleOnFieldChanged;
         _messageStore = new(_editContext);
+    }
+
+    private void HandleOnFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        _messageStore.Clear(e.FieldIdentifier);
     }
 
     async Task SubmitAsync()
@@ -69,7 +80,6 @@
             _editContext.NotifyValidationStateChanged();
             return;
         }
-
         MudDialog.Close(DialogResult.Ok(createdResult));
     }
 
