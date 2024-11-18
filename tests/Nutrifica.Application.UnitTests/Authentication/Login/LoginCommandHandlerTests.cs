@@ -33,7 +33,7 @@ public class LoginCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_InvalidUsernameProvided_Should_ReturnErrorUserBadLoginOrPass()
+    public async Task Handle_When_InvalidUsernameProvided_Should_ReturnErrorUserBadLoginOrPass()
     {
         // Act
         Result<TokenResponse> result = await _sut.Handle(_command, default);
@@ -44,7 +44,7 @@ public class LoginCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_InvalidPasswordProvided_Should_ReturnErrorUserBadLoginOrPass()
+    public async Task Handle_When_InvalidPasswordProvided_Should_ReturnErrorUserBadLoginOrPass()
     {
         // Arrange
         User userInStore = CreateUser();
@@ -61,7 +61,7 @@ public class LoginCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_ValidCredsProvided_Should_SaveRefreshTokenAndReturnTokens()
+    public async Task Handle_When_ValidCredsProvided_Should_SaveRefreshTokenAndReturnTokens()
     {
         // Arrange
         User userInStore = CreateUser();
@@ -88,7 +88,7 @@ public class LoginCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_UserDisabled_Returns_UserDisabledError()
+    public async Task Handle_When_UserDisabled_Returns_UserDisabledError()
     {
         // Arrange
         User userInStore = CreateUser();

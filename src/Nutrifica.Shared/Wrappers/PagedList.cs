@@ -12,7 +12,7 @@ public class PagedList<T>
         TotalCount = totalCount;
     }
 
-    public ICollection<T> Items { get; set; }
+    public ICollection<T> Items { get; set; } = null!;
     public int Page { get; set; }
     public int PageSize { get; set; }
     public int TotalCount { get; set; }

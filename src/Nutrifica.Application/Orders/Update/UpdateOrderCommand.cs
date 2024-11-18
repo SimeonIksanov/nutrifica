@@ -8,7 +8,7 @@ namespace Nutrifica.Application.Orders.Update;
 
 public record UpdateOrderCommand : ICommand<OrderDto>
 {
-    public OrderId Id { get; set; }
+    public OrderId Id { get; set; } = null!;
     public OrderStatus Status { get; set; }
-    public ICollection<UserId> ManagerIds { get; set; }
+    public ICollection<UserId> ManagerIds { get; set; } = null!;
 }

@@ -17,7 +17,8 @@ public class LastName : ValueObject, IComparable
     public int CompareTo(object? obj)
     {
         var other = obj as LastName;
-        return Value.CompareTo(other.Value);
+        if (other is null) return 1;
+        return String.Compare(Value, other.Value, StringComparison.Ordinal);
     }
 
     #region Workaroud for filtering with 'searchTerm'

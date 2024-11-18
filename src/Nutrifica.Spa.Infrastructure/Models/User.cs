@@ -44,7 +44,7 @@ public class User
 
         if (Enum.TryParse(typeof(UserRole), value, true, out var role))
         {
-            return role.ToString();
+            return role?.ToString() ?? string.Empty;
         }
 
         return string.Empty;

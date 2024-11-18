@@ -14,7 +14,7 @@ public class Money : ValueObject
     }
 
     public decimal Amount { get; private set; }
-    public Currency Currency { get; init; }
+    public Currency Currency { get; init; } = null!;
 
     public static Money Zero() => new Money(0, Currency.None);
     public static Money Zero(Currency currency) => new Money(0, currency);

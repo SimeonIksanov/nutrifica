@@ -4,7 +4,7 @@ namespace Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 
 public sealed class ClientId : ValueObject
 {
-    public static ClientId CreateUnique() => Create(Guid.NewGuid());
+    public static ClientId CreateUnique() => Create(Guid.CreateVersion7());
     public static ClientId Create(Guid value) => new(value);
     private ClientId(Guid value) => Value = value;
 

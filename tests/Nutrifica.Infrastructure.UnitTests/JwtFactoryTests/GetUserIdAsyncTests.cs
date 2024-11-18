@@ -7,7 +7,7 @@ namespace Nutrifica.Infrastructure.UnitTests.JwtFactoryTests;
 public class GetUserIdAsyncTests
 {
     [Fact]
-    public async void GetUserId_WhenValidJwtProvided_Should_ReturnUserId()
+    public async Task GetUserId_WhenValidJwtProvided_Should_ReturnUserId()
     {
         // Arrange
         var jwtSettings = JwtSettingsFactory.Create();
@@ -21,7 +21,7 @@ public class GetUserIdAsyncTests
         Assert.False(actual.IsEmpty);
     }
     [Fact]
-    public async void GetUserId_WhenInvalidJwtProvided_Should_ReturnEmptyUserId()
+    public async Task GetUserId_WhenInvalidJwtProvided_Should_ReturnEmptyUserId()
     {
         // Arrange
         var jwtSettings = JwtSettingsFactory.Create();

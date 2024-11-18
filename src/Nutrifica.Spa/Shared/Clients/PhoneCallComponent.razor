@@ -36,7 +36,7 @@
 </MudPaper>
 
 @code {
-    [Parameter] public PhoneCallDto PhoneCall { get; set; }
+    [Parameter] public PhoneCallDto PhoneCall { get; set; } = null!;
     [Parameter] public EventCallback<PhoneCallDto> OnUpdate { get; set; }
     [Parameter] public EventCallback<PhoneCallDto> OnDelete { get; set; }
 

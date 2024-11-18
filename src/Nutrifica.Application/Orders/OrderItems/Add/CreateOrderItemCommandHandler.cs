@@ -40,6 +40,7 @@ public class CreateOrderItemCommandHandler : ICommandHandler<CreateOrderItemComm
     private async Task<OrderItem> CreateOrderItem(CreateOrderItemCommand command, CancellationToken cancellationToken)
     {
         var unitPrice = await _productRepository.GetByIdAsync(command.ProductId, cancellationToken);
+        if (unitPrice is null) throw new ApplicationException("Product not found");
         var orderItem = OrderItem.Create(command.ProductId, command.Quantity, unitPrice.Price);
         return orderItem;
     }

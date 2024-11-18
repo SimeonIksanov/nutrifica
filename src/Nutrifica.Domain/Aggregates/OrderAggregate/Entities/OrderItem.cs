@@ -21,9 +21,9 @@ public class OrderItem : Entity<int>
     }
     internal OrderItem() { }
 
-    public ProductId ProductId { get; init; }
+    public ProductId ProductId { get; init; } = null!;
     public int Quantity { get; private set; }
-    public Money UnitPrice { get; internal set; }
+    public Money UnitPrice { get; internal set; } = null!;
 
     public void UpdateQuantity(int newQuantity)
     {

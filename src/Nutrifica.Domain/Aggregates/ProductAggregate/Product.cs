@@ -22,11 +22,11 @@ public sealed class Product : Entity<ProductId>, IAggregateRoot, IAuditableEntit
     private Product() { }
 
     public string Name { get; set; } = string.Empty;
-    public Money Price { get; set; }
+    public Money Price { get; set; } = null!;
     public string Details { get; set; } = string.Empty;
     public State State { get; set; }
     public DateTime CreatedOn { get; set; }
-    public UserId CreatedBy { get; set; }
+    public UserId CreatedBy { get; set; } = null!;
     public DateTime LastModifiedOn { get; set; }
-    public UserId LastModifiedBy { get; set; }
+    public UserId LastModifiedBy { get; set; } = null!;
 }

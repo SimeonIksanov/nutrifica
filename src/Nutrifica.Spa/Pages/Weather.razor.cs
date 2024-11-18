@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components;
 
 namespace Nutrifica.Spa.Pages;
-
+/*
 partial class Weather
 {
     [Inject] private HttpClient Http { get; set; }
@@ -24,3 +24,4 @@ public class WeatherForecast
 
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
+*/

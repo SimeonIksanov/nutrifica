@@ -6,6 +6,6 @@ public class PhoneCallDto
 {
     public int Id { get; set; }
     public DateTime CreatedOn { get; set; }
-    public UserShortDto CreatedBy { get; set; }
+    public UserShortDto CreatedBy { get; set; } = null!;
     public string Comment { get; set; } = string.Empty;
 }

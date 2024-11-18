@@ -28,7 +28,7 @@ public class ChangePasswordCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_OwnPassChanged_Returns_Success()
+    public async Task Handle_When_OwnPassChanged_Returns_Success()
     {
         var user = UserUtils.CreateUser();
         var command = new ChangePasswordCommand(user.Id, "cur", "new");
@@ -49,7 +49,7 @@ public class ChangePasswordCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_EmptyPass_Returns_WrongPass()
+    public async Task Handle_When_EmptyPass_Returns_WrongPass()
     {
         var user = UserUtils.CreateUser();
         var command = new ChangePasswordCommand(user.Id, string.Empty, "new");
@@ -63,7 +63,7 @@ public class ChangePasswordCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_UserNotFound_Returns_UserNotFound()
+    public async Task Handle_When_UserNotFound_Returns_UserNotFound()
     {
         var command = new ChangePasswordCommand(UserId.CreateUnique(), "", "new");
         _userRepositoryMock
@@ -78,7 +78,7 @@ public class ChangePasswordCommandHandlerTests
     }
 
     [Fact]
-    public async void Handle_When_WrongCurPass_Returns_WrongPassword()
+    public async Task Handle_When_WrongCurPass_Returns_WrongPassword()
     {
         var user = UserUtils.CreateUser();
         var command = new ChangePasswordCommand(user.Id, "wrong", "new");
