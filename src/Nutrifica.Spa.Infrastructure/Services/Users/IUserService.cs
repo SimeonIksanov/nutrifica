@@ -13,4 +13,5 @@ public interface IUserService
     Task<IResult> ChangePasswordAsync(UserChangePasswordDto dto, CancellationToken cancellationToken);
     Task<IResult> ResetPasswordAsync(UserResetPasswordDto dto, CancellationToken cancellationToken);
     Task<IResult<ICollection<UserShortDto>>> GetManagersAsync(CancellationToken cancellationToken);
+    Task<IResult<ICollection<UserShortDto>>> GetSubordinatesAsync(CancellationToken cancellationToken);
 }

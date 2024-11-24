@@ -108,4 +108,10 @@ public class UserService : ServiceBase, IUserService
             return Result.Failure<ICollection<UserShortDto>>(UserServiceErrors.FailedToLoad);
         }
     }
+
+    public async Task<IResult<ICollection<UserShortDto>>> GetSubordinatesAsync(CancellationToken cancellationToken)
+    {
+        ICollection<UserShortDto> list = Array.Empty<UserShortDto>();
+        return Result.Success(list);
+    }
 }

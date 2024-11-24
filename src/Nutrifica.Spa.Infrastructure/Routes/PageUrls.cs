@@ -9,6 +9,7 @@ public static class PageUrls
     public const string Clients = "/clients";
     public const string Products = "/products";
     public const string Orders = "/orders";
+    public const string Notifications = "/notifications";
 
     public static string ClientDetails(Guid clientId) => string.Format($"{PageUrls.Clients}/{clientId}");
     public static string OrdersDetails(Guid orderId) => string.Format($"{PageUrls.Orders}/{orderId}");

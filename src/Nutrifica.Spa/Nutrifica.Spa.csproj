@@ -4,9 +4,11 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Heron.MudCalendar" Version="2.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" />
         <PackageReference Include="MudBlazor" Version="7.15.0" />
@@ -21,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\Clients\" />
+      <Folder Include="Models\" />
     </ItemGroup>
 
 </Project>

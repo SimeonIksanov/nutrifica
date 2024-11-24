@@ -1,0 +1,96 @@
+@page "/Notifications"
+@using Nutrifica.Spa.Extensions
+@using Nutrifica.Spa.Infrastructure.Services.Notifications
+@using Nutrifica.Spa.Models.Notifications
+@using Nutrifica.Spa.Shared.Notifications
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject INotificationService NotificationService
+@implements IDisposable
+
+<MudContainer>
+    <MudCalendar Items="_events"
+                 MonthCellMinHeight="0"
+                 EnableDragItems="false"
+                 EnableResizeItems="false"
+                 DayTimeInterval="CalendarTimeInterval.Minutes15"
+                 DateRangeChanged="OnDateRangeChangedEventHandler"
+                 ItemClicked="OnItemClickedEventHandler"
+                 CellClicked="OnCellClickedEventHandler">
+        <ToolbarContent>
+            <MudButton
+                Variant="Variant.Filled"
+                Color="Color.Secondary"
+                Class="mx-1"
+                OnClick="OnAddEventHandler">
+                Добавить
+            </MudButton>
+        </ToolbarContent>
+    </MudCalendar>
+</MudContainer>
+
+@code {
+    private IList<NotificationItem> _events = Array.Empty<NotificationItem>();
+    private readonly CancellationTokenSource _cts = new();
+    private DateRange? _currentDateRange;
+
+    private async Task OnDateRangeChangedEventHandler(DateRange dateRange)
+    {
+        if (dateRange.Start is null || dateRange.End is null) return;
+        _currentDateRange = dateRange;
+        var results = await NotificationService.GetAsync(dateRange.Start.Value, dateRange.End.Value, _cts.Token);
+        if (results.IsFailure)
+        {
+            _events = Array.Empty<NotificationItem>();
+            return;
+        }
+
+        _events = results.Value.ToCalendarItems();
+    }
+
+    private async Task OnAddEventHandler(MouseEventArgs arg)
+    {
+        await ShowAddEventDialog(null);
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+        Snackbar.Dispose();
+    }
+
+    private Task OnItemClickedEventHandler(CalendarItem calendarItem)
+    {
+        var notification = calendarItem as NotificationItem;
+        if (notification is null) return Task.CompletedTask;
+
+        string title = notification.Sender is null ? "Уведомление" : $"Уведомление от {notification.Sender.FirstName} {notification.Sender.LastName}";
+        DialogService.ShowMessageBox(title, notification.Text);
+        return Task.CompletedTask;
+    }
+
+    private async Task OnCellClickedEventHandler(DateTime dateTime)
+    {
+        await ShowAddEventDialog(dateTime);
+    }
+
+    private async Task ShowAddEventDialog(DateTime? dateTime)
+    {
+        var dialogOptions = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.TopCenter,
+            CloseOnEscapeKey = true
+        };
+        var dialogParameters = new DialogParameters<NotificationCreateComponent> { { x => x.StartDateTime, dateTime } };
+        var dialog = await DialogService.ShowAsync<NotificationCreateComponent>("Создание уведомления", dialogParameters, dialogOptions);
+        var result = await dialog.Result;
+        if (result is null || result.Canceled)
+            return;
+        if (_currentDateRange is not null)
+            await OnDateRangeChangedEventHandler(_currentDateRange);
+    }
+}

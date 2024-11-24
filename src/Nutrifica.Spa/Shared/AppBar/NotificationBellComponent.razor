@@ -1,5 +1,15 @@
+@using Nutrifica.Spa.Infrastructure.Routes
+
 <MudBadge Content="39" Overlap="true" Class="mx-6 my-4" Dot="false" Color="Color.Success">
-    <MudIcon Icon="@Icons.Material.Filled.Notifications" Size="Size.Medium"/>
+    <MudIconButton
+        Icon="@Icons.Material.Filled.Notifications"
+        Size="Size.Medium"
+        DropShadow="false"
+        Variant="Variant.Filled"
+        Color="Color.Primary"
+        Ripple="false"
+        Href="@PageUrls.Notifications"
+    />
 </MudBadge>
 
 @code {

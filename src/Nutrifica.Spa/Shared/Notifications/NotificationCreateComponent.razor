@@ -1,0 +1,158 @@
+@using Nutrifica.Api.Contracts.Notifications
+@using Nutrifica.Api.Contracts.Users.Responses
+@using Nutrifica.Spa.Infrastructure.Services.Notifications
+@using Nutrifica.Spa.Infrastructure.Services.Users
+@using Nutrifica.Spa.Models.Notifications
+@implements IDisposable
+@inject INotificationService NotificationService
+@inject IUserService UserService
+
+<EditForm
+    EditContext="_editContext"
+    OnValidSubmit="Submit">
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <MudTextField Label="Текст уведомления"
+                          @bind-Value="Model.Message"
+                          Required="true"
+                          RequiredError="Это поле обязательно к заполнению"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          AutoGrow
+                          For="() => Model.Message"/>
+            <MudPaper Class="d-flex pb-4 gap-4" Elevation="0">
+                <MudDatePicker Label="День"
+                               Required="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               @bind-Date="Model.Day"
+                               For="() => Model.Day" Editable="true"
+                               MinDate="DateTime.Now.AddDays(-1)"/>
+
+                <MudTimePicker Label="Время"
+                               Required="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               @bind-Time="Model.Time"
+                               For="() => Model.Time"/>
+            </MudPaper>
+            <MudSelect Label="Получатель"
+                       Variant="Variant.Outlined"
+                       Clearable="true"
+                       Dense="true"
+                       Margin="Margin.Dense"
+                       @bind-Value="Model.RecipientId"
+                       T="Guid?">
+                @foreach (var subordinate in _subordinates)
+                {
+                    <MudSelectItem Value="subordinate.Id" T="Guid?">
+                        @subordinate.LastName, @subordinate.FirstName @subordinate.MiddleName
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton
+                OnClick="CloseWindowAsCancel">
+                Отменить
+            </MudButton>
+
+            <MudButton
+                ButtonType="ButtonType.Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary">
+                Создать
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public DateTime? StartDateTime { get; set; }
+    private ValidationMessageStore _messageStore = null!;
+    private NotificationAddModel Model { get; set; } = null!;
+    private EditContext _editContext = null!;
+    private readonly CancellationTokenSource _cts = new();
+    private ICollection<UserShortDto> _subordinates = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        SetInitialDateTime();
+        _editContext = new EditContext(Model);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        _messageStore = new(_editContext);
+        _editContext.NotifyValidationStateChanged();
+        await FetchSubordinates();
+    }
+
+    private void SetInitialDateTime()
+    {
+        if (StartDateTime.HasValue)
+        {
+            Model = new NotificationAddModel() { Day = StartDateTime.Value.Date, Time = StartDateTime.Value.TimeOfDay };
+        }
+        else
+            Model = new();
+    }
+
+    private async Task FetchSubordinates()
+    {
+        _subordinates = Array.Empty<UserShortDto>();
+        var result = await UserService.GetSubordinatesAsync(_cts.Token);
+        if (result.IsSuccess)
+            _subordinates = result.Value;
+    }
+
+    async Task Submit()
+    {
+        if (!Model.Day.HasValue || !Model.Time.HasValue)
+            return;
+        var createDto = new NotificationCreateDto()
+        {
+            DateTime = Model.Day.Value.Add(Model.Time.Value),
+            Message = Model.Message,
+            RecipientId = Model.RecipientId
+        };
+        var createdResult = await NotificationService.CreateAsync(createDto, _cts.Token);
+        if (createdResult.IsFailure)
+        {
+            _messageStore.Add(() => Model, createdResult.Error.Description);
+            return;
+        }
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void CloseWindowAsCancel() => MudDialog.Cancel();
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        _messageStore.Clear();
+        if (!Model.Day.HasValue)
+            _messageStore.Add(() => Model.Day!, "Это поле обязательно к заполнению");
+        if (!Model.Time.HasValue)
+            _messageStore.Add(() => Model.Time!, "Это поле обязательно к заполнению");
+        if (string.IsNullOrWhiteSpace(Model.Message))
+            _messageStore.Add(() => Model.Message, "Это поле обязательно к заполнению");
+
+        if (Model.Day.HasValue && Model.Time.HasValue)
+        {
+            var dt = Model.Day.Value.Add(Model.Time.Value);
+            if (dt < DateTime.Now)
+                _messageStore.Add(() => Model.Time, "Указанная дата является датой в прошлом.");
+        }
+    }
+
+    public void Dispose()
+    {
+        _editContext.OnValidationRequested -= HandleValidationRequested;
+        _cts.CancelAsync();
+        _cts.Dispose();
+    }
+
+}
