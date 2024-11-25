@@ -27,8 +27,8 @@ public class NotificationsController : ApiController
     {
         var query = new GetNotificationsQuery()
         {
-            Since = DateTime.ParseExact(since, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
-            Till = DateTime.ParseExact(till, "s", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+            Since = DateTime.ParseExact(since, "s", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal),
+            Till = DateTime.ParseExact(till, "s", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal),
         };
         Result<ICollection<NotificationDto>> result = await _mediator.Send(query, ct);
 

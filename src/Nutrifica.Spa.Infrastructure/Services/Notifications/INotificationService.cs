@@ -7,4 +7,7 @@ public interface INotificationService
 {
     Task<IResult> CreateAsync(NotificationCreateDto dto, CancellationToken cancellationToken);
     Task<IResult<ICollection<NotificationDto>>> GetAsync(DateTime since, DateTime till, CancellationToken cancellationToken);
+    Task<IResult<ICollection<NotificationDto>>> GetWithAroundAsync(DateTime since, DateTime till, CancellationToken cancellationToken);
+    int BadgeCount { get; }
+    event Action OnChange;
 }

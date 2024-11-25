@@ -38,7 +38,7 @@
     {
         if (dateRange.Start is null || dateRange.End is null) return;
         _currentDateRange = dateRange;
-        var results = await NotificationService.GetAsync(dateRange.Start.Value, dateRange.End.Value, _cts.Token);
+        var results = await NotificationService.GetWithAroundAsync(dateRange.Start.Value, dateRange.End.Value, _cts.Token);
         if (results.IsFailure)
         {
             _events = Array.Empty<NotificationItem>();
@@ -65,7 +65,7 @@
         var notification = calendarItem as NotificationItem;
         if (notification is null) return Task.CompletedTask;
 
-        string title = notification.Sender is null ? "Уведомление" : $"Уведомление от {notification.Sender.FirstName} {notification.Sender.LastName}";
+        string title = notification.Sender is null ? "Уведомление" : $"Уведомление от {notification.Sender.FirstName} {notification.Sender.LastName} в {calendarItem.Start:HH:mm}";
         DialogService.ShowMessageBox(title, notification.Text);
         return Task.CompletedTask;
     }

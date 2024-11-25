@@ -1,6 +1,10 @@
+@inject INotificationService NotificationService
 @using Nutrifica.Spa.Infrastructure.Routes
+@using Nutrifica.Spa.Infrastructure.Services.Notifications
+@implements IDisposable
 
-<MudBadge Content="39" Overlap="true" Class="mx-6 my-4" Dot="false" Color="Color.Success">
+@if (NotificationService.BadgeCount == 0)
+{
     <MudIconButton
         Icon="@Icons.Material.Filled.Notifications"
         Size="Size.Medium"
@@ -10,8 +14,41 @@
         Ripple="false"
         Href="@PageUrls.Notifications"
     />
-</MudBadge>
+}
+else
+{
+    <MudBadge 
+        Content="@NotificationService.BadgeCount" 
+        Overlap="true" 
+        Class="mx-6 my-4" 
+        Dot="false" 
+        Color="Color.Success">
+        <MudIconButton
+            Icon="@Icons.Material.Filled.Notifications"
+            Size="Size.Medium"
+            DropShadow="false"
+            Variant="Variant.Filled"
+            Color="Color.Primary"
+            Ripple="false"
+            Href="@PageUrls.Notifications"
+        />
+    </MudBadge>
+}
+
 
 @code {
+    protected override void OnInitialized()
+    {
+        NotificationService.OnChange += EventHandler;
+    }
 
+    public void Dispose()
+    {
+        NotificationService.OnChange -= EventHandler;
+    }
+
+    private void EventHandler()
+    {
+        StateHasChanged();
+    }
 }
