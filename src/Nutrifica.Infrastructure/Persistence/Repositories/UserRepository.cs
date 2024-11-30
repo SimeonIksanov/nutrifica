@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 
-using Nutrifica.Api.Contracts.Users.Responses;
 using Nutrifica.Application.Interfaces.Services.Persistence;
 using Nutrifica.Application.Models.Users;
 using Nutrifica.Application.Shared;
@@ -90,6 +89,11 @@ public class UserRepository : IUserRepository
                 user.MiddleName.Value,
                 user.LastName.Value);
         return await query.ToListAsync(cancellationToken);
+    }
+
+    public Task<ICollection<UserShortModel>> GetSubordinates(UserId supervisorId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 
     public Task<UserModel?> GetDetailedByIdAsync(UserId id, CancellationToken cancellationToken)

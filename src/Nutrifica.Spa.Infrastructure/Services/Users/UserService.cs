@@ -111,7 +111,16 @@ public class UserService : ServiceBase, IUserService
 
     public async Task<IResult<ICollection<UserShortDto>>> GetSubordinatesAsync(CancellationToken cancellationToken)
     {
-        ICollection<UserShortDto> list = Array.Empty<UserShortDto>();
-        return Result.Success(list);
+        var requestUri = UsersEndpoints.GetSubordinates;
+        try
+        {
+            var response = await GetHttpClient().GetAsync(requestUri, cancellationToken);
+            return await HandleResponse<ICollection<UserShortDto>>(response, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Не удалось загрузить список пользователей: {ex.Message}");
+            return Result.Failure<ICollection<UserShortDto>>(UserServiceErrors.FailedToLoad);
+        }
     }
 }

@@ -10,6 +10,7 @@ using Nutrifica.Application.Users.Create;
 using Nutrifica.Application.Users.Get;
 using Nutrifica.Application.Users.GetById;
 using Nutrifica.Application.Users.GetManagers;
+using Nutrifica.Application.Users.GetSubordinates;
 using Nutrifica.Application.Users.ResetPassword;
 using Nutrifica.Application.Users.Update;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
@@ -47,7 +48,13 @@ public class UsersController : ApiController
         var result = await _mediator.Send(query, ct);
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
-
+[HttpGet("subordinates")]
+    public async Task<IActionResult> GetSubordinates(CancellationToken ct)
+    {
+        var query = new GetSubordinatesQuery();
+        var result = await _mediator.Send(query, ct);
+        return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
+    }
     /// <summary>
     ///     Get User by Id
     /// </summary>
