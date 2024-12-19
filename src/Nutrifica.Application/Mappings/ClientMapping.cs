@@ -27,28 +27,21 @@ public static class ClientMapping
     {
         return new ClientDto
         {
-            Id = client.Id,
-            FirstName = client.FirstName,
-            MiddleName = client.MiddleName,
-            LastName = client.LastName,
+            Id = client.Id.Value,
+            FirstName = client.FirstName.Value,
+            MiddleName = client.MiddleName.Value,
+            LastName = client.LastName.Value,
             Address = client.Address.ToAddressDto(),
-            PhoneNumber = client.PhoneNumber,
-            Comment = client.Comment,
+            PhoneNumber = client.PhoneNumber.Value,
+            Comment = client.Comment.Value,
             CreatedAt = client.CreatedOn,
             Source = client.Source,
             State = client.State,
-            Managers = client.Managers.Select(x=>x.ToUserShortDto()).ToArray()
+            // Managers = client.Managers.Select(x=>x.ToUserShortDto()).ToArray()
         };
     }
 
-    public static PhoneCallDto ToPhoneCallDto(this PhoneCallModel phoneCall)
-    {
-        return new PhoneCallDto
-        {
-            Comment = phoneCall.Comment,
-            CreatedOn = phoneCall.CreatedOn,
-            CreatedBy = phoneCall.CreatedBy.ToUserShortDto(),
-            Id = phoneCall.Id,
-        };
-    }
+    public static ClientShortDto ToClientShortDto(this ClientShortModel client)
+        => new ClientShortDto(client.Id.Value, client.FirstName.Value, client.MiddleName.Value, client.LastName.Value);
+    
 }

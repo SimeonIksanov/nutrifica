@@ -133,7 +133,8 @@
         var queryParams = new QueryParams
         {
             Page = state.Page + 1,
-            PageSize = state.PageSize
+            PageSize = state.PageSize,
+            Filters=$"ClientId=={ClientId}"
         };
 
         var result = await OrderService.GetAsync(queryParams, _cancellationTokenSource.Token);

@@ -29,7 +29,7 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand, C
         }
 
         MapToClient(request, client);
-        client.SetManagerIds(request.ManagerIds);
+        // client.SetManagerIds(request.ManagerIds);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

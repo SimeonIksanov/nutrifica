@@ -2,7 +2,10 @@
 using Microsoft.Extensions.Options;
 
 using Nutrifica.Application.Models.Clients;
+using Nutrifica.Application.Models.Orders;
+using Nutrifica.Application.Models.PhoneCalls;
 using Nutrifica.Application.Models.Users;
+using Nutrifica.Domain.Aggregates.OrderAggregate;
 
 using Sieve.Models;
 using Sieve.Services;
@@ -19,9 +22,9 @@ public class CustomSieveProcessor : SieveProcessor
     // {
     // }
     //
-    // public CustomSieveProcessor(IOptions<SieveOptions> options, ISieveCustomFilterMethods customFilterMethods) : base(options, customFilterMethods)
-    // {
-    // }
+    public CustomSieveProcessor(IOptions<SieveOptions> options, ISieveCustomFilterMethods customFilterMethods) : base(options, customFilterMethods)
+    {
+    }
     //
     // public CustomSieveProcessor(IOptions<SieveOptions> options, ISieveCustomSortMethods customSortMethods, ISieveCustomFilterMethods customFilterMethods) : base(options, customSortMethods, customFilterMethods)
     // {
@@ -29,7 +32,7 @@ public class CustomSieveProcessor : SieveProcessor
 
     protected override SievePropertyMapper MapProperties(SievePropertyMapper mapper)
     {
-        mapper.Property<UserModel>(x => x.Email).CanFilter().CanSort();
+        // mapper.Property<UserModel>(x => x.Email).CanFilter().CanSort();
         mapper.Property<UserModel>(x => x.Enabled).CanFilter().CanSort();
         mapper.Property<UserModel>(x => x.FirstName).CanFilter().CanSort();
         mapper.Property<UserModel>(x => x.LastName).CanFilter().CanSort();
@@ -48,6 +51,7 @@ public class CustomSieveProcessor : SieveProcessor
 
         mapper.Property<PhoneCallModel>(x => x.CreatedOn).CanSort().CanFilter();
 
+        // mapper.Property<OrderModel>(order => order.Client.Id.Value).CanFilter().HasName("ClientId");
         return mapper;
     }
 }

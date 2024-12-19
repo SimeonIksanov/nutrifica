@@ -14,5 +14,4 @@ public interface IClientRepository
     Task<ClientModel?> GetByIdAsync(ClientId clientId, CancellationToken ct = default);
     Task<PagedList<ClientModel>> GetByFilterAsync(QueryParams queryParams, CancellationToken cancellationToken);
 
-    Task<PagedList<PhoneCallModel>> GetPhoneCallsAsync(ClientId id, QueryParams queryParams, CancellationToken cancellationToken);
 }

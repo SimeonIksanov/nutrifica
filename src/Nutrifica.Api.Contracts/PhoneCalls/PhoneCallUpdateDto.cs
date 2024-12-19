@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Nutrifica.Api.Contracts.Clients;
+namespace Nutrifica.Api.Contracts.PhoneCalls;
 
 public record PhoneCallUpdateDto
 {
     [Required]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Required(AllowEmptyStrings = false)]
     public string Comment { get; set; } = string.Empty;

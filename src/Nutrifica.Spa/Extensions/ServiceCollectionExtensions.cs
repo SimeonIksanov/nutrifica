@@ -11,6 +11,7 @@ using Nutrifica.Spa.Infrastructure.Services.Authentication;
 using Nutrifica.Spa.Infrastructure.Services.Clients;
 using Nutrifica.Spa.Infrastructure.Services.Notifications;
 using Nutrifica.Spa.Infrastructure.Services.Orders;
+using Nutrifica.Spa.Infrastructure.Services.PhoneCalls;
 using Nutrifica.Spa.Infrastructure.Services.Products;
 using Nutrifica.Spa.Infrastructure.Services.Users;
 using Nutrifica.Spa.MiddleWares;
@@ -37,6 +38,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IAuthenticationService, AuthenticationService>()
             .AddScoped<IUserService, UserService>()
             .AddScoped<IClientService, ClientService>()
+            .AddScoped<IPhoneCallService, PhoneCallService>()
             .AddScoped<IProductService, ProductService>()
             .AddScoped<IOrderService, OrderService>()
             .AddScoped<INotificationService, NotificationService>()

@@ -1,7 +1,6 @@
 using Nutrifica.Domain.Abstractions;
-using Nutrifica.Domain.Aggregates.ClientAggregate.Entities;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
-using Nutrifica.Domain.Aggregates.OrderAggregate.ValueObjects;
+using Nutrifica.Domain.Aggregates.PhoneCallAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Domain.Common.Models;
 using Nutrifica.Domain.Shared;
@@ -11,20 +10,12 @@ namespace Nutrifica.Domain.Aggregates.ClientAggregate;
 
 public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
 {
-    private readonly HashSet<UserId> _managerIds = null!; // Пользователи которые могут манипулировать клиентом
-    private readonly List<OrderId> _orderIds = null!;
-    private readonly List<PhoneCall> _phoneCalls = null!;
+    // private HashSet<ClientManager> _clientManager = null!; // Пользователи которые могут манипулировать клиентом
+    // private readonly List<Order> _orders = null!;
+    // private List<PhoneCall> _phoneCalls = null!;
 
     // ReSharper disable once UnusedMember.Local
     private Client() { }
-
-    private Client(UserId createdBy)
-    {
-        _managerIds = new() { createdBy };
-        _orderIds = new();
-        _phoneCalls = new();
-        State = State.Active;
-    }
 
     public DateTime CreatedOn { get; set; }
     public UserId CreatedBy { get; set; } = null!;
@@ -38,16 +29,17 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
     public Comment Comment { get; set; } = null!;
     public PhoneNumber PhoneNumber { get; set; } = null!;
     public string Source { get; set; } = string.Empty;
+
     public State State { get; set; }
-    public IReadOnlyCollection<UserId> ManagerIds => _managerIds.ToList();
-    public IReadOnlyCollection<OrderId> OrderIds => _orderIds.ToList();
-    public IReadOnlyCollection<PhoneCall> PhoneCalls => _phoneCalls.ToList();
+    // public IReadOnlyCollection<UserId> ManagerIds => _clientManager.Select(cm => cm.UserId).ToList();
+    // public IReadOnlyCollection<Order> Orders => _orders.ToList();
+    // public IReadOnlyCollection<PhoneCall> PhoneCalls => _phoneCalls.ToList();
 
 
     public static Client Create(FirstName firstName, MiddleName middleName, LastName lastName,
         PhoneNumber phoneNumber, Address address, Comment comment, UserId createdBy, string source)
     {
-        var client = new Client(createdBy)
+        var client = new Client()
         {
             Id = ClientId.CreateUnique(),
             FirstName = firstName,
@@ -56,74 +48,29 @@ public sealed class Client : Entity<ClientId>, IAggregateRoot, IAuditableEntity
             PhoneNumber = phoneNumber,
             Address = address,
             Comment = comment,
-            Source = source
+            Source = source,
+            State = State.Active,
+            // _clientManager = new(),
+            // _phoneCalls = new(),
         };
+        // client.SetManagerId(createdBy);
         client.RaiseDomainEvent(new ClientCreatedDomainEvent(client.Id));
         return client;
     }
 
-    public void AddPhoneCall(PhoneCall phoneCall)
-    {
-        _phoneCalls.Add(phoneCall);
-    }
+    // public void AddPhoneCall(PhoneCall phoneCall)
+    // {
+    //     _phoneCalls.Add(phoneCall);
+    // }
 
-    public void DeletePhoneCall(PhoneCall phoneCall) => _phoneCalls.Remove(phoneCall);
+    // public void DeletePhoneCall(PhoneCall phoneCall) => _phoneCalls.Remove(phoneCall);
 
-    public void SetManagerIds(ICollection<UserId> managerIds)
-    {
-        _managerIds.Clear();
-        _managerIds.UnionWith(managerIds);
-    }
+    // public void SetManagerIds(ICollection<UserId> managerIds)
+    // {
+    //     _clientManager.Clear();
+    //     foreach (var managerId in managerIds)
+    //         _clientManager.Add(new ClientManager() {ClientId = Id, UserId = managerId});
+    // }
 
-    public class Builder
-    {
-        private Client _client;
-
-        public Builder(UserId createdBy)
-        {
-            _client = new Client(createdBy);
-        }
-
-        public Builder WithFirstName(FirstName value)
-        {
-            _client.FirstName = value;
-            return this;
-        }
-
-        public Builder WithLastName(LastName value)
-        {
-            _client.LastName = value;
-            return this;
-        }
-
-        public Builder WithMiddleName(MiddleName value)
-        {
-            _client.MiddleName = value;
-            return this;
-        }
-
-        public Builder WithPhoneNumber(PhoneNumber value)
-        {
-            _client.PhoneNumber = value;
-            return this;
-        }
-
-        public Builder WithAddress(Address value)
-        {
-            _client.Address = value;
-            return this;
-        }
-
-        public Builder WithComment(Comment value)
-        {
-            _client.Comment = value;
-            return this;
-        }
-
-        public Builder WithSource(string value)
-        {
-            _client.Source = value;
-            return this;
-        }
-    }
+    // private void SetManagerId(UserId managerId) => SetManagerIds([managerId]);
 }

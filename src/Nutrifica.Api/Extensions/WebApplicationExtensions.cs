@@ -19,6 +19,8 @@ public static class WebApplicationExtensions
             .GetRequiredService<AppDbContext>();
         var passHasher = scope.GetRequiredService<IPasswordHasherService>();
 
+        if (context.Set<User>().Any())
+            return;
         var admin = CreateMainUser(passHasher);
         context.Users.Add(admin);
         var users = CreateUsers(passHasher);

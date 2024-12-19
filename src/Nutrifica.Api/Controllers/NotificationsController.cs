@@ -27,8 +27,8 @@ public class NotificationsController : ApiController
     {
         var query = new GetNotificationsQuery()
         {
-            Since = DateTime.ParseExact(since, "s", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal),
-            Till = DateTime.ParseExact(till, "s", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal),
+            Since = ParseDateTimeAsUTC(since),
+            Till = ParseDateTimeAsUTC(till),
         };
         Result<ICollection<NotificationDto>> result = await _mediator.Send(query, ct);
 
@@ -46,5 +46,11 @@ public class NotificationsController : ApiController
         };
         var result = await _mediator.Send(command, ct);
         return result.IsSuccess ? Created() : HandleFailure(result);
+    }
+
+    private DateTime ParseDateTimeAsUTC(string dateTime)
+    {
+        var parsed = DateTime.ParseExact(dateTime, "s", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+        return DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
     }
 }

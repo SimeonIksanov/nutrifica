@@ -32,24 +32,28 @@ public class NotificationRepository : INotificationRepository
                     || x.RecipientId == filter.Requester))
             .Select(x => new NotificationModel
             {
-                Id = x.Id.Value,
+                Id = x.Id,
                 DateTime = x.DateTime,
                 Message = x.Message,
                 CreatedOn = x.CreatedOn,
                 Recipient = (from user in _context.Users
                     where user.Id == x.RecipientId
-                    select new UserShortModel(
-                        user.Id.Value,
-                        user.FirstName.Value,
-                        user.MiddleName.Value,
-                        user.LastName.Value)).FirstOrDefault(),
+                    select new UserShortModel
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        MiddleName = user.MiddleName,
+                        LastName = user.LastName
+                    }).FirstOrDefault(),
                 CreatedBy = (from user in _context.Users
                     where user.Id == x.CreatedBy
-                    select new UserShortModel(
-                        user.Id.Value,
-                        user.FirstName.Value,
-                        user.MiddleName.Value,
-                        user.LastName.Value)).FirstOrDefault(),
+                    select new UserShortModel
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        MiddleName = user.MiddleName,
+                        LastName = user.LastName
+                    }).FirstOrDefault()!,
             })
             .ToListAsync(cancellationToken);
         return models;

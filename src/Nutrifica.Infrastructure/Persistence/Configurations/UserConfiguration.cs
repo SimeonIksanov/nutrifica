@@ -22,42 +22,77 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     private static void ConfigureProperties(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id)
+        builder
+            .Property(x => x.Id)
             .HasConversion(
                 x => x.Value,
                 x => UserId.Create(x));
-        builder.Property(x => x.FirstName)
+
+        builder
+            .Property(x => x.FirstName)
             .HasConversion<string>(
                 x => x.Value,
                 x => FirstName.Create(x));
-        builder.Property(x => x.MiddleName)
+
+        builder
+            .Property(x => x.MiddleName)
             .HasConversion<string>(
                 x => x.Value,
                 x => MiddleName.Create(x));
-        builder.Property(x => x.LastName)
+
+        builder
+            .Property(x => x.LastName)
             .HasConversion<string>(
                 x => x.Value,
                 x => LastName.Create(x));
-        builder.Property(x => x.Email)
+
+        builder
+            .Property(x => x.Email)
             .HasConversion<string>(
                 x => x.Value,
                 x => Email.Create(x));
-        builder.Property(x => x.PhoneNumber)
+
+        builder
+            .Property(x => x.PhoneNumber)
             .HasConversion<string>(
                 x => x.Value,
                 x => PhoneNumber.Create(x));
-        builder.Property(x => x.SupervisorId)
+
+        builder
+            .Property(x => x.SupervisorId)
             .HasConversion(
                 x => x!.Value,
                 x => UserId.Create(x));
         builder.Ignore(x => x.FullName);
 
-        builder.Property(x => x.CreatedBy)
+        builder
+            .Property(x => x.CreatedBy)
             .HasConversion(x => x.Value, x => UserId.Create(x));
-        builder.Property(x => x.LastModifiedBy)
+
+        builder
+            .Property(x => x.LastModifiedBy)
             .HasConversion(x => x.Value, x => UserId.Create(x));
 
         // builder.Property(x => x.Role).HasConversion<string>();
+        builder
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.CreatedBy)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.LastModifiedBy)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.SupervisorId).IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 
     private static void ConfigureAccountTable(EntityTypeBuilder<User> builder)

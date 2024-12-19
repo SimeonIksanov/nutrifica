@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 
 using Nutrifica.Application.Interfaces.Services.Persistence;
+using Nutrifica.Application.Models.Clients;
 using Nutrifica.Application.Models.Orders;
 using Nutrifica.Application.Models.Users;
 using Nutrifica.Application.Shared;
@@ -33,33 +33,35 @@ public class OrderRepository : IOrderRepository
             where order.Id.Equals(orderId)
             select order
         ).FirstOrDefaultAsync(ct);
-        // return await _context
-        //     .Set<Order>()
-        //     .FirstOrDefaultAsync(x => x.Id == orderId, ct);
     }
 
     public async Task<OrderModel?> GetOrderModelByIdAsync(OrderId orderId, UserId managerId,
         CancellationToken ct = default)
     {
         var query = (from order in _context.Orders.AsNoTracking()
-            join creator in _context.Users on order.CreatedBy.Value equals creator.Id.Value
-            join client in _context.Clients on order.ClientId.Value equals client.Id.Value
-            where order.Id.Value == orderId.Value
+            join creator in _context.Users on order.CreatedBy equals creator.Id
+            join client in _context.Clients on order.ClientId equals client.Id
+            where order.Id == orderId
             select new OrderModel
             {
-                Id = order.Id.Value,
+                Id = order.Id,
                 CreatedOn = order.CreatedOn,
                 TotalSum = order.TotalSum,
                 Status = order.Status,
-                CreatedBy = new UserShortModel(creator.Id.Value, creator.FirstName.Value, creator.MiddleName.Value,
-                    creator.LastName.Value),
-                Client = new UserShortModel(client.Id.Value, client.FirstName.Value, client.MiddleName.Value,
-                    client.LastName.Value),
-                Managers = (
-                    from managerId in order.ManagerIds
-                    join manager in _context.Users on managerId.Value equals manager.Id.Value
-                    select new UserShortModel(manager.Id.Value, manager.FirstName.Value, manager.MiddleName.Value,
-                        manager.LastName.Value)).ToList(),
+                CreatedBy = new UserShortModel
+                {
+                    Id = creator.Id,
+                    FirstName = creator.FirstName,
+                    MiddleName = creator.MiddleName,
+                    LastName = creator.LastName
+                },
+                Client = new ClientShortModel
+                {
+                    Id = client.Id,
+                    FirstName = client.FirstName,
+                    MiddleName = client.MiddleName,
+                    LastName = client.LastName
+                },
                 OrderItems = (
                     from orderItem in order.OrderItems
                     join product in _context.Products on orderItem.ProductId equals product.Id
@@ -67,7 +69,7 @@ public class OrderRepository : IOrderRepository
                     {
                         Id = orderItem.Id,
                         Quantity = orderItem.Quantity,
-                        ProductId = orderItem.ProductId.Value,
+                        ProductId = orderItem.ProductId,
                         UnitPrice = orderItem.UnitPrice,
                         ProductName = product.Name,
                         ProductDetails = product.Details
@@ -81,25 +83,29 @@ public class OrderRepository : IOrderRepository
         CancellationToken cancellationToken)
     {
         var query = (from order in _context.Orders.AsNoTracking()
-            join creator in _context.Users on order.CreatedBy.Value equals creator.Id.Value
-            join client in _context.Clients on order.ClientId.Value equals client.Id.Value
+            join creator in _context.Users on order.CreatedBy equals creator.Id
+            join client in _context.Clients on order.ClientId equals client.Id
             select new OrderModel
             {
-                Id = order.Id.Value,
+                Id = order.Id,
                 CreatedOn = order.CreatedOn,
                 TotalSum = order.TotalSum,
                 Status = order.Status,
                 CreatedBy =
-                    new UserShortModel(creator.Id.Value, creator.FirstName.Value, creator.MiddleName.Value,
-                        creator.LastName.Value),
-                Client = new UserShortModel(client.Id.Value, client.FirstName.Value, client.MiddleName.Value,
-                    client.LastName.Value),
-                Managers = (
-                    from managerId in order.ManagerIds
-                    join manager in _context.Users on managerId.Value equals manager.Id.Value
-                    select new UserShortModel(manager.Id.Value, manager.FirstName.Value, manager.MiddleName.Value,
-                        manager.LastName.Value)
-                ).ToList(),
+                    new UserShortModel
+                    {
+                        Id = creator.Id,
+                        FirstName = creator.FirstName,
+                        MiddleName = creator.MiddleName,
+                        LastName = creator.LastName
+                    },
+                Client = new ClientShortModel
+                {
+                    Id = client.Id,
+                    FirstName = client.FirstName,
+                    MiddleName = client.MiddleName,
+                    LastName = client.LastName
+                },
                 OrderItems = (
                     from orderItem in order.OrderItems
                     join product in _context.Products on orderItem.ProductId equals product.Id
@@ -107,7 +113,7 @@ public class OrderRepository : IOrderRepository
                     {
                         Id = orderItem.Id,
                         Quantity = orderItem.Quantity,
-                        ProductId = orderItem.ProductId.Value,
+                        ProductId = orderItem.ProductId,
                         UnitPrice = orderItem.UnitPrice,
                         ProductName = product.Name,
                         ProductDetails = product.Details

@@ -1,16 +1,19 @@
 using System.Reflection;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 using Nutrifica.Application.Abstractions.Clock;
 using Nutrifica.Application.Interfaces.Services;
+using Nutrifica.Application.Models.Users;
 using Nutrifica.Domain.Abstractions;
 using Nutrifica.Domain.Aggregates.ClientAggregate;
 using Nutrifica.Domain.Aggregates.NotificationAggregate;
 using Nutrifica.Domain.Aggregates.OrderAggregate;
+using Nutrifica.Domain.Aggregates.PhoneCallAggregate;
 using Nutrifica.Domain.Aggregates.ProductAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate;
+using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
+using Nutrifica.Domain.Shared;
 
 namespace Nutrifica.Infrastructure.Persistence;
 
@@ -23,12 +26,14 @@ public class AppDbContext : DbContext, IUnitOfWork
     {
         _currentUserService = currentUserService;
         _dateTimeProvider = dateTimeProvider;
+        // Database.EnsureDeleted();
         Database.EnsureCreated();
+        // TODO: Configure Indexes
     }
 
     public DbSet<User> Users { get; set; }
-
     public DbSet<Client> Clients { get; set; }
+    public DbSet<PhoneCall> PhoneCalls { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Notification> Notifications { get; set; }
@@ -41,7 +46,31 @@ public class AppDbContext : DbContext, IUnitOfWork
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder
+            .HasDbFunction(()=>GetEmployeeTree(default))
+            .HasName("GetEmployeeTree");
+        var builder = modelBuilder.Entity<UserShortModel>();
+        builder
+            .Property(x => x.Id)
+            .HasConversion(
+                x => x.Value,
+                x => UserId.Create(x));
+        builder.Property(x=>x.FirstName)
+            .HasConversion<string>(
+                x => x.Value,
+                x => FirstName.Create(x));
+        builder.Property(x=>x.MiddleName)
+            .HasConversion<string>(
+                x => x.Value,
+                x => MiddleName.Create(x));
+        builder.Property(x=>x.LastName)
+            .HasConversion<string>(
+                x => x.Value,
+                x => LastName.Create(x));
     }
+
+    public IQueryable<UserShortModel> GetEmployeeTree(Guid userId)
+        => FromExpression(()=>GetEmployeeTree(userId));
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {

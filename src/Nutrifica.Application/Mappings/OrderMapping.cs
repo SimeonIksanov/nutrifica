@@ -9,13 +9,13 @@ public static class OrderMapping
     public static OrderDto ToOrderDto(this OrderModel model) =>
         new()
         {
-            Id = model.Id,
+            Id = model.Id.Value,
             CreatedBy = model.CreatedBy.ToUserShortDto(),
             CreatedOn = model.CreatedOn,
             Status = model.Status,
             TotalSum = model.TotalSum.ToMoneyDto(),
-            Client = model.Client.ToUserShortDto(),
-            Managers = model.Managers.Select(x => x.ToUserShortDto()).ToArray(),
+            Client = model.Client.ToClientShortDto(),
+            // Managers = model.Managers.Select(x => x.ToUserShortDto()).ToArray(),
             OrderItems = model.OrderItems.Select(x => x.ToOrderItemDto()).ToArray()
         };
 
@@ -25,7 +25,7 @@ public static class OrderMapping
             Id = model.Id,
             Quantity = model.Quantity,
             UnitPrice = model.UnitPrice.ToMoneyDto(),
-            ProductId = model.ProductId,
+            ProductId = model.ProductId.Value,
             ProductName = model.ProductName,
             ProductDetails = model.ProductDetails
         };

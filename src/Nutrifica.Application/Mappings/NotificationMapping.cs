@@ -9,7 +9,7 @@ public static class NotificationMapping
     {
         return new NotificationDto()
         {
-            Id = notification.Id,
+            Id = notification.Id.Value,
             DateTime = notification.DateTime,
             Message = notification.Message,
             CreatedOn = notification.CreatedOn,

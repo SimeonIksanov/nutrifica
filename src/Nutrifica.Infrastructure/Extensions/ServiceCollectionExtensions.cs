@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +29,7 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddJwtAuthentication(configuration)
-            .AddPersistence()
+            .AddPersistence(configuration)
             .AddServices()
             .AddSieveSortingAndFiltering(configuration);
 
@@ -73,16 +75,26 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddPersistence(this IServiceCollection services)
+    private static IServiceCollection AddPersistence(this IServiceCollection services, ConfigurationManager configuration)
     {
-        services.AddDbContext<AppDbContext>(
-            options => options.UseInMemoryDatabase("InMemory"));
-
+        // services.AddDbContext<AppDbContext>(
+        //     options => options.UseInMemoryDatabase("InMemory"));
+        services.AddDbContext<AppDbContext>(optionsBuilder =>
+            optionsBuilder.UseNpgsql(
+                configuration.GetConnectionString("postgres"),
+                options =>
+                {
+                    options.MigrationsAssembly(Assembly.GetExecutingAssembly());
+                })
+                .EnableSensitiveDataLogging(true)
+                .EnableDetailedErrors(true)
+            );
         services
             .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IClientRepository, ClientRepository>()
             .AddScoped<IOrderRepository, OrderRepository>()
             .AddScoped<IProductRepository, ProductRepository>()
+            .AddScoped<IPhoneCallRepository, PhoneCallRepository>()
             .AddScoped<INotificationRepository, NotificationRepository>();
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
@@ -95,6 +107,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
         services.Configure<SieveOptions>(configuration.GetSection(nameof(SieveOptions)));
+        services.AddScoped<ISieveCustomFilterMethods, SieveCustomFilterMethods>();
         return services;
     }
 }

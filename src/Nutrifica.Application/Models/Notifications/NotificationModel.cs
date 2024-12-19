@@ -1,14 +1,15 @@
 using Nutrifica.Application.Models.Users;
+using Nutrifica.Domain.Aggregates.NotificationAggregate.ValueObjects;
 
 namespace Nutrifica.Application.Models.Notifications;
 
 public class NotificationModel : IEquatable<NotificationModel>
 {
-    public Guid Id { get; set; }
+    public NotificationId Id { get; set; } = null!;
     public DateTime DateTime { get; set; }
     public string Message { get; set; } = null!;
-    public UserShortModel? Recipient { get; set; } = null!;
-    public UserShortModel? CreatedBy { get; set; } = null!;
+    public UserShortModel? Recipient { get; set; }
+    public UserShortModel CreatedBy { get; set; } = null!;
     public DateTime CreatedOn { get; set; }
 
     public bool Equals(NotificationModel? other)
@@ -26,5 +27,6 @@ public class NotificationModel : IEquatable<NotificationModel>
         return Equals((NotificationModel)obj);
     }
 
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Id.GetHashCode();
 }

@@ -27,12 +27,12 @@ else
     <div>CreatedOn : @_order.CreatedOn.ToString("M", CultureInfo.CreateSpecificCulture("ru-RU"))</div>
     <div>
         Managers:
-        <MudList T="string" Dense="true">
-            @foreach (var manager in _order.Managers)
-            {
-                <MudListItem Text=@($"{manager.LastName}, {manager.FirstName} {manager.MiddleName}")/>
-            }
-        </MudList>
+        @* <MudList T="string" Dense="true"> *@
+        @*     @foreach (var manager in _order.Managers) *@
+        @*     { *@
+        @*         <MudListItem Text=@($"{manager.LastName}, {manager.FirstName} {manager.MiddleName}")/> *@
+        @*     } *@
+        @* </MudList> *@
     </div>
     <MudButton OnClick="OnModifyOrderClick">Редактировать заказ</MudButton>
 

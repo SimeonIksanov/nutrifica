@@ -1,7 +1,9 @@
-@using Nutrifica.Api.Contracts.Clients
+@using Nutrifica.Api.Contracts.PhoneCalls
 @using Nutrifica.Spa.Infrastructure.Services.Clients
+@using Nutrifica.Spa.Infrastructure.Services.PhoneCalls
 @implements IDisposable
 @inject IClientService ClientService
+@inject IPhoneCallService PhoneCallService
 
 <EditForm EditContext="_editContext"
           OnValidSubmit="OnSubmitAsync">
@@ -72,7 +74,7 @@
 
     private async Task OnSubmitAsync(EditContext obj)
     {
-        var result = await ClientService.UpdatePhoneCallAsync(ClientId, _model, _cts.Token);
+        var result = await PhoneCallService.UpdatePhoneCallAsync(ClientId, _model, _cts.Token);
         if (result.IsFailure)
         {
             _messageStore.Add(()=>_model, result.Error.Description);

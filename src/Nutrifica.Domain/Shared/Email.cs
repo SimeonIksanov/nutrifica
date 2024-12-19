@@ -6,7 +6,7 @@ public class Email : ValueObject
 {
     public static Email Create(string value) => new Email(value);
     private Email(string value) => Value = value;
-    public string Value { get; set; } = string.Empty;
+    public string Value { get; set; }
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value;

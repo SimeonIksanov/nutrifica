@@ -11,19 +11,11 @@ namespace Nutrifica.Domain.Aggregates.OrderAggregate;
 
 public sealed class Order : Entity<OrderId>, IAggregateRoot, IAuditableEntity
 {
-    private readonly HashSet<UserId> _managerIds = null!;
-    private readonly List<OrderItem> _orderItems = null!;
+    // private HashSet<OrderManager> _orderManager = null!;
+    private List<OrderItem> _orderItems = null!;
 
     // ReSharper disable once UnusedMember.Local
     private Order() { }
-
-    private Order(UserId createdBy)
-    {
-        _managerIds = new HashSet<UserId> { createdBy };
-        _orderItems = new List<OrderItem>();
-        Status = OrderStatus.New;
-        State = State.Active;
-    }
 
     public DateTime CreatedOn { get; set; }
     public UserId CreatedBy { get; set; } = null!;
@@ -36,11 +28,21 @@ public sealed class Order : Entity<OrderId>, IAggregateRoot, IAuditableEntity
 
     public Money TotalSum { get; private set; } = Money.Zero();
     public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.ToList();
-    public IReadOnlyCollection<UserId> ManagerIds => _managerIds.ToList();
+    // public IReadOnlyCollection<UserId> ManagerIds => _orderManager.Select(om => om.UserId).ToList();
 
     public static Order Create(ClientId clientId, UserId userId)
     {
-        var order = new Order(userId) { Id = OrderId.CreateUnique(), ClientId = clientId };
+        var order = new Order()
+        {
+            Id = OrderId.CreateUnique(),
+            ClientId = clientId,
+            // _orderManager = new HashSet<OrderManager>(),
+            _orderItems = new List<OrderItem>(),
+            Status = OrderStatus.New,
+            State = State.Active,
+            CreatedBy = userId,
+        };
+        // order.SetManagerId(userId);
         return order;
     }
 
@@ -80,9 +82,11 @@ public sealed class Order : Entity<OrderId>, IAggregateRoot, IAuditableEntity
         TotalSum -= currentOrderItem.UnitPrice * currentOrderItem.Quantity;
     }
 
-    public void SetManagerIds(ICollection<UserId> managerIds)
-    {
-        _managerIds.Clear();
-        _managerIds.UnionWith(managerIds);
-    }
+    // public void SetManagerIds(ICollection<UserId> managerIds)
+    // {
+    //     _orderManager.Clear();
+    //     foreach (var id in managerIds)
+    //         _orderManager.Add(new OrderManager { OrderId = Id, UserId = id });
+    // }
+    // private void SetManagerId(UserId managerId) => SetManagerIds( [managerId] );
 }

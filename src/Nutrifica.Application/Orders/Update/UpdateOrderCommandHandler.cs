@@ -29,7 +29,7 @@ public class UpdateOrderCommandHandler : ICommandHandler<UpdateOrderCommand, Ord
             return Result.Failure<OrderDto>(OrderError.OrderNotFound);
 
         order.Status = request.Status;
-        order.SetManagerIds(request.ManagerIds);
+        // order.SetManagerIds(request.ManagerIds);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         var orderModel = await _orderRepository.GetOrderModelByIdAsync(order.Id, _currentUserService.UserId, cancellationToken);

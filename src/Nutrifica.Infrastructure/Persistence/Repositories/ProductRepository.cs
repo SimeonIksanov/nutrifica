@@ -26,10 +26,10 @@ public class ProductRepository : IProductRepository
     public async Task<ProductModel?> GetProductModelByIdAsync(ProductId productId, CancellationToken ct)
     {
         var query = from product in _context.Products.AsNoTracking()
-            where product.Id.Value.Equals(productId.Value)
+            where product.Id.Equals(productId)
             select new ProductModel
             {
-                Id = product.Id.Value,
+                Id = product.Id,
                 Name = product.Name,
                 Details = product.Details,
                 Price = product.Price,
@@ -45,7 +45,7 @@ public class ProductRepository : IProductRepository
         var query = from product in _context.Products.AsNoTracking()
             select new ProductModel
             {
-                Id = product.Id.Value,
+                Id = product.Id,
                 Name = product.Name,
                 Details = product.Details,
                 Price = product.Price,
@@ -60,7 +60,7 @@ public class ProductRepository : IProductRepository
     {
         var product = await _context
             .Products
-            .FirstOrDefaultAsync(x => x.Id.Value.Equals(productId.Value), ct);
+            .FirstOrDefaultAsync(x => x.Id.Equals(productId), ct);
         return product;
     }
 

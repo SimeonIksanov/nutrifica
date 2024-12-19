@@ -15,6 +15,6 @@ public record ClientDto
     public string Source { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public State State { get; set; }
-    public ICollection<UserShortDto> Managers { get; set; } = null!;
+    // public ICollection<UserShortDto> Managers { get; set; } = null!;
     public string FullName => string.Join(" ", LastName, FirstName, MiddleName);
 }

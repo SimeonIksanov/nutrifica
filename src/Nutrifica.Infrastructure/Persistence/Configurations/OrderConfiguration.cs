@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using Nutrifica.Domain.Aggregates.ClientAggregate;
 using Nutrifica.Domain.Aggregates.ClientAggregate.ValueObjects;
 using Nutrifica.Domain.Aggregates.OrderAggregate;
 using Nutrifica.Domain.Aggregates.OrderAggregate.Entities;
@@ -18,7 +19,6 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.ToTable("Orders");
 
         ConfigureProperties(builder);
-        ConfigureManagersTable(builder);
         ConfigureOrderItemsTable(builder);
     }
 
@@ -43,44 +43,77 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 
-    private void ConfigureManagersTable(EntityTypeBuilder<Order> builder)
-    {
-        builder.OwnsMany(x => x.ManagerIds, mib =>
-        {
-            mib.ToTable("OrderManagerIds");
-            mib.WithOwner().HasForeignKey("OrderId");
-
-            mib.HasKey(nameof(User.Id));
-            mib
-                .Property(x => x.Value)
-                .HasColumnName("ManagerId")
-                .ValueGeneratedNever();
-        });
-        builder
-            .Navigation(x => x.ManagerIds)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-    }
+    // private void ConfigureManagersTable(EntityTypeBuilder<Order> builder)
+    // {
+    //     builder.OwnsMany(order => order.ManagerIds, ownedNavigationBuilder =>
+    //     {
+    //         ownedNavigationBuilder
+    //             .ToTable("OrderManagerIds");
+    //         ownedNavigationBuilder
+    //             .WithOwner()
+    //             .HasForeignKey("OrderId");
+    //         ownedNavigationBuilder
+    //             .HasKey("Id");
+    //         ownedNavigationBuilder
+    //             .Property(x => x.Value)
+    //             .HasColumnName("ManagerId")
+    //             .ValueGeneratedNever();
+    //     });
+    //     builder
+    //         .Metadata
+    //         .FindNavigation(nameof(Order.ManagerIds))!
+    //         .SetPropertyAccessMode(PropertyAccessMode.Field);
+    // }
 
     private void ConfigureProperties(EntityTypeBuilder<Order> builder)
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id)
+        builder
+            .Property(x => x.Id)
             .HasConversion(
                 x => x.Value,
                 x => OrderId.Create(x));
-        builder.Property(x => x.ClientId)
+
+        builder
+            .Property(x => x.ClientId)
             .HasConversion(
                 x => x.Value,
                 x => ClientId.Create(x));
-        builder.Property(x => x.CreatedBy)
-            .HasConversion(x => x.Value, x => UserId.Create(x));
-        builder.Property(x => x.LastModifiedBy)
+
+        builder
+            .Property(x => x.CreatedBy)
             .HasConversion(x => x.Value, x => UserId.Create(x));
 
-        builder.OwnsOne(x => x.TotalSum, mb =>
-        {
-            mb.OwnsOne(x => x.Currency);
-        });
+        builder
+            .Property(x => x.LastModifiedBy)
+            .HasConversion(x => x.Value, x => UserId.Create(x));
+
+        builder
+            .OwnsOne(x => x.TotalSum, mb =>
+            {
+                mb.OwnsOne(x => x.Currency);
+            });
+
+        builder
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(order => order.CreatedBy)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(order => order.LastModifiedBy)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne<Client>()
+            .WithMany()
+            .HasForeignKey(order => order.ClientId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -6,7 +6,6 @@ using Nutrifica.Application.Shared;
 using Nutrifica.Domain.Aggregates.UserAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 using Nutrifica.Infrastructure.Services.SortAndFilter;
-using Nutrifica.Shared.Enums;
 using Nutrifica.Shared.Wrappers;
 
 using Sieve.Services;
@@ -58,42 +57,59 @@ public class UserRepository : IUserRepository
     {
         var query = _context.Set<User>()
             .AsNoTracking()
-            .Include(x => x.Account)
-            .Select(user => new UserModel(
-                user.Id.Value,
-                user.Account.Username,
-                user.FirstName.Value,
-                user.MiddleName.Value,
-                user.LastName.Value,
-                user.Email.Value,
-                user.PhoneNumber.Value,
-                user.Enabled,
-                user.DisableReason,
-                user.SupervisorId.Value,
-                user.Role,
-                user.CreatedOn));
+            .Select(user => new UserModel
+            {
+                Id = user.Id,
+                Username = user.Account.Username,
+                FirstName = user.FirstName,
+                MiddleName = user.MiddleName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber.Value,
+                Enabled = user.Enabled,
+                DisableReason = user.DisableReason,
+                SupervisorId = user.SupervisorId,
+                Role = user.Role,
+                CreatedOn = user.CreatedOn
+            });
 
         var pagedList =
             await query.SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
     }
 
+    public async Task<UserShortModel?> GetShortByIdAsync(UserId id, CancellationToken ct = default)
+    {
+        return await _context
+            .Users
+            .Where(user => user.Id == id)
+            .Select(user => new UserShortModel
+            {
+                Id = user.Id, FirstName = user.FirstName, MiddleName = user.MiddleName, LastName = user.LastName
+            })
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<ICollection<UserShortModel>> GetManagers(UserId supervisorId, CancellationToken cancellationToken)
     {
         // TODO Выборка пользователей, которые подчиняются supervisorId
-        var query = from user in _context.Users.AsNoTracking()
-            where user.Role != UserRole.Operator
-            select new UserShortModel(
-                user.Id.Value,
-                user.FirstName.Value,
-                user.MiddleName.Value,
-                user.LastName.Value);
-        return await query.ToListAsync(cancellationToken);
+        // var query = from user in _context.Users.AsNoTracking()
+        //     where user.Role != UserRole.Operator
+        //     select new UserShortModel(
+        //         user.Id.Value,
+        //         user.FirstName.Value,
+        //         user.MiddleName.Value,
+        //         user.LastName.Value);
+        // return await query.ToListAsync(cancellationToken);
+        return await GetSubordinates(supervisorId, cancellationToken);
     }
 
-    public Task<ICollection<UserShortModel>> GetSubordinates(UserId supervisorId, CancellationToken cancellationToken)
+    public async Task<ICollection<UserShortModel>> GetSubordinates(UserId supervisorId,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await _context
+            .GetEmployeeTree(supervisorId.Value)
+            .ToListAsync(cancellationToken);
     }
 
     public Task<UserModel?> GetDetailedByIdAsync(UserId id, CancellationToken cancellationToken)

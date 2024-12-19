@@ -157,7 +157,7 @@
         _editContext.OnValidationRequested += HandleValidationRequested;
         _messageStore = new ValidationMessageStore(_editContext);
         MapIncomingClientToFormModel();
-        _selectableManagers = await GetSelectableManagersAsync(Client.Managers, _cts.Token);
+        // _selectableManagers = await GetSelectableManagersAsync(Client.Managers, _cts.Token);
     }
 
 
@@ -206,21 +206,21 @@
         MudDialog.Close(DialogResult.Ok(result.Value));
     }
 
-    private async Task<ICollection<SelectableManager>> GetSelectableManagersAsync(ICollection<UserShortDto> currentManagers, CancellationToken ct)
-    {
-        var managers = await LoadManagersAsync(ct);
-        var selectable = new List<SelectableManager>(managers.Count);
-        var currentIds = currentManagers.Select(x => x.Id).ToArray();
-        foreach (var manager in managers)
-        {
-            SelectableManager val = currentIds.Contains(manager.Id)
-                ? new(manager, true)
-                : new(manager, false);
-            selectable.Add(val);
-        }
-
-        return selectable;
-    }
+    // private async Task<ICollection<SelectableManager>> GetSelectableManagersAsync(ICollection<UserShortDto> currentManagers, CancellationToken ct)
+    // {
+    //     var managers = await LoadManagersAsync(ct);
+    //     var selectable = new List<SelectableManager>(managers.Count);
+    //     var currentIds = currentManagers.Select(x => x.Id).ToArray();
+    //     foreach (var manager in managers)
+    //     {
+    //         SelectableManager val = currentIds.Contains(manager.Id)
+    //             ? new(manager, true)
+    //             : new(manager, false);
+    //         selectable.Add(val);
+    //     }
+    //
+    //     return selectable;
+    // }
 
     private async Task<ICollection<UserShortDto>> LoadManagersAsync(CancellationToken ct)
     {
