@@ -19,7 +19,7 @@ public class Program
             .AddPresentationLayer()
             .AddApplicationLayer()
             .AddInfrastructureLayer(builder.Configuration);
-
+        //TODO: Apply Migrations at runtime?
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
