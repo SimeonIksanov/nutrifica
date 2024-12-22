@@ -49,24 +49,6 @@ public class AppDbContext : DbContext, IUnitOfWork
         modelBuilder
             .HasDbFunction(()=>GetEmployeeTree(default))
             .HasName("GetEmployeeTree");
-        var builder = modelBuilder.Entity<UserShortModel>();
-        builder
-            .Property(x => x.Id)
-            .HasConversion(
-                x => x.Value,
-                x => UserId.Create(x));
-        builder.Property(x=>x.FirstName)
-            .HasConversion<string>(
-                x => x.Value,
-                x => FirstName.Create(x));
-        builder.Property(x=>x.MiddleName)
-            .HasConversion<string>(
-                x => x.Value,
-                x => MiddleName.Create(x));
-        builder.Property(x=>x.LastName)
-            .HasConversion<string>(
-                x => x.Value,
-                x => LastName.Create(x));
     }
 
     public IQueryable<UserShortModel> GetEmployeeTree(Guid userId)
