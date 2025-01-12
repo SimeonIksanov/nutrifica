@@ -52,9 +52,9 @@ public sealed class User : Entity<UserId>, IAggregateRoot, IAuditableEntity
     public string DisableReason { get; private set; } = string.Empty;
 
     public DateTime CreatedOn { get; set; }
-    public UserId CreatedBy { get; set; } = null!;
+    public UserId? CreatedBy { get; set; } = null!;
     public DateTime LastModifiedOn { get; set; }
-    public UserId LastModifiedBy { get; set; } = null!;
+    public UserId? LastModifiedBy { get; set; } = null!;
 
     public FirstName FirstName { get; set; } = null!;
     public MiddleName MiddleName { get; set; } = null!;

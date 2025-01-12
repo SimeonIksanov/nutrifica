@@ -9,7 +9,8 @@ public class CurrentUserService : ICurrentUserService
 {
     public CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
-        UserId = UserId.Empty;
+        // UserId = UserId.Empty;
+        UserId = null;
 
         if (!IsAuthenticated(httpContextAccessor))
         {
@@ -20,7 +21,7 @@ public class CurrentUserService : ICurrentUserService
             UserId = UserId.Create(guid);
     }
 
-    public UserId UserId { get; }
+    public UserId? UserId { get; }
 
     private bool IsAuthenticated(IHttpContextAccessor httpContextAccessor) =>
         httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;

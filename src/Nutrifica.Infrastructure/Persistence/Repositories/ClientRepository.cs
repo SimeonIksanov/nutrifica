@@ -118,43 +118,7 @@ public class ClientRepository : IClientRepository
                 Source = client.Source,
                 State = client.State,
                 CreatedOn = client.CreatedOn,
-                // client.ManagerIds
             });
-        // var filtered = _sieveProcessor.Apply(queryParams.ToSieveModel(), query, applyPagination: false);
-        // var totalCount = await filtered.CountAsync(cancellationToken);
-        // var clients = await _sieveProcessor
-        //     .Apply(queryParams.ToSieveModel(), query, applyFiltering: false, applySorting: false)
-        //     .ToListAsync(cancellationToken);
-        // var managerIds = clients.SelectMany(c => c.ManagerIds);
-        // var managers = await _context.Users
-        //     .Where(user => managerIds.Contains(user.Id))
-        //     .Select(user => new UserShortModel(user.Id, user.FirstName, user.MiddleName, user.LastName))
-        //     .ToListAsync(cancellationToken);
-        // var clientModels = clients
-        //     .Select(client => new ClientModel
-        //     {
-        //         Id = client.Id,
-        //         FirstName = client.FirstName,
-        //         MiddleName = client.MiddleName,
-        //         LastName = client.LastName,
-        //         Address = client.Address,
-        //         Comment = client.Comment,
-        //         PhoneNumber = client.PhoneNumber,
-        //         Source = client.Source,
-        //         State = client.State,
-        //         CreatedOn = client.CreatedOn,
-        //         Managers = client
-        //             .ManagerIds
-        //             .Join(managers,
-        //                 managerId => managerId,
-        //                 user => user.Id,
-        //                 (_, uModel) => uModel)
-        //             .ToList()
-        //     })
-        //     .ToList();
-
-        // return PagedList<ClientModel>.Create(clientModels, queryParams.Page ?? 1,
-        //     queryParams.PageSize ?? clientModels.Count, totalCount);
         var pagedList = await query
             .SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
         return pagedList;
@@ -166,34 +130,4 @@ public class ClientRepository : IClientRepository
             .Set<Client>()
             .AnyAsync(client => client.Id.Equals(id), cancellationToken);
     }
-
-    // public async Task<PagedList<PhoneCallModel>> GetPhoneCallsAsync(ClientId id, QueryParams queryParams,
-    //     CancellationToken cancellationToken)
-    // {
-    //     var query = _context
-    //         .Set<Client>()
-    //         .Where(c => c.Id.Equals(id))
-    //         .SelectMany(c => c.PhoneCalls)
-    //         .Select(phoneCall => new { phoneCall.Id, phoneCall.CreatedOn, phoneCall.CreatedBy, phoneCall.Comment });
-    //     var pagedCals = await query
-    //         .SieveToPagedListAsync(_sieveProcessor, queryParams.ToSieveModel(), cancellationToken);
-    //     var userIds = pagedCals.Items.Select(call => call.CreatedBy).ToList();
-    //     var userModels = await _context
-    //         .Users
-    //         .Where(user => userIds.Any(uid => uid == user.Id))
-    //         .Select(user => new UserShortModel(user.Id, user.FirstName, user.MiddleName, user.LastName))
-    //         .ToListAsync(cancellationToken);
-    //
-    //     var phoneCallModels = pagedCals
-    //         .Items
-    //         .Join(userModels,
-    //             phoneCall => phoneCall.CreatedBy,
-    //             user => user.Id,
-    //             (phoneCall, uModel) => new PhoneCallModel(phoneCall.Id, phoneCall.CreatedOn, uModel, phoneCall.Comment))
-    //         .ToList();
-    //     return PagedList<PhoneCallModel>.Create(phoneCallModels,
-    //         queryParams.Page ?? 1,
-    //         queryParams.PageSize ?? phoneCallModels.Count,
-    //         pagedCals.TotalCount);
-    // }
 }

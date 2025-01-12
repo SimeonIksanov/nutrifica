@@ -43,27 +43,6 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 
-    // private void ConfigureManagersTable(EntityTypeBuilder<Order> builder)
-    // {
-    //     builder.OwnsMany(order => order.ManagerIds, ownedNavigationBuilder =>
-    //     {
-    //         ownedNavigationBuilder
-    //             .ToTable("OrderManagerIds");
-    //         ownedNavigationBuilder
-    //             .WithOwner()
-    //             .HasForeignKey("OrderId");
-    //         ownedNavigationBuilder
-    //             .HasKey("Id");
-    //         ownedNavigationBuilder
-    //             .Property(x => x.Value)
-    //             .HasColumnName("ManagerId")
-    //             .ValueGeneratedNever();
-    //     });
-    //     builder
-    //         .Metadata
-    //         .FindNavigation(nameof(Order.ManagerIds))!
-    //         .SetPropertyAccessMode(PropertyAccessMode.Field);
-    // }
 
     private void ConfigureProperties(EntityTypeBuilder<Order> builder)
     {
@@ -94,6 +73,14 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             {
                 mb.OwnsOne(x => x.Currency);
             });
+
+        builder
+            .Property(order => order.State)
+            .HasConversion<string>();
+
+        builder
+            .Property(order => order.Status)
+            .HasConversion<string>();
 
         builder
             .HasOne<User>()

@@ -3,7 +3,7 @@ using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
 
 namespace Nutrifica.Domain.Common.Models;
 
-public abstract class Entity<TId> : IEquatable<Entity<TId>> where TId : notnull
+public abstract class Entity<TId> : IEntity, IEquatable<Entity<TId>> where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = new();
     public TId Id { get; protected set; } = default(TId)!;

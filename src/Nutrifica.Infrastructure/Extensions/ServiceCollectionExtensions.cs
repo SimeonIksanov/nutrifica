@@ -95,7 +95,8 @@ public static class ServiceCollectionExtensions
             .AddScoped<IOrderRepository, OrderRepository>()
             .AddScoped<IProductRepository, ProductRepository>()
             .AddScoped<IPhoneCallRepository, PhoneCallRepository>()
-            .AddScoped<INotificationRepository, NotificationRepository>();
+            .AddScoped<INotificationRepository, NotificationRepository>()
+            .AddScoped<IUserClientAccessRepository, UserClientAccessRepository>();
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
 

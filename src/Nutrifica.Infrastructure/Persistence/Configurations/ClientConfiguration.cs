@@ -57,6 +57,10 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .HasConversion(x => x.Value, x => UserId.Create(x));
 
         builder
+            .Property(client => client.State)
+            .HasConversion<string>();
+
+        builder
             .OwnsOne(x => x.Address);
 
         builder
@@ -73,21 +77,4 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
     }
-
-    // private void ConfigureOrdersTable(EntityTypeBuilder<Client> builder)
-    // {
-    //     builder.OwnsMany(x => x.OrderIds, oib =>
-    //         {
-    //             oib.ToTable("ClientOrderIds");
-    //             oib.WithOwner().HasForeignKey("ClientId");
-    //
-    //             oib.HasKey(nameof(Order.Id));
-    //             oib.Property(x => x.Value)
-    //                 .HasColumnName("OrderId")
-    //                 .ValueGeneratedNever();
-    //         });
-    //     builder.Metadata
-    //         .FindNavigation(nameof(Client.OrderIds))!
-    //         .SetPropertyAccessMode(PropertyAccessMode.Field);
-    // }
 }

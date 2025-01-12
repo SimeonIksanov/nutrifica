@@ -73,20 +73,23 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .Property(x => x.LastModifiedBy)
             .HasConversion(x => x.Value, x => UserId.Create(x));
 
-        // builder.Property(x => x.Role).HasConversion<string>();
+        builder
+            .Property(user => user.Role)
+            .HasConversion<string>();
+
         builder
             .HasOne<User>()
             .WithMany()
             .HasForeignKey(x => x.CreatedBy)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            .IsRequired(false);
+        // .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne<User>()
             .WithMany()
             .HasForeignKey(x => x.LastModifiedBy)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            .IsRequired(false);
+        // .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne<User>()

@@ -4,5 +4,5 @@ namespace Nutrifica.Application.Interfaces.Services;
 
 public interface ICurrentUserService
 {
-    UserId UserId { get; }
+    UserId? UserId { get; }
 }

@@ -1,5 +1,7 @@
 using System.Reflection;
 
+using MediatR;
+
 using Microsoft.EntityFrameworkCore;
 
 using Nutrifica.Application.Abstractions.Clock;
@@ -12,8 +14,7 @@ using Nutrifica.Domain.Aggregates.OrderAggregate;
 using Nutrifica.Domain.Aggregates.PhoneCallAggregate;
 using Nutrifica.Domain.Aggregates.ProductAggregate;
 using Nutrifica.Domain.Aggregates.UserAggregate;
-using Nutrifica.Domain.Aggregates.UserAggregate.ValueObjects;
-using Nutrifica.Domain.Shared;
+using Nutrifica.Domain.Common.Models;
 
 namespace Nutrifica.Infrastructure.Persistence;
 
@@ -21,11 +22,16 @@ public class AppDbContext : DbContext, IUnitOfWork
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly IMediator _mediator;
 
-    public AppDbContext(DbContextOptions options, ICurrentUserService currentUserService, IDateTimeProvider dateTimeProvider) : base(options)
+    public AppDbContext(DbContextOptions options,
+        ICurrentUserService currentUserService,
+        IDateTimeProvider dateTimeProvider,
+        IMediator mediator) : base(options)
     {
         _currentUserService = currentUserService;
         _dateTimeProvider = dateTimeProvider;
+        _mediator = mediator;
         // Database.EnsureDeleted();
         Database.EnsureCreated();
         // TODO: Configure Indexes
@@ -37,6 +43,8 @@ public class AppDbContext : DbContext, IUnitOfWork
     public DbSet<Order> Orders { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<UserClientAccess> UserClientAccesses { get; set; }
+    public DbSet<UserOrderAccess> UserOrderAccess { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -47,22 +55,34 @@ public class AppDbContext : DbContext, IUnitOfWork
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder
-            .HasDbFunction(()=>GetEmployeeTree(default))
+            .HasDbFunction(() => GetEmployeeTree(default))
             .HasName("GetEmployeeTree");
     }
 
     public IQueryable<UserShortModel> GetEmployeeTree(Guid userId)
-        => FromExpression(()=>GetEmployeeTree(userId));
+        => FromExpression(() => GetEmployeeTree(userId));
+
+    public override int SaveChanges()
+    {
+         return Task.Run(async () => await SaveChangesAsync()).Result;
+    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {
-        OnBeforeSaveChanges();
+        await OnBeforeSaveChanges();
         var result = await base.SaveChangesAsync(cancellationToken);
         OnAfterSaveChanges();
         return result;
     }
 
-    private void OnBeforeSaveChanges()
+    private async Task OnBeforeSaveChanges()
+    {
+        ChangeModifiedProperties();
+
+        await PublishDomainEventsAsync();
+    }
+
+    private void ChangeModifiedProperties()
     {
         foreach (var entry in ChangeTracker.Entries<IAuditableEntity>())
         {
@@ -79,6 +99,25 @@ public class AppDbContext : DbContext, IUnitOfWork
                     entry.Entity.LastModifiedOn = _dateTimeProvider.UtcNow;
                     break;
             }
+        }
+    }
+
+    private async Task PublishDomainEventsAsync()
+    {
+        var domainEvents = ChangeTracker
+            .Entries<IEntity>()
+            .Select(entry => entry.Entity)
+            .SelectMany(entity =>
+            {
+                var domainEvents = entity.GetDomainEvents();
+                entity.ClearDomainEvents();
+                return domainEvents;
+            })
+            .ToList();
+
+        foreach (var domainEvent in domainEvents)
+        {
+            await _mediator.Publish(domainEvent);
         }
     }
 
